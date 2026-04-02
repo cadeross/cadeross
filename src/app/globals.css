@@ -1,26 +1,2232 @@
 @import "tailwindcss";
 
+/* ─── Custom properties ──────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cr-bg: #fdfdfc;
+  --cr-text: #111111;
+  --cr-muted: rgba(0, 0, 0, 0.4);
+  --cr-secondary: rgba(0, 0, 0, 0.55);
+  --cr-border: #f2f2f2;
+  --cr-accent: #3e9fff;
+  --cr-font-body: var(--font-inter, system-ui, -apple-system, sans-serif);
+
+  --ease-snappy: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease-swift:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Era variable overrides ─────────────────────────── */
+
+html[data-era="1600s"] {
+  --cr-bg: #f5e6c8;
+  --cr-text: #2c1810;
+  --cr-muted: rgba(44, 24, 16, 0.45);
+  --cr-secondary: rgba(44, 24, 16, 0.6);
+  --cr-border: #d4a96a;
+  --cr-accent: #8b4513;
+  --cr-font-body: var(--font-playfair, Georgia, serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html[data-era="1800s"] {
+  --cr-bg: #0f0b07;
+  --cr-text: #e8dcc8;
+  --cr-muted: rgba(232, 220, 200, 0.45);
+  --cr-secondary: rgba(232, 220, 200, 0.6);
+  --cr-border: #2d1f0e;
+  --cr-accent: #c9a84c;
+  --cr-font-body: var(--font-baskerville, "Times New Roman", serif);
+}
+
+html[data-era="2000"] {
+  --cr-bg: #d4d0c8;
+  --cr-text: #000000;
+  --cr-muted: rgba(0, 0, 0, 0.5);
+  --cr-secondary: rgba(0, 0, 0, 0.65);
+  --cr-border: #808080;
+  --cr-accent: #0000ff;
+  --cr-font-body: Arial, Helvetica, sans-serif;
+}
+
+html[data-era="2077"] {
+  --cr-bg: #050810;
+  --cr-text: #e0f0ff;
+  --cr-muted: rgba(224, 240, 255, 0.4);
+  --cr-secondary: rgba(224, 240, 255, 0.55);
+  --cr-border: rgba(0, 255, 170, 0.2);
+  --cr-accent: #00ffaa;
+  --cr-font-body: var(--font-space-mono, "Courier New", monospace);
+}
+
+/* ─── Base ───────────────────────────────────────────── */
+
+@layer base {
+  html {
+    background: var(--cr-bg);
+    color: var(--cr-text);
+    font-family: var(--cr-font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--cr-bg);
+    min-height: 100vh;
+    overflow-y: scroll;
+  }
+
+  ::selection { background: #ededed; color: #111; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: transparent; border-radius: 100px; }
+  :hover::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
+}
+
+/* ─── Utilities ──────────────────────────────────────── */
+
+@layer utilities {
+
+  /* ── Shared top gradient (homepage + inner pages) ── */
+
+  .homepage::before,
+  .inner-page::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8rem;
+    z-index: 9;
+    background: linear-gradient(
+      180deg,
+      var(--cr-bg) 0%,
+      hsla(60, 33%, 99%, 0.738) 19%,
+      hsla(60, 33%, 99%, 0.541) 34%,
+      hsla(60, 33%, 99%, 0.382) 47%,
+      hsla(60, 33%, 99%, 0.278) 56.5%,
+      hsla(60, 33%, 99%, 0.194) 65%,
+      hsla(60, 33%, 99%, 0.126) 73%,
+      hsla(60, 33%, 99%, 0.075) 80.2%,
+      hsla(60, 33%, 99%, 0.042) 86.1%,
+      hsla(60, 33%, 99%, 0.021) 91%,
+      hsla(60, 33%, 99%, 0.008) 95.2%,
+      hsla(60, 33%, 99%, 0.002) 98.2%,
+      hsla(60, 33%, 99%, 0) 100%
+    );
+  }
+
+  @media screen and (max-width: 768px) {
+    .homepage::before,
+    .inner-page::before { height: 2.5rem; }
+  }
+
+  /* ── Column layout (homepage + inner pages) ── */
+
+  .homepage,
+  .inner-page {
+    position: relative;
+    max-width: 36.375rem;
+    margin: 0 auto;
+    padding: 5rem 1rem 2.5rem;
+  }
+
+  @media screen and (max-width: 768px) {
+    .homepage,
+    .inner-page { padding: 2rem 1.5rem 2.5rem; }
+  }
+
+  /* ── Stagger entrance: homepage ── */
+
+  .homepage > .article > * {
+    animation: staggerIn 0.5s ease both;
+  }
+  .homepage > .article > :nth-child(1)   { animation-delay: 0s; }
+  .homepage > .article > :nth-child(2)   { animation-delay: 0.05s; }
+  .homepage > .article > :nth-child(3)   { animation-delay: 0.1s; }
+  .homepage > .article > :nth-child(4)   { animation-delay: 0.15s; }
+  .homepage > .article > :nth-child(5)   { animation-delay: 0.2s; }
+  .homepage > .article > :nth-child(6)   { animation-delay: 0.25s; }
+  .homepage > .article > :nth-child(n+7) { animation-delay: 0.3s; }
+  .homepage > .postList { animation: staggerIn 0.5s ease 0.35s both; }
+  .homepage > footer    { animation: staggerIn 0.5s ease 0.45s both; }
+
+  /* ── Stagger entrance: inner pages ── */
+
+  .inner-page > * {
+    animation: staggerIn 0.5s ease both;
+  }
+  .inner-page > :nth-child(1)   { animation-delay: 0s; }
+  .inner-page > :nth-child(2)   { animation-delay: 0.05s; }
+  .inner-page > :nth-child(3)   { animation-delay: 0.1s; }
+  .inner-page > :nth-child(4)   { animation-delay: 0.15s; }
+  .inner-page > :nth-child(5)   { animation-delay: 0.2s; }
+  .inner-page > :nth-child(6)   { animation-delay: 0.25s; }
+  .inner-page > :nth-child(7)   { animation-delay: 0.3s; }
+  .inner-page > :nth-child(8)   { animation-delay: 0.35s; }
+  .inner-page > :nth-child(n+9) { animation-delay: 0.4s; }
+
+  /* ── Avatar ── */
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 0.875rem;
+  }
+
+  .avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.07);
+    margin-bottom: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Header text ── */
+
+  .page-name {
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-text);
+    letter-spacing: -0.00563rem;
+    margin-bottom: 0.125rem;
+  }
+
+  .page-role {
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    letter-spacing: -0.00563rem;
+  }
+
+  .page-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 0.875rem;
+  }
+
+  .page-nav a {
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    text-decoration: none;
+    letter-spacing: -0.00563rem;
+    transition: color 0.14s ease;
+  }
+
+  .page-nav a:hover { color: var(--cr-text); }
+
+  /* ── Back link (inner pages) ── */
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    text-decoration: none;
+    letter-spacing: -0.00563rem;
+    transition: color 0.14s ease;
+  }
+
+  .back-link:hover { color: var(--cr-text); }
+
+  /* ── Footer (shared) ── */
+
+  .page-footer {
+    padding: 2.5rem 0 5rem;
+  }
+
+  .page-footer::before {
+    content: "";
+    display: block;
+    height: 1px;
+    width: 3.125rem;
+    background: #ededed;
+    margin: 0 0 2.375rem;
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .footer-row p,
+  .footer-row a {
+    color: var(--cr-muted);
+    font-size: 0.8125rem;
+    font-weight: 460;
+    letter-spacing: -0.0025rem;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .footer-row a:hover { opacity: 0.5; }
+
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  /* ── Post list ── */
+
+  .postList { padding: 3rem 0 0; }
+
+  .postList-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--cr-border);
+  }
+
+  .postList-title {
+    color: var(--cr-muted);
+    font-size: 0.875rem;
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+  }
+
+  .filter-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  .filter-tabs button {
+    font-size: 0.8125rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    background: none;
+    border: none;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    letter-spacing: -0.00563rem;
+    transition: color 0.14s ease;
+    border-radius: 4px;
+    font-family: var(--cr-font-body);
+  }
+
+  .filter-tabs button:hover { color: var(--cr-text); }
+
+  .filter-tabs button[data-active="true"] {
+    color: var(--cr-text);
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .postList > ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 520px) {
+    .postList > ul:hover > li > ul > li > a h2,
+    .postList > ul:hover > li > ul > li > a time span { opacity: 0.3; }
+  }
+
+  .postList > ul > li > ul > li > a:hover h2,
+  .postList > ul > li > ul > li > a:hover time span { opacity: 1 !important; }
+
+  .postList > ul > li > ul > li > a:hover h2::after {
+    transform: translateX(0.25rem) rotate(45deg);
+  }
+
+  .postList > ul > li { border-bottom: 1px solid var(--cr-border); }
+  .postList > ul > li:last-child { border-bottom: none; }
+
+  .postList > ul > li > ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+  }
+
+  .postList > ul > li > ul > li:last-child > a::after { display: none; }
+
+  .postList > ul > li > ul > li:first-child > a > time > span:last-child {
+    visibility: visible;
+  }
+
+  .postList > ul > li > ul > li > a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.735rem 0 0.735rem 6.75rem;
+    text-decoration: none;
+  }
+
+  @media screen and (max-width: 520px) {
+    .postList > ul > li > ul > li > a { padding-left: 3rem; }
+  }
+
+  .postList > ul > li > ul > li > a::after {
+    content: "";
+    border-bottom: 1px solid var(--cr-border);
+    position: absolute;
+    bottom: 0;
+    left: 6.75rem;
+    right: 0;
+  }
+
+  @media screen and (max-width: 520px) {
+    .postList > ul > li > ul > li > a::after { left: 3rem; }
+  }
+
+  .postList > ul > li > ul > li > a h2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--cr-text);
+    font-size: 0.875rem;
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+    transition: opacity 0.14s ease;
+  }
+
+  .postList > ul > li > ul > li > a h2::after {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-top: 1.5px solid currentColor;
+    border-right: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.4;
+    transition: transform 0.14s var(--ease-snappy);
+    flex-shrink: 0;
+  }
+
+  .postList > ul > li > ul > li > a time {
+    color: var(--cr-muted);
+    font-size: 0.875rem;
+    font-weight: 460;
+    line-height: normal;
+    letter-spacing: -0.00563rem;
+    white-space: nowrap;
+  }
+
+  .postList > ul > li > ul > li > a time span {
+    transition: opacity 0.14s ease;
+    display: inline-block;
+  }
+
+  .postList > ul > li > ul > li > a time span:nth-child(2) {
+    position: absolute;
+    width: 0;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .postList > ul > li > ul > li > a time span:last-child {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    font-size: 0.8125rem;
+    color: var(--cr-muted);
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+    white-space: nowrap;
+  }
+
+  /* ── Preview panel ── */
+
+  .preview-panel {
+    position: fixed;
+    right: calc(50% - 17.1875rem);
+    top: 5rem;
+    transform: scale(0.97) translateY(6px);
+    width: 280px;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity 220ms var(--ease-snappy),
+      transform 220ms var(--ease-snappy);
+    z-index: 50;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .preview-panel[data-visible="true"] {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  @media screen and (max-width: 900px) { .preview-panel { display: none; } }
+
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+  }
+
+  .preview-shimmer {
+    position: absolute;
+    inset: 0;
+    background-size: 200% 100%;
+    animation: shimmer 2.5s linear infinite;
+  }
+
+  /* ── Homepage about section ── */
+
+  .about-section { padding-top: 3.5rem; padding-bottom: 1rem; }
+
+  .about-section p {
+    font-size: 0.875rem;
+    font-weight: 460;
+    line-height: 1.625rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+  }
+
+  .about-section p + p { margin-top: 0.875rem; }
+
+  .about-link {
+    color: var(--cr-text);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    transition: border-color 0.14s ease;
+  }
+
+  .about-link:hover { border-color: var(--cr-text); }
+
+  /* ── About page ── */
+
+  .about-header { margin-bottom: 2.5rem; }
+
+  .about-bio {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .about-bio p {
+    font-size: 0.9375rem;
+    font-weight: 460;
+    line-height: 1.75rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+  }
+
+  .about-beliefs {
+    border-top: 1px solid var(--cr-border);
+    padding-top: 2rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .belief-item {
+    display: flex;
+    gap: 0.875rem;
+    align-items: flex-start;
+  }
+
+  .belief-num {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--cr-muted);
+    letter-spacing: -0.003rem;
+    line-height: 1.75rem;
+    flex-shrink: 0;
+    width: 1rem;
+  }
+
+  .belief-text {
+    font-size: 0.875rem;
+    font-weight: 460;
+    line-height: 1.625rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+  }
+
+  .about-connect {
+    border-top: 1px solid var(--cr-border);
+    padding-top: 2rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .connect-link {
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-text);
+    text-decoration: none;
+    letter-spacing: -0.00563rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    padding-bottom: 1px;
+    transition: border-color 0.14s ease;
+  }
+
+  .connect-link:hover { border-color: var(--cr-text); }
+
+  .connect-link-muted {
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    text-decoration: none;
+    letter-spacing: -0.00563rem;
+    transition: color 0.14s ease;
+  }
+
+  .connect-link-muted:hover { color: var(--cr-text); }
+
+  /* ── Case study ── */
+
+  .cs-meta {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .cs-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .cs-meta-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cr-muted);
+  }
+
+  .cs-meta-value {
+    font-size: 0.875rem;
+    font-weight: 460;
+    color: var(--cr-text);
+    letter-spacing: -0.00563rem;
+  }
+
+  .cs-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--cr-text);
+    line-height: 1.2;
+  }
+
+  .cs-tagline {
+    font-size: 0.9375rem;
+    font-weight: 460;
+    line-height: 1.625rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+  }
+
+  .cs-hero {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .cs-overview {
+    font-size: 0.9375rem;
+    font-weight: 460;
+    line-height: 1.75rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--cr-border);
+  }
+
+  .cs-section {
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--cr-border);
+  }
+
+  .cs-section:last-of-type { border-bottom: none; }
+
+  .cs-section-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--cr-muted);
+    margin-bottom: 0.875rem;
+  }
+
+  .cs-section-body {
+    font-size: 0.9375rem;
+    font-weight: 460;
+    line-height: 1.75rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+  }
+
+  /* ── cs-layout: two-column shell (project pages) ── */
+
+  .cs-layout {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 3rem;
+    max-width: 48.375rem;
+    margin: 0 auto;
+    padding: 5rem 1rem 2.5rem;
+  }
+
+  .cs-layout::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8rem;
+    z-index: 9;
+    background: linear-gradient(
+      180deg,
+      var(--cr-bg) 0%,
+      hsla(60, 33%, 99%, 0.738) 19%,
+      hsla(60, 33%, 99%, 0.541) 34%,
+      hsla(60, 33%, 99%, 0.382) 47%,
+      hsla(60, 33%, 99%, 0.278) 56.5%,
+      hsla(60, 33%, 99%, 0.194) 65%,
+      hsla(60, 33%, 99%, 0.126) 73%,
+      hsla(60, 33%, 99%, 0.075) 80.2%,
+      hsla(60, 33%, 99%, 0.042) 86.1%,
+      hsla(60, 33%, 99%, 0.021) 91%,
+      hsla(60, 33%, 99%, 0.008) 95.2%,
+      hsla(60, 33%, 99%, 0.002) 98.2%,
+      hsla(60, 33%, 99%, 0) 100%
+    );
+  }
+
+  @media screen and (max-width: 768px) {
+    .cs-layout::before { height: 2.5rem; }
+  }
+
+  /* ── Sidebar ── */
+
+  .cs-sidebar {
+    width: 9rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: 5rem;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: staggerIn 0.5s ease 0s both;
+  }
+
+  /* ── Main content column ── */
+
+  .cs-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 36.375rem;
+  }
+
+  .cs-main .cs-meta  { margin-top: 1.25rem; }
+  .cs-main .cs-hero  { margin-top: 2rem; }
+  .cs-main section#overview { margin-top: 2rem; }
+
+  /* Stagger: main content children */
+  .cs-main > :nth-child(1)   { animation: staggerIn 0.5s ease 0.05s both; }
+  .cs-main > :nth-child(2)   { animation: staggerIn 0.5s ease 0.1s both; }
+  .cs-main > :nth-child(3)   { animation: staggerIn 0.5s ease 0.15s both; }
+  .cs-main > :nth-child(4)   { animation: staggerIn 0.5s ease 0.2s both; }
+  .cs-main > :nth-child(5)   { animation: staggerIn 0.5s ease 0.25s both; }
+  .cs-main > :nth-child(6)   { animation: staggerIn 0.5s ease 0.3s both; }
+  .cs-main > :nth-child(7)   { animation: staggerIn 0.5s ease 0.35s both; }
+  .cs-main > :nth-child(8)   { animation: staggerIn 0.5s ease 0.4s both; }
+  .cs-main > :nth-child(n+9) { animation: staggerIn 0.5s ease 0.45s both; }
+
+  /* ── Table of Contents ── */
+
+  .cs-toc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .cs-toc-link {
+    font-size: 0.75rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    text-decoration: none;
+    letter-spacing: -0.00563rem;
+    line-height: 1.4;
+    opacity: 0.6;
+    transition: color 0.14s ease, opacity 0.14s ease;
+  }
+
+  .cs-toc-link:hover,
+  .cs-toc-link[data-active="true"] {
+    color: var(--cr-text);
+    opacity: 1;
+  }
+
+  /* ── Mobile: collapse to single column ── */
+
+  @media screen and (max-width: 768px) {
+    .cs-layout {
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 2rem 1.5rem 2.5rem;
+    }
+    .cs-sidebar {
+      position: static;
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+    }
+    .cs-toc { display: none; }
+    .cs-main { max-width: 100%; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+/* ─── Keyframes ──────────────────────────────────────── */
+
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════
+   TIME TRAVEL — era-specific overrides
+   All rules here live outside @layer so they override
+   the layered utilities above via cascade priority.
+   ══════════════════════════════════════════════════════ */
+
+/* ─── Top gradient: correct for non-2026 backgrounds ── */
+
+html[data-era="1600s"] .homepage::before,
+html[data-era="1600s"] .inner-page::before,
+html[data-era="1600s"] .cs-layout::before {
+  background: linear-gradient(180deg, #f5e6c8 0%, rgba(245, 230, 200, 0) 100%);
+}
+html[data-era="1800s"] .homepage::before,
+html[data-era="1800s"] .inner-page::before,
+html[data-era="1800s"] .cs-layout::before {
+  background: linear-gradient(180deg, #0f0b07 0%, rgba(15, 11, 7, 0) 100%);
+}
+html[data-era="2000"] .homepage::before,
+html[data-era="2000"] .inner-page::before,
+html[data-era="2000"] .cs-layout::before {
+  background: linear-gradient(180deg, #d4d0c8 0%, rgba(212, 208, 200, 0) 100%);
+}
+html[data-era="2077"] .homepage::before,
+html[data-era="2077"] .inner-page::before,
+html[data-era="2077"] .cs-layout::before {
+  background: linear-gradient(180deg, #050810 0%, rgba(5, 8, 16, 0) 100%);
+}
+
+/* ─── Entrance animation overrides per era ───────────
+   Use sub-properties (not shorthand) to preserve the
+   existing nth-child animation-delay stagger values.   */
+
+html[data-era="1600s"] .homepage > .article > *,
+html[data-era="1600s"] .inner-page > *,
+html[data-era="1600s"] .cs-sidebar,
+html[data-era="1600s"] .cs-main > * {
+  animation-name: inkReveal;
+  animation-duration: 0.9s;
+  animation-timing-function: ease-in-out;
+}
+html[data-era="1600s"] .homepage > .postList,
+html[data-era="1600s"] .homepage > footer {
+  animation-name: inkReveal;
+  animation-duration: 0.9s;
+  animation-timing-function: ease-in-out;
+}
+
+html[data-era="1800s"] .homepage > .article > *,
+html[data-era="1800s"] .inner-page > *,
+html[data-era="1800s"] .cs-sidebar,
+html[data-era="1800s"] .cs-main > * {
+  animation-name: candleReveal;
+  animation-duration: 0.65s;
+  animation-timing-function: ease;
+}
+html[data-era="1800s"] .homepage > .postList,
+html[data-era="1800s"] .homepage > footer {
+  animation-name: candleReveal;
+  animation-duration: 0.65s;
+  animation-timing-function: ease;
+}
+
+html[data-era="2000"] .homepage > .article > *,
+html[data-era="2000"] .inner-page > *,
+html[data-era="2000"] .cs-sidebar,
+html[data-era="2000"] .cs-main > * {
+  animation-name: blockReveal;
+  animation-duration: 0.05s;
+  animation-timing-function: steps(1);
+}
+html[data-era="2000"] .homepage > .postList,
+html[data-era="2000"] .homepage > footer {
+  animation-name: blockReveal;
+  animation-duration: 0.05s;
+  animation-timing-function: steps(1);
+}
+
+html[data-era="2077"] .homepage > .article > *,
+html[data-era="2077"] .inner-page > *,
+html[data-era="2077"] .cs-sidebar,
+html[data-era="2077"] .cs-main > * {
+  animation-name: scanlineReveal;
+  animation-duration: 0.3s;
+  animation-timing-function: steps(8);
+}
+html[data-era="2077"] .homepage > .postList,
+html[data-era="2077"] .homepage > footer {
+  animation-name: scanlineReveal;
+  animation-duration: 0.3s;
+  animation-timing-function: steps(8);
+}
+
+/* ─── Selection ──────────────────────────────────────── */
+
+html[data-era="1600s"] ::selection { background: #d4a96a; color: #2c1810; }
+html[data-era="1800s"] ::selection { background: #3d2e1e; color: #e8dcc8; }
+html[data-era="2000"]  ::selection { background: #000080; color: #ffffff; }
+html[data-era="2077"]  ::selection { background: #00ffaa; color: #050810; }
+
+/* ─── Scrollbar overrides ────────────────────────────── */
+
+html[data-era="1600s"] ::-webkit-scrollbar-thumb,
+html[data-era="1600s"] :hover::-webkit-scrollbar-thumb {
+  background: rgba(139, 69, 19, 0.35);
+}
+html[data-era="1800s"] ::-webkit-scrollbar-thumb,
+html[data-era="1800s"] :hover::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.35);
+}
+html[data-era="2000"] ::-webkit-scrollbar { width: 16px; }
+html[data-era="2000"] ::-webkit-scrollbar-track {
+  background: #d4d0c8;
+  border-left: 1px solid #808080;
+}
+html[data-era="2000"] ::-webkit-scrollbar-thumb {
+  background: #b0aca4;
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+}
+html[data-era="2000"] :hover::-webkit-scrollbar-thumb { background: #9a9690; }
+html[data-era="2077"] ::-webkit-scrollbar { width: 3px; }
+html[data-era="2077"] ::-webkit-scrollbar-track { background: #050810; }
+html[data-era="2077"] ::-webkit-scrollbar-thumb,
+html[data-era="2077"] :hover::-webkit-scrollbar-thumb {
+  background: #00ffaa;
+  border-radius: 0;
+}
+
+/* ─── Footer divider line ────────────────────────────── */
+
+html[data-era="1600s"] .page-footer::before { background: #d4a96a; }
+html[data-era="1800s"] .page-footer::before { background: #2d1f0e; }
+html[data-era="2000"]  .page-footer::before { background: #808080; height: 2px; }
+html[data-era="2077"]  .page-footer::before {
+  background: rgba(0, 255, 170, 0.25);
+  box-shadow: 0 0 8px rgba(0, 255, 170, 0.2);
+}
+
+/* ─── Avatar placeholder ─────────────────────────────── */
+
+html[data-era="1600s"] .avatar-placeholder { background: rgba(44, 24, 16, 0.1); }
+html[data-era="1800s"] .avatar-placeholder { background: rgba(232, 220, 200, 0.08); }
+html[data-era="2000"]  .avatar-placeholder {
+  background: #b0aca4;
+  border: 2px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+  border-radius: 0;
+}
+html[data-era="2077"]  .avatar-placeholder {
+  background: rgba(0, 255, 170, 0.06);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 0;
+}
+
+/* ─── Link underline colors ──────────────────────────── */
+
+html[data-era="1600s"] .about-link,
+html[data-era="1600s"] .connect-link { border-bottom-color: rgba(44, 24, 16, 0.2); }
+html[data-era="1600s"] .about-link:hover,
+html[data-era="1600s"] .connect-link:hover { border-bottom-color: var(--cr-accent); }
+
+html[data-era="1800s"] .about-link,
+html[data-era="1800s"] .connect-link { border-bottom-color: rgba(232, 220, 200, 0.2); }
+html[data-era="1800s"] .about-link:hover,
+html[data-era="1800s"] .connect-link:hover { border-bottom-color: var(--cr-accent); }
+
+html[data-era="2077"] .about-link,
+html[data-era="2077"] .connect-link { border-bottom-color: rgba(0, 255, 170, 0.3); }
+html[data-era="2077"] .about-link:hover { border-bottom-color: #00ffaa; }
+html[data-era="2077"] .connect-link:hover { border-bottom-color: #00ffaa; }
+
+/* ─── Hover effects: 1600s — calligraphic warmth ─────── */
+
+html[data-era="1600s"] .postList > ul > li > ul > li > a:hover h2 {
+  letter-spacing: 0.02em;
+  color: var(--cr-accent);
+  opacity: 1 !important;
+  transition: letter-spacing 0.5s var(--ease-smooth), color 0.2s ease, opacity 0.14s ease;
+}
+html[data-era="1600s"] .page-nav a:hover,
+html[data-era="1600s"] .back-link:hover { color: var(--cr-accent); }
+html[data-era="1600s"] .footer-row a:hover { opacity: 0.6; }
+
+/* ─── Hover effects: 1800s — candlelight glow ────────── */
+
+html[data-era="1800s"] .postList > ul > li > ul > li > a:hover h2 {
+  text-shadow: 0 0 14px rgba(201, 168, 76, 0.5);
+  color: var(--cr-accent);
+  opacity: 1 !important;
+}
+html[data-era="1800s"] .page-nav a:hover,
+html[data-era="1800s"] .back-link:hover { color: var(--cr-accent); }
+html[data-era="1800s"] .footer-row a:hover { opacity: 1; color: var(--cr-accent); }
+html[data-era="1800s"] .connect-link-muted:hover { color: var(--cr-accent); }
+
+/* ─── Hover effects: 2000 — classic hyperlink ────────── */
+
+/* Disable the dim-on-hover behavior in 2000 era */
+html[data-era="2000"] .postList > ul:hover > li > ul > li > a h2,
+html[data-era="2000"] .postList > ul:hover > li > ul > li > a time span { opacity: 1; }
+
+html[data-era="2000"] .postList > ul > li > ul > li > a:hover h2 {
+  color: var(--cr-accent);
+  text-decoration: underline;
+}
+html[data-era="2000"] .postList > ul > li > ul > li > a h2::after { display: none; }
+html[data-era="2000"] .page-nav a:hover,
+html[data-era="2000"] .back-link:hover {
+  color: var(--cr-accent);
+  text-decoration: underline;
+}
+html[data-era="2000"] .footer-row a:hover {
+  opacity: 1;
+  color: var(--cr-accent);
+  text-decoration: underline;
+}
+html[data-era="2000"] .connect-link-muted:hover {
+  color: var(--cr-accent);
+  text-decoration: underline;
+}
+
+/* ─── Hover effects: 2077 — neon glow ───────────────── */
+
+html[data-era="2077"] .postList > ul > li > ul > li > a:hover h2 {
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.8);
+  color: var(--cr-accent);
+  opacity: 1 !important;
+}
+html[data-era="2077"] .page-nav a:hover,
+html[data-era="2077"] .back-link:hover {
+  color: var(--cr-accent);
+  text-shadow: 0 0 8px rgba(0, 255, 170, 0.6);
+}
+html[data-era="2077"] .footer-row a:hover {
+  opacity: 1;
+  color: var(--cr-accent);
+  text-shadow: 0 0 6px rgba(0, 255, 170, 0.5);
+}
+html[data-era="2077"] .connect-link-muted:hover {
+  color: var(--cr-accent);
+  text-shadow: 0 0 6px rgba(0, 255, 170, 0.5);
+}
+
+/* ─── 2000: bevel borders & boxy details ─────────────── */
+
+html[data-era="2000"] .about-beliefs { border-top-color: #808080; }
+html[data-era="2000"] .about-connect { border-top-color: #808080; }
+html[data-era="2000"] .cs-overview   { border-bottom-color: #808080; }
+html[data-era="2000"] .cs-section    { border-bottom-color: #808080; }
+html[data-era="2000"] .cs-hero,
+html[data-era="2000"] .preview-panel { border-radius: 0; }
+
+/* ─── 2077: angular & neon borders ──────────────────── */
+
+html[data-era="2077"] .about-beliefs { border-top-color: rgba(0, 255, 170, 0.2); }
+html[data-era="2077"] .about-connect { border-top-color: rgba(0, 255, 170, 0.2); }
+html[data-era="2077"] .cs-overview   { border-bottom-color: rgba(0, 255, 170, 0.15); }
+html[data-era="2077"] .cs-section    { border-bottom-color: rgba(0, 255, 170, 0.15); }
+html[data-era="2077"] .postList > ul > li { border-bottom-color: rgba(0, 255, 170, 0.15); }
+html[data-era="2077"] .postList > ul > li > ul > li > a::after {
+  border-bottom-color: rgba(0, 255, 170, 0.1);
+}
+html[data-era="2077"] .cs-hero,
+html[data-era="2077"] .preview-panel { border-radius: 0; }
+html[data-era="2077"] .preview-panel {
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  box-shadow: 0 0 30px rgba(0, 255, 170, 0.12), 0 0 60px rgba(0, 255, 170, 0.04);
+}
+html[data-era="2077"] .cs-title { letter-spacing: -0.01em; }
+
+/* ─── 2077: CRT scanline overlay ─────────────────────── */
+
+html[data-era="2077"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.06) 3px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+}
+
+/* ─── Time Travel Dial: base styles ──────────────────── */
+
+@layer utilities {
+
+  .dial {
+    position: fixed;
+    bottom: 1.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    transition: opacity 0.2s ease;
+  }
+
+  .dial--busy {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* ── Display card ── */
+
+  .dial__card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.09), 0 1px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 0.45rem 1rem 0.5rem;
+    min-width: 10.5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .dial__card-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    animation: dialCardIn 0.22s ease both;
+  }
+
+  .dial__card-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--cr-muted);
+    letter-spacing: 0.05em;
+    font-family: var(--font-inter, system-ui, sans-serif);
+    line-height: 1;
+  }
+
+  .dial__card-year {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--cr-text);
+    font-family: var(--font-mono, monospace);
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+  }
+
+  /* ── Track + pips ── */
+
+  .dial__track {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 0.25rem;
+  }
+
+  .dial__line {
+    position: absolute;
+    top: 0.5rem;           /* vertically centered on pip */
+    left: 1.375rem;
+    right: 1.375rem;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+  }
+
+  .dial__stops {
+    display: flex;
+    justify-content: space-between;
+    gap: 0;
+    width: 20rem;
+    position: relative;
+  }
+
+  .dial__stop {
+    width: 3.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.15s ease;
+  }
+
+  .dial__stop:disabled { cursor: default; }
+
+  .dial__stop:not(:disabled):hover .dial__pip {
+    transform: scale(1.3);
+    background: var(--cr-accent);
+  }
+
+  .dial__pip {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.18);
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    flex-shrink: 0;
+  }
+
+  .dial__stop--active .dial__pip {
+    width: 0.6875rem;
+    height: 0.6875rem;
+    background: var(--cr-accent);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06), 0 0 0 5px rgba(0, 0, 0, 0.03);
+  }
+
+  .dial__tick {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--cr-muted);
+    font-family: var(--font-mono, monospace);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    transition: color 0.15s ease;
+  }
+
+  .dial__stop--active .dial__tick { color: var(--cr-text); }
+
+  .dial__stop:not(:disabled):hover .dial__tick { color: var(--cr-text); }
+
+}
+
+/* ── Dial: 1600s ── */
+
+html[data-era="1600s"] .dial__card {
+  background: #ede0c0;
+  border: 1px solid #c09a5a;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 #8b4513, 0 2px 12px rgba(139, 69, 19, 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-era="1600s"] .dial__card-label {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-style: italic;
+  letter-spacing: 0.02em;
+  font-size: 10px;
+  color: #8b4513;
+}
+html[data-era="1600s"] .dial__card-year {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #2c1810;
+}
+html[data-era="1600s"] .dial__line { background: rgba(139, 69, 19, 0.25); }
+html[data-era="1600s"] .dial__pip {
+  border-radius: 0;
+  background: rgba(44, 24, 16, 0.2);
+}
+html[data-era="1600s"] .dial__stop--active .dial__pip {
+  background: #8b4513;
+  border-radius: 0;
+  box-shadow: 1px 1px 0 #5a2d0c, 0 0 0 3px rgba(139, 69, 19, 0.12);
+}
+html[data-era="1600s"] .dial__stop:not(:disabled):hover .dial__pip {
+  background: #8b4513;
+  border-radius: 0;
+}
+html[data-era="1600s"] .dial__tick {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-style: italic;
+  font-size: 9px;
+  color: rgba(44, 24, 16, 0.55);
+}
+html[data-era="1600s"] .dial__stop--active .dial__tick { color: #2c1810; }
+
+/* ── Dial: 1800s ── */
+
+html[data-era="1800s"] .dial__card {
+  background: #110e09;
+  border: 1px solid #c9a84c;
+  border-radius: 2px;
+  box-shadow: 0 0 28px rgba(201, 168, 76, 0.14), 0 2px 10px rgba(0, 0, 0, 0.7);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-era="1800s"] .dial__card-label {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.7);
+  text-transform: uppercase;
+  font-size: 9px;
+}
+html[data-era="1800s"] .dial__card-year {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #e8dcc8;
+}
+html[data-era="1800s"] .dial__line { background: rgba(201, 168, 76, 0.18); }
+html[data-era="1800s"] .dial__pip {
+  background: rgba(201, 168, 76, 0.2);
+}
+html[data-era="1800s"] .dial__stop--active .dial__pip {
+  background: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12), 0 0 8px rgba(201, 168, 76, 0.5);
+}
+html[data-era="1800s"] .dial__stop:not(:disabled):hover .dial__pip {
+  background: #c9a84c;
+  box-shadow: 0 0 6px rgba(201, 168, 76, 0.4);
+}
+html[data-era="1800s"] .dial__tick {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-size: 9px;
+  color: rgba(232, 220, 200, 0.35);
+}
+html[data-era="1800s"] .dial__stop--active .dial__tick { color: #c9a84c; }
+
+/* ── Dial: 2000 ── */
+
+html[data-era="2000"] .dial__card {
+  background: #d4d0c8;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  border-radius: 0;
+  box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #5a5a5a, 2px 2px 0 rgba(0,0,0,0.3);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-era="2000"] .dial__card-label {
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  letter-spacing: 0;
+  color: rgba(0, 0, 0, 0.55);
+  text-transform: none;
+}
+html[data-era="2000"] .dial__card-year {
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000080;
+}
+html[data-era="2000"] .dial__line { background: #808080; height: 2px; }
+html[data-era="2000"] .dial__pip {
+  border-radius: 0;
+  background: #808080;
+  border: 2px solid;
+  border-color: #ffffff #5a5a5a #5a5a5a #ffffff;
+  width: 0.5625rem;
+  height: 0.5625rem;
+  box-sizing: border-box;
+}
+html[data-era="2000"] .dial__stop--active .dial__pip {
+  background: #000080;
+  border-color: #5555aa #000040 #000040 #5555aa;
+  border-radius: 0;
+  box-shadow: none;
+  width: 0.6875rem;
+  height: 0.6875rem;
+}
+html[data-era="2000"] .dial__stop:not(:disabled):hover .dial__pip {
+  background: #000080;
+  border-radius: 0;
+}
+html[data-era="2000"] .dial__tick {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+html[data-era="2000"] .dial__stop--active .dial__tick { color: #000080; }
+
+/* ── Dial: 2077 ── */
+
+html[data-era="2077"] .dial__card {
+  background: rgba(5, 8, 16, 0.95);
+  border: 1px solid rgba(0, 255, 170, 0.4);
+  border-radius: 0;
+  box-shadow: 0 0 24px rgba(0, 255, 170, 0.1), inset 0 0 20px rgba(0, 255, 170, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html[data-era="2077"] .dial__card-label {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(0, 255, 170, 0.55);
+  text-transform: uppercase;
+}
+html[data-era="2077"] .dial__card-year {
+  font-family: var(--font-space-mono, monospace);
+  color: #00ffaa;
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.7);
+  letter-spacing: 0.02em;
+  animation: neonPulse 2.4s ease-in-out infinite;
+}
+html[data-era="2077"] .dial__line {
+  background: rgba(0, 255, 170, 0.2);
+  box-shadow: 0 0 4px rgba(0, 255, 170, 0.2);
+}
+html[data-era="2077"] .dial__pip {
+  border-radius: 0;
+  background: rgba(0, 255, 170, 0.2);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+}
+html[data-era="2077"] .dial__stop--active .dial__pip {
+  background: #00ffaa;
+  border-radius: 0;
+  border: 1px solid #00ffaa;
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.1), 0 0 10px rgba(0, 255, 170, 0.6);
+  animation: neonPulse 1.8s ease-in-out infinite;
+}
+html[data-era="2077"] .dial__stop:not(:disabled):hover .dial__pip {
+  background: #00ffaa;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(0, 255, 170, 0.5);
+}
+html[data-era="2077"] .dial__tick {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 8px;
+  color: rgba(224, 240, 255, 0.3);
+  letter-spacing: 0.02em;
+}
+html[data-era="2077"] .dial__stop--active .dial__tick {
+  color: #00ffaa;
+  text-shadow: 0 0 6px rgba(0, 255, 170, 0.5);
+}
+
+@keyframes dialCardIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes neonPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* ─── Era transition overlay ─────────────────────────── */
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0;
+}
+
+/* Exit: overlay covers screen — data-era is the era being LEFT */
+html[data-era-transitioning="exit"][data-era="1600s"] body::after {
+  background: #2c1810;
+  animation: inkBlotExit 0.7s ease-in both;
+}
+html[data-era-transitioning="exit"][data-era="1800s"] body::after {
+  background: #0f0b07;
+  animation: candleFlickerOut 0.6s ease both;
+}
+html[data-era-transitioning="exit"][data-era="2000"] body::after {
+  background: #000080;
+  animation: wipeRight 0.4s steps(16) both;
+}
+html[data-era-transitioning="exit"][data-era="2026"] body::after {
+  background: #ffffff;
+  animation: fadeOverlay 0.35s ease both;
+}
+html[data-era-transitioning="exit"][data-era="2077"] body::after {
+  background: #00ffaa;
+  animation: glitchCover 0.4s steps(6) both;
+}
+
+/* Enter: overlay reveals screen — data-era is the era being ENTERED */
+html[data-era-transitioning="enter"][data-era="1600s"] body::after {
+  background: #2c1810;
+  animation: inkBlotEnter 0.8s ease-out both;
+}
+html[data-era-transitioning="enter"][data-era="1800s"] body::after {
+  background: #0f0b07;
+  animation: candleFlickerIn 0.7s ease both;
+}
+html[data-era-transitioning="enter"][data-era="2000"] body::after {
+  background: #000080;
+  animation: wipeLeft 0.3s steps(16) both;
+}
+html[data-era-transitioning="enter"][data-era="2026"] body::after {
+  background: #ffffff;
+  animation: revealOverlay 0.35s ease both;
+}
+html[data-era-transitioning="enter"][data-era="2077"] body::after {
+  background: #00ffaa;
+  animation: glitchReveal 0.45s steps(6) both;
+}
+
+/* ─── Entrance animation keyframes ───────────────────── */
+
+@keyframes inkReveal {
+  from { opacity: 0; filter: blur(4px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+@keyframes candleReveal {
+  0%   { opacity: 0; filter: brightness(0.6); }
+  60%  { opacity: 0.85; filter: brightness(1.08); }
+  100% { opacity: 1; filter: brightness(1); }
+}
+
+@keyframes blockReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scanlineReveal {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0% 0); }
+}
+
+/* ─── Transition overlay keyframes ───────────────────── */
+
+/* 1600s — ink blot from center */
+@keyframes inkBlotExit {
+  from { clip-path: circle(0% at 50% 50%); opacity: 1; }
+  to   { clip-path: circle(150% at 50% 50%); opacity: 1; }
+}
+@keyframes inkBlotEnter {
+  from { clip-path: circle(150% at 50% 50%); opacity: 1; }
+  to   { clip-path: circle(0% at 50% 50%); opacity: 1; }
+}
+
+/* 1800s — candle flicker out / in */
+@keyframes candleFlickerOut {
+  0%   { opacity: 0; }
+  20%  { opacity: 0.9; }
+  35%  { opacity: 0.3; }
+  55%  { opacity: 1; }
+  70%  { opacity: 0.15; }
+  85%  { opacity: 0.95; }
+  100% { opacity: 1; }
+}
+@keyframes candleFlickerIn {
+  0%   { opacity: 1; }
+  15%  { opacity: 0.1; }
+  30%  { opacity: 0.8; }
+  50%  { opacity: 0.2; }
+  70%  { opacity: 0.85; }
+  85%  { opacity: 0.05; }
+  100% { opacity: 0; }
+}
+
+/* 2000 — progress wipe left-to-right / right-to-left */
+@keyframes wipeRight {
+  from { clip-path: inset(0 100% 0 0); opacity: 1; }
+  to   { clip-path: inset(0 0% 0 0);   opacity: 1; }
+}
+@keyframes wipeLeft {
+  from { clip-path: inset(0 0% 0 0);   opacity: 1; }
+  to   { clip-path: inset(0 100% 0 0); opacity: 1; }
+}
+
+/* 2026 — clean fade */
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes revealOverlay {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* 2077 — digital glitch */
+@keyframes glitchCover {
+  0%   { opacity: 0; transform: skewX(0deg); }
+  15%  { opacity: 0.9; transform: skewX(-4deg); }
+  30%  { opacity: 0.6; transform: skewX(3deg); }
+  50%  { opacity: 1; transform: skewX(-2deg); }
+  75%  { opacity: 0.85; transform: skewX(1deg); }
+  100% { opacity: 1; transform: skewX(0deg); }
+}
+@keyframes glitchReveal {
+  0%   { opacity: 1; transform: skewX(0deg); }
+  20%  { opacity: 0.8; transform: skewX(2deg); }
+  40%  { opacity: 1; transform: skewX(-3deg); }
+  60%  { opacity: 0.4; transform: skewX(1deg); }
+  80%  { opacity: 0.15; transform: skewX(-1deg); }
+  100% { opacity: 0; transform: skewX(0deg); }
+}
+
+/* Shared: blinking cursor (2077) */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   IMMERSIVE ERA TYPOGRAPHY & DECORATION
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── 1600s: Renaissance Parchment ───────────────────── */
+
+/* Body copy: generous leading, warmer rhythm */
+html[data-era="1600s"] body {
+  line-height: 1.95;
+  font-style: italic;
+}
+
+/* Page identity */
+html[data-era="1600s"] .page-name {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #2c1810;
+}
+html[data-era="1600s"] .page-name::before { content: "❧ "; color: #8b4513; font-style: normal; }
+html[data-era="1600s"] .page-name::after  { content: " ❧"; color: #8b4513; font-style: normal; }
+
+html[data-era="1600s"] .page-role {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: #8b4513;
+}
+
+/* Project list — italic titles, leaf bullet */
+html[data-era="1600s"] .postList > ul > li > ul > li > a h2 {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+html[data-era="1600s"] .postList > ul > li > ul > li > a h2::after {
+  content: " ❧";
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  font-style: normal;
+  color: #8b4513;
+}
+html[data-era="1600s"] .postList > ul > li > ul > li > a:hover h2::after { opacity: 1; }
+
+/* About beliefs — ornamental heading */
+html[data-era="1600s"] .about-beliefs::before {
+  content: "— ❦ —";
+  display: block;
+  text-align: center;
+  font-family: var(--font-playfair, Georgia, serif);
+  font-size: 1.1rem;
+  color: #8b4513;
+  margin-bottom: 1rem;
+  letter-spacing: 0.2em;
+}
+
+/* Footer — decorative rule */
+html[data-era="1600s"] footer {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+html[data-era="1600s"] footer::before {
+  content: "· · ·";
+  display: block;
+  text-align: center;
+  color: #c09a5a;
+  font-style: normal;
+  letter-spacing: 0.5em;
+  margin-bottom: 0.75rem;
+}
+
+/* Case study title */
+html[data-era="1600s"] .cs-title {
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* ─── 1800s: Victorian Dark ───────────────────────────── */
+
+/* Page identity */
+html[data-era="1800s"] .page-name {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: #e8dcc8;
+}
+
+html[data-era="1800s"] .page-role {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: rgba(232, 220, 200, 0.55);
+}
+
+/* Project list — gazette headline style */
+html[data-era="1800s"] .postList > ul > li > ul > li > a h2 {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-size: 1.05em;
+}
+html[data-era="1800s"] .postList > ul > li > ul > li > a:hover h2 {
+  text-shadow: 0 0 18px rgba(201, 168, 76, 0.5);
+  color: #c9a84c;
+}
+
+/* Section labels — gold, tight caps */
+html[data-era="1800s"] .postList > ul > li > h3,
+html[data-era="1800s"] .postList > ul > li > span {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  color: #c9a84c;
+}
+
+/* About beliefs — gold rule ornament */
+html[data-era="1800s"] .about-beliefs::before {
+  content: "✦ · ✦ · ✦";
+  display: block;
+  text-align: center;
+  color: #c9a84c;
+  letter-spacing: 0.4em;
+  margin-bottom: 1rem;
+  font-size: 0.75rem;
+  text-shadow: 0 0 8px rgba(201, 168, 76, 0.4);
+}
+
+/* Footer — gold gradient rule */
+html[data-era="1800s"] footer {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  letter-spacing: 0.04em;
+  border-top: 1px solid;
+  border-image: linear-gradient(to right, transparent, #c9a84c 30%, #c9a84c 70%, transparent) 1;
+}
+
+/* Case study title */
+html[data-era="1800s"] .cs-title {
+  font-family: var(--font-baskerville, "Times New Roman", serif);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 20px rgba(201, 168, 76, 0.15);
+}
+
+/* ─── 2000: Y2K Web ───────────────────────────────────── */
+
+/* Page identity — Windows title bar aesthetic */
+html[data-era="2000"] .page-name {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  background: #000080;
+  color: #ffffff;
+  padding: 2px 6px;
+  display: inline-block;
+  border: 2px solid;
+  border-color: #5555aa #000040 #000040 #5555aa;
+}
+
+html[data-era="2000"] .page-role {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-style: normal;
+}
+
+/* Project titles — classic hyperlink blue underline */
+html[data-era="2000"] .postList > ul > li > ul > li > a h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  color: #0000cc;
+  text-decoration: underline;
+  font-size: 0.95em;
+}
+html[data-era="2000"] .postList > ul > li > ul > li > a:hover h2 {
+  color: #cc0000;
+  text-shadow: none;
+}
+html[data-era="2000"] .postList > ul > li > ul > li > a h2::after { display: none; }
+
+/* "Projects" section header — navy title bar */
+html[data-era="2000"] .postList > ul > li > h3,
+html[data-era="2000"] .postList > ul > li > span {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  background: #000080;
+  color: #ffffff;
+  padding: 1px 5px;
+  text-transform: none;
+}
+
+/* Footer — system font */
+html[data-era="2000"] footer {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.75rem;
+  border-top: 2px solid #808080;
+}
+
+/* Case study */
+html[data-era="2000"] .cs-title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* ─── 2077: Cyberpunk Future ──────────────────────────── */
+
+/* Page identity — terminal prefix */
+html[data-era="2077"] .page-name {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: #00ffaa;
+  text-shadow: 0 0 8px rgba(0, 255, 170, 0.5);
+  text-transform: uppercase;
+}
+html[data-era="2077"] .page-name::before {
+  content: "> ";
+  opacity: 0.7;
+}
+
+html[data-era="2077"] .page-role {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: rgba(224, 240, 255, 0.45);
+}
+html[data-era="2077"] .page-role::before {
+  content: "// ";
+  color: rgba(0, 255, 170, 0.4);
+}
+
+/* Project list — terminal line items */
+html[data-era="2077"] .postList > ul > li > ul > li > a h2 {
+  font-family: var(--font-space-mono, monospace);
+  font-weight: 400;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+html[data-era="2077"] .postList > ul > li > ul > li > a h2::before {
+  content: "> ";
+  color: rgba(0, 255, 170, 0.5);
+  font-size: 0.85em;
+}
+html[data-era="2077"] .postList > ul > li > ul > li > a:hover h2 {
+  color: #00ffaa;
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+  animation: glitchText 0.15s steps(2) both;
+}
+html[data-era="2077"] .postList > ul > li > ul > li > a h2::after { display: none; }
+
+/* Section header — sys.list */
+html[data-era="2077"] .postList > ul > li > h3,
+html[data-era="2077"] .postList > ul > li > span {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: rgba(0, 255, 170, 0.55);
+  text-transform: uppercase;
+}
+
+/* About beliefs — protocol header */
+html[data-era="2077"] .about-beliefs::before {
+  content: "[ core.protocols ]";
+  display: block;
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.65rem;
+  color: rgba(0, 255, 170, 0.55);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* Footer */
+html[data-era="2077"] footer {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: rgba(224, 240, 255, 0.35);
+  border-top: 1px solid rgba(0, 255, 170, 0.15);
+}
+
+/* Case study */
+html[data-era="2077"] .cs-title {
+  font-family: var(--font-space-mono, monospace);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@keyframes glitchText {
+  0%   { transform: translateX(0); }
+  33%  { transform: translateX(-2px); }
+  66%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+/* ─── Filter tab overrides per era ──────────────────── */
+
+html[data-era="1600s"] .postList-header { border-bottom-color: #d4a96a; }
+html[data-era="1600s"] .filter-tabs button[data-active="true"] { background: rgba(139, 69, 19, 0.1); }
+
+html[data-era="1800s"] .postList-header { border-bottom-color: #2d1f0e; }
+html[data-era="1800s"] .filter-tabs button[data-active="true"] { background: rgba(232, 220, 200, 0.08); }
+
+html[data-era="2000"] .postList-header { border-bottom-color: #808080; border-bottom-width: 2px; }
+html[data-era="2000"] .filter-tabs button { border-radius: 0; }
+html[data-era="2000"] .filter-tabs button[data-active="true"] { background: #808080; color: #ffffff; }
+
+html[data-era="2077"] .postList-header { border-bottom-color: rgba(0, 255, 170, 0.2); }
+html[data-era="2077"] .filter-tabs button[data-active="true"] { background: rgba(0, 255, 170, 0.08); color: #00ffaa; }
+html[data-era="2077"] .filter-tabs button:hover { color: #00ffaa; }
+
+/* ═══════════════════════════════════════════════════════
+   CLOCK DIAL
+   ═══════════════════════════════════════════════════════ */
+
+.clock-dial-wrapper {
+  position: fixed;
+  top: 1.375rem;
+  /* Align with the right edge of the site content column.
+     Falls back to 1rem on viewports narrower than the column. */
+  right: max(1rem, calc(50% - 18.1875rem));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Handwritten annotation ── */
+
+.clock-annotation {
+  pointer-events: none;
+  color: var(--cr-muted);
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* Arrow path — draws in via stroke-dashoffset */
+.annotation-arrow-path {
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: drawPath 0.65s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+/* Arrowhead — draws after main arrow */
+.annotation-arrowhead-path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: drawPath 0.22s ease 1.05s forwards;
+}
+
+/* Text — fades in after arrow completes */
+.annotation-label {
+  animation: annotationFade 0.45s ease 1.1s forwards;
+}
+
+@keyframes drawPath {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes annotationFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Clock button ── */
+
+.clock-dial {
+  width: 42px;
+  height: 42px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--cr-text);
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clock-dial--busy {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.clock-dial svg {
+  display: block;
+  transition: filter 250ms ease;
+}
+
+.clock-dial:hover svg {
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.1));
+}
+
+/* Spin animation triggered by data-spinning attribute */
+.clock-dial svg[data-spinning="true"] {
+  animation: clockSpin 0.48s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes clockSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(720deg); }
+}
+
+/* ── Era-specific clock tints ── */
+
+html[data-era="1600s"] .clock-dial { color: var(--cr-accent); }
+html[data-era="1600s"] .clock-annotation { color: rgba(44, 24, 16, 0.4); }
+
+html[data-era="1800s"] .clock-dial { color: var(--cr-accent); }
+html[data-era="1800s"] .clock-annotation { color: rgba(201, 168, 76, 0.45); }
+
+html[data-era="2000"] .clock-dial { color: var(--cr-text); }
+html[data-era="2000"] .clock-annotation { color: rgba(0, 0, 0, 0.4); }
+
+html[data-era="2077"] .clock-dial {
+  color: var(--cr-accent);
+  filter: drop-shadow(0 0 6px rgba(0, 255, 170, 0.35));
+}
+html[data-era="2077"] .clock-annotation { color: rgba(0, 255, 170, 0.45); }
+
+/* Hide annotation on mobile (no room) */
+@media screen and (max-width: 600px) {
+  .clock-annotation { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   GREETING
+   ═══════════════════════════════════════════════════════ */
+
+.page-greeting {
+  font-size: 0.875rem;
+  font-weight: 460;
+  color: var(--cr-muted);
+  letter-spacing: -0.00563rem;
+  margin-top: 0.125rem;
+}
+
+.greeting-icon {
+  display: inline-block;
+  font-style: normal;
+}
+
+.greeting-icon[data-period="morning"] {
+  animation: iconSpin 14s linear infinite;
+}
+
+.greeting-icon[data-period="afternoon"] {
+  animation: iconPulse 3.5s ease-in-out infinite;
+}
+
+.greeting-icon[data-period="evening"] {
+  animation: iconFloat 4.5s ease-in-out infinite;
+}
+
+.greeting-icon[data-period="night"] {
+  animation: iconTwinkle 2.8s ease-in-out infinite;
+}
+
+@keyframes iconSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%       { transform: scale(1.15) translateY(-1px); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50%       { transform: translateY(-2.5px) rotate(6deg); }
+}
+
+@keyframes iconTwinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  40%       { opacity: 0.55; transform: scale(0.88); }
+  70%       { opacity: 0.9; transform: scale(1.05); }
+}
+
+/* Greeting in each era */
+html[data-era="1600s"] .page-greeting { font-style: italic; color: rgba(44, 24, 16, 0.55); }
+html[data-era="1800s"] .page-greeting { letter-spacing: 0.04em; color: rgba(232, 220, 200, 0.5); }
+html[data-era="2000"]  .page-greeting { font-family: Arial, Helvetica, sans-serif; font-size: 0.8125rem; }
+html[data-era="2077"]  .page-greeting {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.75rem;
+  color: rgba(224, 240, 255, 0.4);
+}
+html[data-era="2077"]  .page-greeting::before { content: "// "; color: rgba(0, 255, 170, 0.35); }
+
+/* ═══════════════════════════════════════════════════════
+   WORKS LIST (new grid layout)
+   ═══════════════════════════════════════════════════════ */
+
+.works-list {
+  display: grid;
+  grid-template-columns: 2.875rem 1fr;
+}
+
+.works-year-cell {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  align-self: start;
+}
+
+.works-year {
+  font-size: 0.75rem;
+  color: var(--cr-muted);
+  letter-spacing: -0.003rem;
+  font-weight: 460;
+  line-height: 1.5rem; /* aligns with title baseline */
+}
+
+.works-project-cell {
+  display: block;
+  text-decoration: none;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--cr-border);
+  transition: opacity 0.14s ease;
+}
+
+/* Dim sibling titles when list is hovered */
+@media screen and (min-width: 520px) {
+  .works-list:hover .works-project-cell .works-project-title,
+  .works-list:hover .works-project-cell .works-project-tag {
+    opacity: 0.28;
+  }
+
+  .works-project-cell:hover .works-project-title,
+  .works-project-cell:hover .works-project-tag {
+    opacity: 1 !important;
+  }
+}
+
+.works-project-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cr-text);
+  letter-spacing: -0.00563rem;
+  transition: opacity 0.14s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Arrow indicator on hover */
+.works-project-title::after {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.14s ease, transform 0.14s var(--ease-snappy);
+  flex-shrink: 0;
+}
+
+.works-project-cell:hover .works-project-title::after {
+  opacity: 0.4;
+  transform: translateX(0.2rem) rotate(45deg);
+}
+
+.works-project-tag {
+  font-size: 0.8125rem;
+  font-weight: 460;
+  color: var(--cr-muted);
+  letter-spacing: -0.003rem;
+  margin-top: 0.15rem;
+  transition: opacity 0.14s ease;
+}
+
+/* ── Era overrides for works list ── */
+
+html[data-era="1600s"] .works-project-cell { border-top-color: #d4a96a; }
+html[data-era="1600s"] .works-project-title {
+  font-family: var(--font-playfair, Georgia, serif);
+  font-style: italic;
+}
+html[data-era="1600s"] .works-project-cell:hover .works-project-title { color: var(--cr-accent); }
+
+html[data-era="1800s"] .works-project-cell { border-top-color: #2d1f0e; }
+html[data-era="1800s"] .works-project-title { font-family: var(--font-baskerville, "Times New Roman", serif); }
+html[data-era="1800s"] .works-project-cell:hover .works-project-title {
+  color: var(--cr-accent);
+  text-shadow: 0 0 14px rgba(201, 168, 76, 0.5);
+}
+
+html[data-era="2000"] .works-project-cell { border-top-color: #808080; border-top-width: 2px; }
+html[data-era="2000"] .works-project-title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.875rem;
+  color: #0000cc;
+  text-decoration: underline;
+}
+html[data-era="2000"] .works-project-title::after { display: none; }
+html[data-era="2000"] .works-project-cell:hover .works-project-title { color: #cc0000; }
+html[data-era="2000"] .works-list:hover .works-project-cell .works-project-title,
+html[data-era="2000"] .works-list:hover .works-project-cell .works-project-tag { opacity: 1; }
+
+html[data-era="2077"] .works-project-cell { border-top-color: rgba(0, 255, 170, 0.12); }
+html[data-era="2077"] .works-project-title {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+html[data-era="2077"] .works-project-title::before { content: "> "; color: rgba(0, 255, 170, 0.45); }
+html[data-era="2077"] .works-project-title::after { display: none; }
+html[data-era="2077"] .works-project-cell:hover .works-project-title {
+  color: var(--cr-accent);
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.6);
 }
