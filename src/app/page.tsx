@@ -105,11 +105,13 @@ function WorksList({ onHover }: { onHover: (slug: string | null) => void }) {
 
 /* ─── Time-of-day greeting ────────────────────────────── */
 
+type DayPeriod = "morning" | "afternoon" | "evening" | "night";
+
 function getTimeInfo(hour: number) {
-  if (hour >= 5 && hour < 12)  return { greeting: "Good morning",   icon: "☀️",  period: "morning"   };
-  if (hour >= 12 && hour < 17) return { greeting: "Good afternoon", icon: "🌤️", period: "afternoon" };
-  if (hour >= 17 && hour < 21) return { greeting: "Good evening",   icon: "🌙",  period: "evening"   };
-  return                               { greeting: "Good night",     icon: "✦",   period: "night"     };
+  if (hour >= 5 && hour < 12)  return { greeting: "Good morning",   icon: "☀️",  period: "morning" as DayPeriod };
+  if (hour >= 12 && hour < 17) return { greeting: "Good afternoon", icon: "🌤️", period: "afternoon" as DayPeriod };
+  if (hour >= 17 && hour < 21) return { greeting: "Good evening",   icon: "🌙",  period: "evening" as DayPeriod };
+  return                               { greeting: "Good night",     icon: "✦",   period: "night" as DayPeriod };
 }
 
 /* ─── Page ────────────────────────────────────────────── */
@@ -117,7 +119,6 @@ function getTimeInfo(hour: number) {
 export default function Home() {
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [timeInfo, setTimeInfo] = useState(getTimeInfo(20)); // default to evening for SSR
-
   useEffect(() => {
     setTimeInfo(getTimeInfo(new Date().getHours()));
   }, []);
@@ -127,8 +128,6 @@ export default function Home() {
 
   return (
     <div className="homepage">
-      <PreviewPanel project={hoveredProject} />
-
       <article className="article">
         {/* ── Header ── */}
         <header>
@@ -141,63 +140,96 @@ export default function Home() {
           </p>
         </header>
 
-        {/* ── Bio ── */}
-        <section className="about-section">
+        <div
+          className="about-preview"
+          data-preview={hoveredProject ? "true" : "false"}
+        >
+          <PreviewPanel project={hoveredProject} />
+
+          {/* ── Bio ── */}
+          <section className="about-section">
+            <p>
+              I was born in Dallas, Texas, and now reside in Atlanta, Georgia.
+            </p>
           <p>
-            I was born in Dallas, Texas, and now reside in Atlanta, Georgia.
-          </p>
-          <p>
-            Previously, I founded Vlyss, a design and development firm focused on
-            blockchain and edtech initiatives. We partnered with companies such as
-            Solana and Baylor University to bring their visions to life.
-          </p>
-          <p>
-            Recently, I launched{" "}
+            Previously, I founded{" "}
             <a
-              href="https://openwrit.com"
+              href="https://vlyss.com"
               className="about-link"
               target="_blank"
               rel="noopener noreferrer"
             >
-              OpenWrit
+              Vlyss
             </a>
-            , an open source, distractionless way to read the Bible.
-          </p>
-          <p>
-            Currently, I am exploring new design opportunities while building
-            personal projects.
-          </p>
-          <p>
-            Beyond design and craft, I am learning Portuguese, and I thoroughly
-            enjoy a match of tennis along with a sci-fi or fantasy novel. Let me
-            know if you have any recs.
-          </p>
-          <p>
-            I am on{" "}
+            , a design and development firm focused on blockchain and edtech initiatives.
+            We partnered with companies such as{" "}
             <a
-              href="https://x.com/cadeross"
+              href="https://solana.com"
               className="about-link"
               target="_blank"
               rel="noopener noreferrer"
             >
-              X
-            </a>
-            , and you can message me on{" "}
-            <a
-              href="https://t.me/cadeross"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Telegram
+              Solana
             </a>{" "}
-            or by{" "}
-            <a href="mailto:hello@cadeross.com" className="about-link">
-              email
-            </a>
-            .
+            and{" "}
+            <a
+              href="https://baylor.edu"
+              className="about-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Baylor University
+            </a>{" "}
+            to bring their visions to life.
           </p>
-        </section>
+            <p>
+              Recently, I launched{" "}
+              <a
+                href="https://openwrit.com"
+                className="about-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                OpenWrit
+              </a>
+              , an open source, distractionless way to read the Bible.
+            </p>
+            <p>
+              Currently, I am exploring new design opportunities while building
+              personal projects.
+            </p>
+            <p>
+              Beyond design and craft, I am learning Portuguese, and I thoroughly
+              enjoy a match of tennis along with a sci-fi or fantasy novel. Let me
+              know if you have any recs.
+            </p>
+            <p>
+              I am on{" "}
+              <a
+                href="https://x.com/cadeross"
+                className="about-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                X
+              </a>
+              , and you can message me on{" "}
+              <a
+                href="https://t.me/cadeross"
+                className="about-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Telegram
+              </a>{" "}
+              or by{" "}
+              <a href="mailto:hello@cadeross.com" className="about-link">
+                email
+              </a>
+              .
+            </p>
+          </section>
+        </div>
       </article>
 
       {/* ── Works ── */}

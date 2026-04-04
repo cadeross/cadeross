@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import {
   Inter,
   IBM_Plex_Mono,
@@ -9,7 +10,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { EraProvider } from "@/components/EraContext";
-import ClockDial from "@/components/ClockDial";
+import ClockDialGate from "@/components/ClockDialGate";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -67,9 +68,12 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${ibmPlexMono.variable} ${playfairDisplay.variable} ${libreBaskerville.variable} ${spaceMono.variable} ${caveat.variable} antialiased`}
       >
+        <Script id="system-theme" strategy="beforeInteractive">
+          {`(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');var set=function(){document.documentElement.setAttribute('data-system-theme',m.matches?'dark':'light');};set();if(m.addEventListener){m.addEventListener('change',set);}else if(m.addListener){m.addListener(set);}}catch(e){}})();`}
+        </Script>
         <EraProvider>
           {children}
-          <ClockDial />
+          <ClockDialGate />
         </EraProvider>
       </body>
     </html>
