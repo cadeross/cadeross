@@ -10,6 +10,7 @@ export default function ClockDialGate() {
   const pathname = usePathname();
   const normalized = pathname && pathname !== "/" ? pathname.replace(/\/$/, "") : "/";
 
+  if (normalized === "/focus") return null;
   if (normalized && projectPaths.has(normalized)) return null;
   return <ClockDial />;
 }

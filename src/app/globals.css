@@ -2553,3 +2553,783 @@ html[data-system-theme="dark"][data-era="2000"] .dial__stop--active .dial__tick 
 
 html[data-system-theme="dark"][data-era="2077"] ::selection { background: rgba(0, 255, 170, 0.35); color: #050810; }
 html[data-system-theme="dark"][data-era="2077"] .page-footer::before { background: rgba(0, 255, 170, 0.3); }
+
+/* ══════════════════════════════════════════════════════
+   FOCUS TRACKER
+   ══════════════════════════════════════════════════════ */
+
+.focus-page {
+  position: relative;
+  max-width: 36.375rem;
+  margin: 0 auto;
+  padding: 5rem 1rem 2.5rem;
+}
+
+.focus-page::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8rem;
+  z-index: 9;
+  background: linear-gradient(
+    180deg,
+    var(--cr-bg) 0%,
+    hsla(60, 33%, 99%, 0.738) 19%,
+    hsla(60, 33%, 99%, 0.541) 34%,
+    hsla(60, 33%, 99%, 0.382) 47%,
+    hsla(60, 33%, 99%, 0.278) 56.5%,
+    hsla(60, 33%, 99%, 0.194) 65%,
+    hsla(60, 33%, 99%, 0.126) 73%,
+    hsla(60, 33%, 99%, 0.075) 80.2%,
+    hsla(60, 33%, 99%, 0.042) 86.1%,
+    hsla(60, 33%, 99%, 0.021) 91%,
+    hsla(60, 33%, 99%, 0.008) 95.2%,
+    hsla(60, 33%, 99%, 0.002) 98.2%,
+    hsla(60, 33%, 99%, 0) 100%
+  );
+}
+
+.focus-page > * {
+  animation: staggerIn 0.5s ease both;
+}
+
+.focus-page > :nth-child(1) { animation-delay: 0s; }
+.focus-page > :nth-child(2) { animation-delay: 0.05s; }
+.focus-page > :nth-child(3) { animation-delay: 0.1s; }
+.focus-page > :nth-child(4) { animation-delay: 0.15s; }
+.focus-page > :nth-child(5) { animation-delay: 0.2s; }
+.focus-page > :nth-child(6) { animation-delay: 0.25s; }
+.focus-page > :nth-child(n+7) { animation-delay: 0.3s; }
+
+.focus-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.focus-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 0 0 2rem;
+}
+
+.focus-summary div {
+  min-width: 0;
+  border-top: 1px solid var(--cr-border);
+  padding-top: 0.625rem;
+}
+
+.focus-kicker {
+  display: block;
+  color: var(--cr-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.focus-summary strong {
+  display: block;
+  color: var(--cr-text);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-top: 0.5rem;
+}
+
+.focus-section {
+  border-top: 1px solid var(--cr-border);
+  padding: 2rem 0;
+}
+
+.focus-section-header,
+.focus-group-header,
+.focus-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.focus-section-header {
+  margin-bottom: 1rem;
+}
+
+.focus-section-header h1,
+.focus-group-header h2,
+.focus-selected-project h2 {
+  color: var(--cr-text);
+  font-size: 0.875rem;
+  font-weight: 560;
+  letter-spacing: -0.00563rem;
+  line-height: 1.25rem;
+}
+
+.focus-section-header span,
+.focus-group-header span,
+.focus-form-row span,
+.focus-empty {
+  color: var(--cr-muted);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  line-height: 1.25rem;
+}
+
+.focus-form,
+.focus-project-edit,
+.focus-issue-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.focus-form {
+  border: 1px solid var(--cr-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.focus-form-grid,
+.focus-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.focus-filter-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.focus-filter-grid label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--cr-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.focus-page input,
+.focus-page select,
+.focus-page textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--cr-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--cr-bg) 92%, var(--cr-text) 8%);
+  color: var(--cr-text);
+  font-family: var(--cr-font-body);
+  font-size: 0.875rem;
+  font-weight: 460;
+  letter-spacing: -0.00563rem;
+  line-height: 1.25rem;
+  outline: none;
+  padding: 0.5rem 0.625rem;
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+
+.focus-page textarea {
+  resize: vertical;
+}
+
+.focus-page input::placeholder,
+.focus-page textarea::placeholder {
+  color: var(--cr-muted);
+}
+
+.focus-page input:focus,
+.focus-page select:focus,
+.focus-page textarea:focus {
+  border-color: color-mix(in srgb, var(--cr-text) 25%, var(--cr-border));
+  background: var(--cr-bg);
+}
+
+.focus-page button {
+  border: 1px solid var(--cr-border);
+  border-radius: 6px;
+  background: var(--cr-text);
+  color: var(--cr-bg);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: var(--cr-font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.0025rem;
+  line-height: 1.15rem;
+  padding: 0.5rem 0.7rem;
+  transition: opacity 0.14s ease, transform 0.14s var(--ease-snappy);
+}
+
+.focus-page button:hover {
+  opacity: 0.78;
+}
+
+.focus-page button:active {
+  transform: translateY(1px);
+}
+
+.focus-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.focus-project-list,
+.focus-issue-groups {
+  display: flex;
+  flex-direction: column;
+}
+
+.focus-project-card,
+.focus-issue-group,
+.focus-issue {
+  border-top: 1px solid var(--cr-border);
+}
+
+.focus-project-card:last-child,
+.focus-issue:last-child {
+  border-bottom: 1px solid var(--cr-border);
+}
+
+.focus-project-row,
+.focus-issue summary {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--cr-text);
+  cursor: pointer;
+  list-style: none;
+  padding: 0.735rem 0;
+  text-align: left;
+}
+
+.focus-project-row::-webkit-details-marker,
+.focus-issue summary::-webkit-details-marker {
+  display: none;
+}
+
+.focus-project-row span,
+.focus-issue summary span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.focus-project-row strong,
+.focus-issue summary strong {
+  color: var(--cr-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 460;
+  letter-spacing: -0.00563rem;
+  line-height: 1.25rem;
+}
+
+.focus-project-row small,
+.focus-issue summary small,
+.focus-selected-project p {
+  color: var(--cr-secondary);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  line-height: 1.35rem;
+}
+
+.focus-project-row em {
+  color: var(--cr-muted);
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-style: normal;
+  font-weight: 460;
+}
+
+.focus-project-row[data-active="true"] strong,
+.focus-project-row:hover strong,
+.focus-issue summary:hover strong {
+  color: var(--cr-accent);
+}
+
+.focus-project-edit,
+.focus-issue-edit {
+  padding: 0 0 1rem;
+}
+
+.focus-selected-project {
+  border-top: 1px solid var(--cr-border);
+  padding: 1.5rem 0;
+}
+
+.focus-selected-project h2 {
+  margin-top: 0.5rem;
+}
+
+.focus-selected-project p {
+  margin-top: 0.35rem;
+}
+
+.focus-issue-group {
+  padding: 1.25rem 0 0;
+}
+
+.focus-group-header {
+  margin-bottom: 0.35rem;
+}
+
+.focus-empty {
+  padding: 0.75rem 0 1.25rem;
+}
+
+.focus-data-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.focus-data-actions button,
+.focus-project-edit button,
+.focus-issue-edit button {
+  background: transparent;
+  color: var(--cr-muted);
+}
+
+.focus-data-actions button:hover,
+.focus-project-edit button:hover,
+.focus-issue-edit button:hover {
+  color: var(--cr-text);
+  opacity: 1;
+}
+
+.focus-import {
+  margin-bottom: 0.75rem;
+}
+
+@media screen and (max-width: 768px) {
+  .focus-page {
+    padding: 2rem 1.5rem 2.5rem;
+  }
+
+  .focus-page::before {
+    height: 2.5rem;
+  }
+
+  .focus-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .focus-summary,
+  .focus-filter-grid,
+  .focus-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .focus-form-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .focus-form-row button {
+    width: 100%;
+  }
+}
+
+html[data-era="1600s"] .focus-page::before {
+  background: linear-gradient(180deg, #f5e6c8 0%, rgba(245, 230, 200, 0) 100%);
+}
+
+html[data-era="1800s"] .focus-page::before {
+  background: linear-gradient(180deg, #0f0b07 0%, rgba(15, 11, 7, 0) 100%);
+}
+
+html[data-era="2000"] .focus-page::before {
+  background: linear-gradient(180deg, #d4d0c8 0%, rgba(212, 208, 200, 0) 100%);
+}
+
+html[data-era="2077"] .focus-page::before {
+  background: linear-gradient(180deg, #050810 0%, rgba(5, 8, 16, 0) 100%);
+}
+
+html[data-system-theme="dark"][data-era="1600s"] .focus-page::before {
+  background: linear-gradient(180deg, #0f0b08 0%, rgba(15, 11, 8, 0) 100%);
+}
+
+html[data-system-theme="dark"][data-era="2000"] .focus-page::before {
+  background: linear-gradient(180deg, #0b0f1a 0%, rgba(11, 15, 26, 0) 100%);
+}
+
+html[data-era="2000"] .focus-page input,
+html[data-era="2000"] .focus-page select,
+html[data-era="2000"] .focus-page textarea,
+html[data-era="2000"] .focus-form {
+  border-radius: 0;
+}
+
+html[data-era="2077"] .focus-project-row[data-active="true"] strong,
+html[data-era="2077"] .focus-project-row:hover strong,
+html[data-era="2077"] .focus-issue summary:hover strong {
+  text-shadow: 0 0 12px rgba(0, 255, 170, 0.25);
+}
+
+/* ─── Focus dashboard refactor overrides ─────────────── */
+
+.focus-project-toggle {
+  display: flex;
+  gap: 0.375rem;
+  overflow-x: auto;
+  padding: 0 0 1.5rem;
+  scrollbar-width: none;
+}
+
+.focus-project-toggle::-webkit-scrollbar {
+  display: none;
+}
+
+.focus-project-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: max-content;
+  border: 1px solid var(--cr-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cr-muted);
+  padding: 0.375rem 0.625rem;
+}
+
+.focus-project-toggle button[data-active="true"] {
+  background: var(--cr-text);
+  border-color: var(--cr-text);
+  color: var(--cr-bg);
+}
+
+.focus-project-toggle span {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.0025rem;
+  line-height: 1rem;
+}
+
+.focus-project-toggle small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.focus-hero {
+  border-top: 1px solid var(--cr-border);
+  padding: 2rem 0;
+}
+
+.focus-hero h1 {
+  color: var(--cr-text);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-top: 0.5rem;
+}
+
+.focus-hero p {
+  color: var(--cr-secondary);
+  font-size: 0.9375rem;
+  font-weight: 460;
+  letter-spacing: -0.00563rem;
+  line-height: 1.625rem;
+  margin-top: 0.75rem;
+}
+
+.focus-module-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.focus-module {
+  border-top: 1px solid var(--cr-border);
+  padding: 1.5rem 0;
+}
+
+.focus-module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.875rem;
+}
+
+.focus-module-header h2,
+.focus-group-header h3 {
+  color: var(--cr-text);
+  font-size: 0.875rem;
+  font-weight: 560;
+  letter-spacing: -0.00563rem;
+  line-height: 1.25rem;
+}
+
+.focus-module-header span,
+.focus-module p {
+  color: var(--cr-muted);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  line-height: 1.35rem;
+}
+
+.focus-progress-track {
+  position: relative;
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cr-text) 8%, transparent);
+  margin-bottom: 0.75rem;
+}
+
+.focus-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cr-text);
+}
+
+.focus-action-list,
+.focus-media-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--cr-border);
+}
+
+.focus-action-list button,
+.focus-media-row,
+.focus-edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--cr-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--cr-text);
+  padding: 0.75rem 0;
+  text-align: left;
+}
+
+.focus-action-list button {
+  cursor: pointer;
+}
+
+.focus-action-list button:hover span,
+.focus-media-row a:hover,
+.focus-media-row button:hover,
+.focus-edit-row button:hover {
+  color: var(--cr-accent);
+}
+
+.focus-action-list span,
+.focus-media-row strong,
+.focus-edit-row strong {
+  display: block;
+  color: var(--cr-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 460;
+  letter-spacing: -0.00563rem;
+  line-height: 1.25rem;
+}
+
+.focus-action-list small,
+.focus-media-row small,
+.focus-edit-row small {
+  display: block;
+  color: var(--cr-muted);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  line-height: 1.25rem;
+  margin-top: 0.125rem;
+}
+
+.focus-media-row > span,
+.focus-edit-row > span {
+  min-width: 0;
+}
+
+.focus-media-row > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.focus-media-row a,
+.focus-media-row button,
+.focus-edit-row button {
+  border: 0;
+  background: transparent;
+  color: var(--cr-muted);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  padding: 0;
+  text-decoration: none;
+}
+
+.focus-disclosure {
+  border-top: 1px solid var(--cr-border);
+}
+
+.focus-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+}
+
+.focus-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.focus-disclosure > summary::after {
+  content: "+";
+  color: var(--cr-muted);
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 460;
+  line-height: 1;
+}
+
+.focus-disclosure[open] > summary::after {
+  content: "-";
+}
+
+.focus-disclosure > summary strong {
+  display: block;
+  color: var(--cr-text);
+  font-size: 0.875rem;
+  font-weight: 560;
+  letter-spacing: -0.00563rem;
+  line-height: 1.25rem;
+}
+
+.focus-disclosure > summary small {
+  display: block;
+  color: var(--cr-muted);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  line-height: 1.25rem;
+  margin-top: 0.125rem;
+}
+
+.focus-disclosure-body {
+  padding-top: 1rem;
+}
+
+.focus-nested-disclosure {
+  padding: 1rem 0;
+}
+
+.focus-issue-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.focus-issue-summary span {
+  border-top: 1px solid var(--cr-border);
+  color: var(--cr-muted);
+  font-size: 0.75rem;
+  font-weight: 460;
+  letter-spacing: -0.0025rem;
+  line-height: 1.25rem;
+  padding-top: 0.5rem;
+}
+
+.focus-issue-summary strong {
+  color: var(--cr-text);
+  font-weight: 560;
+}
+
+.focus-issue-edit {
+  padding: 0 0 1rem;
+}
+
+.focus-form {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+.focus-data-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.focus-data-actions button {
+  border: 1px solid var(--cr-border);
+  border-radius: 6px;
+  color: var(--cr-muted);
+  padding: 0.5rem 0.7rem;
+}
+
+@media screen and (max-width: 768px) {
+  .focus-module-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .focus-issue-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .focus-media-row,
+  .focus-edit-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+html[data-era="2000"] .focus-project-toggle button,
+html[data-era="2000"] .focus-progress-track,
+html[data-era="2000"] .focus-data-actions button {
+  border-radius: 0;
+}
