@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About — Cade Ross",
@@ -13,7 +14,7 @@ export default function AboutPage() {
     <div className="inner-page">
 
       {/* 1 */}
-      <a href="/" className="back-link">← Home</a>
+      <Link href="/" className="back-link">← Home</Link>
 
       {/* 2 — Header */}
       <header className="about-header">
@@ -66,14 +67,6 @@ export default function AboutPage() {
           Get in touch →
         </a>
         <a
-          href="https://twitter.com/cadeross"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="connect-link-muted"
-        >
-          Twitter
-        </a>
-        <a
           href="https://github.com/cadeross"
           target="_blank"
           rel="noopener noreferrer"
@@ -89,7 +82,6 @@ export default function AboutPage() {
           <p>© {year} Cade Ross</p>
           <div className="footer-links">
             <a href="mailto:hello@cadeross.com">Email</a>
-            <a href="https://twitter.com/cadeross" target="_blank" rel="noopener noreferrer">Twitter</a>
             <a href="https://github.com/cadeross" target="_blank" rel="noopener noreferrer">GitHub</a>
           </div>
         </div>
