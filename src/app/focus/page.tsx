@@ -1230,12 +1230,6 @@ export default function FocusPage() {
       <footer className="page-footer">
         <div className="footer-row">
           <p>Focus is stored in this browser.</p>
-          <div className="footer-links">
-            <a href="mailto:hello@cadeross.com">Email</a>
-            <a href="https://github.com/cadeross" target="_blank" rel="noopener noreferrer">
-              GitHub
-            </a>
-          </div>
         </div>
       </footer>
     </div>

@@ -1,6 +1,6 @@
-export default function Home() {
-  const year = new Date().getFullYear();
+import ArchiveLink from "@/components/ArchiveLink";
 
+export default function Home() {
   return (
     <div className="homepage">
       <article className="article">
@@ -52,7 +52,7 @@ export default function Home() {
             >
               OpenWrit
             </a>
-            , an open source, distractionless way to read the Bible.
+            , an intentional, distractionless way to read the Bible.
           </p>
           <p>
             Currently, I am exploring new design opportunities while building
@@ -60,8 +60,12 @@ export default function Home() {
           </p>
           <p>
             Beyond design and craft, I am learning Portuguese, and I thoroughly
-            enjoy a match of tennis along with a sci-fi or fantasy novel. Let me
-            know if you have any recs.
+            enjoy a match of tennis or a good sci-fi/fantasy novel. Let me
+            know if you have any recs!
+          </p>
+          <p>
+            A small archive of my work lives at{" "}
+            <ArchiveLink className="about-link" />
           </p>
           <p>
             I am on{" "}
@@ -73,7 +77,7 @@ export default function Home() {
             >
               X
             </a>
-            , and you can message me on{" "}
+            , and you can reach me on{" "}
             <a
               href="https://t.me/cadeross"
               className="about-link"
@@ -83,36 +87,13 @@ export default function Home() {
               Telegram
             </a>{" "}
             or by{" "}
-            <a href="mailto:hello@cadeross.com" className="about-link">
+            <a href="mailto:cadeross33@gmail.com" className="about-link">
               email
-            </a>
-            .
-          </p>
-          <p>
-            A small archive of my work lives at{" "}
-            <a href="/archive" className="about-link">
-              /archive
             </a>
             .
           </p>
         </section>
       </article>
-
-      <footer className="page-footer">
-        <div className="footer-row">
-          <p>© {year} Cade Ross</p>
-          <div className="footer-links">
-            <a href="mailto:hello@cadeross.com">Email</a>
-            <a
-              href="https://github.com/cadeross"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
