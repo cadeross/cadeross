@@ -2,14 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import ClockDial from "@/components/ClockDial";
-import { projects } from "@/lib/projects";
 
-const projectPaths = new Set(projects.map((p) => `/${p.slug}`));
+const HIDDEN_PATHS = new Set(["/focus", "/archive"]);
 
 export default function ClockDialGate() {
   const pathname = usePathname();
-  const normalized = pathname && pathname !== "/" ? pathname.replace(/\/$/, "") : "/";
+  const normalized =
+    pathname && pathname !== "/" ? pathname.replace(/\/$/, "") : "/";
 
-  if (normalized && projectPaths.has(normalized)) return null;
+  if (HIDDEN_PATHS.has(normalized)) return null;
   return <ClockDial />;
 }
