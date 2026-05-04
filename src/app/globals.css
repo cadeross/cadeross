@@ -1273,8 +1273,7 @@ html[data-system-theme="dark"] .page-footer::before {
 
 html[data-system-theme="dark"] .page-nav a,
 html[data-system-theme="dark"] .back-link,
-html[data-system-theme="dark"] .footer-row a,
-html[data-system-theme="dark"] .about-link {
+html[data-system-theme="dark"] .footer-row a {
   transition: color 0.2s ease, text-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
