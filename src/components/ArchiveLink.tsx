@@ -8,10 +8,16 @@ type Props = {
 };
 
 const TARGET = "/archive";
+const PATH_CHAR = /^[A-Za-z0-9/_\-.]$/;
+
+function destination(typed: string) {
+  return typed.startsWith("/") && typed.length > 1 ? typed : TARGET;
+}
 
 /* Interactive /archive link: type the path and press Enter to open it,
    or click as a normal link. The cursor sits at the start of the path
-   and advances as matching characters are typed. */
+   and advances as matching characters are typed. Typing diverges freely
+   from "/archive" — Enter navigates to whatever path the user typed. */
 export default function ArchiveLink({ className }: Props) {
   const router = useRouter();
   const [typed, setTyped] = useState("");
@@ -47,9 +53,9 @@ export default function ArchiveLink({ className }: Props) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       if (e.key === "Enter") {
-        if (typed === TARGET) {
+        if (typed.startsWith("/")) {
           e.preventDefault();
-          router.push("/archive");
+          router.push(typed);
         }
         return;
       }
@@ -70,13 +76,12 @@ export default function ArchiveLink({ className }: Props) {
         return;
       }
 
-      if (e.key.length === 1) {
-        const next = TARGET[typed.length];
-        if (next && e.key === next) {
-          e.preventDefault();
-          setTyped((prev) => prev + e.key);
-          markTyping();
-        }
+      if (e.key.length === 1 && PATH_CHAR.test(e.key)) {
+        // The first character must be `/` so the typed string stays a path.
+        if (typed.length === 0 && e.key !== "/") return;
+        e.preventDefault();
+        setTyped((prev) => prev + e.key);
+        markTyping();
       }
     }
 
@@ -89,10 +94,12 @@ export default function ArchiveLink({ className }: Props) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (e.button !== 0) return;
     e.preventDefault();
-    router.push("/archive");
+    router.push(destination(typed));
   }
 
-  const remaining = TARGET.slice(typed.length);
+  const isPrefix = typed === TARGET.slice(0, typed.length);
+  const remaining = isPrefix ? TARGET.slice(typed.length) : "";
+  const href = destination(typed);
 
   /* The cursor sits in the same column as the next character to be typed
      (overlay variant: 0-width with overflowing glyph), kept as a sibling of
@@ -105,7 +112,7 @@ export default function ArchiveLink({ className }: Props) {
       data-typing={isTyping ? "true" : undefined}
     >
       {typed && (
-        <a href="/archive" className={className} onClick={handleClick}>
+        <a href={href} className={className} onClick={handleClick}>
           {typed}
         </a>
       )}
@@ -118,7 +125,7 @@ export default function ArchiveLink({ className }: Props) {
             █
           </span>
           <a
-            href="/archive"
+            href={href}
             className={`${className ?? ""} archive-placeholder`.trim()}
             onClick={handleClick}
           >
