@@ -2872,3 +2872,770 @@ html[data-system-theme="dark"] .bg-sparkle {
   .archive-lightbox,
   .archive-lightbox-figure { animation: none; }
 }
+
+/* ══════════════════════════════════════════════════════
+   TASKS (personal task list — terminal prose feel)
+   Direct children of .about-section are <p> so they
+   inherit the homepage typography, terminalPrint cascade,
+   and boot-pause rules with no extra wiring.
+   ══════════════════════════════════════════════════════ */
+
+:root {
+  --task-backlog: rgba(112, 116, 124, 0.85);
+  --task-todo: rgba(96, 124, 158, 0.95);
+  --task-in-progress: #d49a2a;
+  --task-done: #4ea66a;
+  --task-canceled: rgba(140, 140, 145, 0.55);
+}
+
+html[data-system-theme="dark"] {
+  --task-backlog: rgba(190, 200, 220, 0.55);
+  --task-todo: rgba(150, 178, 220, 0.92);
+  --task-in-progress: #f0c466;
+  --task-done: #74d68d;
+  --task-canceled: rgba(190, 200, 220, 0.4);
+}
+
+/* ── Status color dot ── */
+
+.task-status-dot {
+  display: inline-block;
+  font-size: 0.7em;
+  line-height: 1;
+  margin-right: 0.5ch;
+  vertical-align: 0.18em;
+  letter-spacing: 0;
+}
+
+.task-status-dot[data-status="Backlog"]      { color: var(--task-backlog); }
+.task-status-dot[data-status="Todo"]         { color: var(--task-todo); }
+.task-status-dot[data-status="In Progress"]  { color: var(--task-in-progress); }
+.task-status-dot[data-status="Done"]         { color: var(--task-done); }
+.task-status-dot[data-status="Canceled"]     { color: var(--task-canceled); }
+
+/* ── Slash-command input ── */
+
+.task-input-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75ch;
+}
+
+.task-input-prompt {
+  color: var(--cr-accent);
+  flex-shrink: 0;
+}
+
+.task-input {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  color: var(--cr-text);
+  font: inherit;
+  letter-spacing: inherit;
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  caret-color: var(--cr-accent);
+}
+
+.task-input::placeholder {
+  color: var(--cr-muted);
+  opacity: 0.7;
+}
+
+/* ── Live preview ── */
+
+.task-preview-row {
+  color: var(--cr-muted);
+  min-height: 1.625rem;
+}
+
+.task-preview {
+  color: var(--cr-secondary);
+  font-size: 0.85em;
+}
+
+.task-preview-hint {
+  color: var(--cr-muted);
+  opacity: 0.7;
+  font-size: 0.85em;
+}
+
+/* ── Section header ── */
+
+.task-section-header { color: var(--cr-text); }
+
+.task-section-glyph {
+  color: var(--cr-muted);
+  display: inline-block;
+  width: 1ch;
+}
+
+.task-section-name { color: var(--cr-text); }
+.task-section-count,
+.task-section-note { color: var(--cr-muted); }
+
+/* ── Task row (flex; missing children collapse naturally) ── */
+
+.task-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+}
+
+/* ── Title + description stack ── */
+
+.task-row-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.task-row-title {
+  color: var(--cr-text);
+  cursor: text;
+  word-break: break-word;
+}
+
+.task-row-title--done {
+  color: var(--cr-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--cr-muted);
+}
+
+.task-row-description {
+  color: var(--cr-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+  font-size: 0.85em;
+  line-height: 1.4rem;
+}
+
+.task-row-description-add {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cr-muted);
+  cursor: pointer;
+  text-align: left;
+  align-self: flex-start;
+  font-size: 0.85em;
+  opacity: 0;
+  transition: opacity 0.18s ease, color 0.18s ease;
+}
+
+.task-row:hover .task-row-description-add { opacity: 0.6; }
+.task-row-description-add:hover { opacity: 1; color: var(--cr-text); }
+
+.task-row-title-input { width: 100%; min-width: 0; }
+
+.task-row-description-input {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+  color: var(--cr-secondary);
+  font-size: 0.85em;
+  line-height: 1.4rem;
+  min-height: 2.8rem;
+}
+
+/* ── Status / schedule triggers + custom dropdown ── */
+
+.task-status-wrap,
+.task-schedule-wrap {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.task-status-trigger,
+.task-schedule-trigger {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.task-status-label,
+.task-schedule-label {
+  color: var(--cr-muted);
+  transition: color 0.18s ease;
+}
+
+.task-status-trigger:hover .task-status-label,
+.task-status-trigger[aria-expanded="true"] .task-status-label,
+.task-schedule-trigger:hover .task-schedule-label,
+.task-schedule-trigger[aria-expanded="true"] .task-schedule-label {
+  color: var(--cr-text);
+}
+
+.task-schedule-trigger--empty .task-schedule-label { opacity: 0.55; }
+
+.task-popover {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--cr-bg);
+  border: 1px solid var(--cr-border);
+  padding: 0.25rem 0;
+  z-index: 20;
+  min-width: 12rem;
+  box-shadow: 0 6px 18px rgba(3, 7, 15, 0.06);
+}
+
+html[data-system-theme="dark"] .task-popover {
+  box-shadow: 0 12px 28px rgba(2, 6, 16, 0.5),
+    0 0 0 1px rgba(124, 196, 255, 0.08);
+}
+
+.task-popover-option {
+  background: none;
+  border: 0;
+  padding: 0.3rem 0.75rem;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cr-secondary);
+  cursor: pointer;
+  text-align: left;
+  display: inline-flex;
+  align-items: baseline;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.task-popover-option:hover {
+  color: var(--cr-text);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+html[data-system-theme="dark"] .task-popover-option:hover {
+  background: rgba(124, 196, 255, 0.08);
+}
+
+.task-popover-option--current { color: var(--cr-text); }
+
+.task-popover-divider {
+  display: block;
+  height: 1px;
+  background: var(--cr-border);
+  margin: 0.25rem 0;
+}
+
+.task-popover-row {
+  padding: 0.3rem 0.75rem;
+  display: flex;
+}
+
+.task-popover-date-input {
+  width: 100%;
+  color: var(--cr-text);
+  color-scheme: light dark;
+}
+
+.task-popover-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+/* ── Delete ── */
+
+.task-row-delete {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cr-muted);
+  cursor: pointer;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.18s ease, color 0.18s ease;
+}
+
+.task-row:hover .task-row-delete,
+.task-row-delete:focus-visible { opacity: 0.6; }
+.task-row-delete:hover { opacity: 1; color: var(--cr-text); }
+
+/* ── Empty state ── */
+
+.task-empty {
+  color: var(--cr-muted);
+  font-style: italic;
+}
+
+/* ── Vertical rhythm — class-on-tag adjacent-sibling rules beat .about-section p + p. ── */
+
+.about-section > p.task-input-row + p.task-preview-row { margin-top: 0.25rem; }
+.about-section > p + p.task-section-header { margin-top: 1.5rem; }
+.about-section > p.task-section-header + p.task-row { margin-top: 0.5rem; }
+.about-section > p.task-row + p.task-row { margin-top: 0.5rem; }
+
+/* ── Habits row ── */
+
+.task-habits-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.task-habit-cell {
+  position: relative;
+  display: inline-block;
+}
+
+.task-habit-box {
+  width: 2.25rem;
+  height: 2.25rem;
+  background: transparent;
+  border: 1px solid var(--cr-border);
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: 0;
+  color: var(--cr-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.task-habit-box:hover {
+  border-color: var(--cr-text);
+  color: var(--cr-text);
+}
+
+.task-habit-box[data-done="true"] {
+  border-color: var(--task-done);
+  background: var(--task-done);
+  color: var(--cr-bg);
+}
+
+.task-habit-box[data-done="true"]:hover {
+  border-color: var(--task-done);
+  color: var(--cr-bg);
+  filter: brightness(1.05);
+}
+
+.task-habit-box--add {
+  border-style: dashed;
+  color: var(--cr-muted);
+}
+
+.task-habit-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.task-habit-delete {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1rem;
+  height: 1rem;
+  background: var(--cr-bg);
+  border: 1px solid var(--cr-border);
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--cr-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, color 0.18s ease;
+}
+
+.task-habit-cell:hover .task-habit-delete,
+.task-habit-delete:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.task-habit-delete:hover { color: var(--cr-text); }
+
+.task-habit-add-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.task-habit-popover {
+  min-width: 14rem;
+  padding: 0.5rem 0;
+}
+
+.task-habit-popover-label {
+  color: var(--cr-muted);
+  width: 4ch;
+  flex-shrink: 0;
+  margin-right: 0.5ch;
+}
+
+.task-habit-popover-input {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+/* Vertical rhythm — habits row spacing */
+.about-section > p.task-habits-row { margin-top: 0; }
+.about-section > p.task-habits-row + p.task-input-row { margin-top: 1.25rem; }
+
+/* ── Dark-mode glow on interactive bits, matching the rest of the site ── */
+
+html[data-system-theme="dark"] .task-status-trigger:hover .task-status-label,
+html[data-system-theme="dark"] .task-status-trigger[aria-expanded="true"] .task-status-label,
+html[data-system-theme="dark"] .task-schedule-trigger:hover .task-schedule-label,
+html[data-system-theme="dark"] .task-schedule-trigger[aria-expanded="true"] .task-schedule-label,
+html[data-system-theme="dark"] .task-row-delete:hover {
+  text-shadow: 0 0 10px var(--cr-glow);
+}
+
+/* ══════════════════════════════════════════════════════
+   WEATHER (terminal forecast view)
+   ══════════════════════════════════════════════════════ */
+
+.weather-page {
+  position: relative;
+  max-width: 36.375rem;
+  margin: 0 auto;
+  padding: 5rem 1rem 2.5rem;
+}
+
+@media screen and (max-width: 768px) {
+  .weather-page { padding: 2rem 1.5rem 2.5rem; }
+}
+
+.weather-page > * {
+  animation: staggerIn 0.5s ease both;
+}
+.weather-page > :nth-child(1) { animation-delay: 0s; }
+.weather-page > :nth-child(2) { animation-delay: 0.05s; }
+.weather-page > :nth-child(3) { animation-delay: 0.1s; }
+.weather-page > :nth-child(4) { animation-delay: 0.15s; }
+.weather-page > :nth-child(5) { animation-delay: 0.2s; }
+.weather-page > :nth-child(6) { animation-delay: 0.25s; }
+.weather-page > :nth-child(7) { animation-delay: 0.3s; }
+.weather-page > :nth-child(n+8) { animation-delay: 0.35s; }
+
+html[data-booting="true"] .weather-page > * {
+  animation-play-state: paused;
+}
+
+.weather-page > header {
+  margin-bottom: 1.25rem;
+}
+
+.weather-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0 0;
+  margin-bottom: 0.5rem;
+  border-top: 1px solid var(--cr-border);
+  font-size: 0.8125rem;
+  font-weight: 460;
+  letter-spacing: -0.005em;
+  color: var(--cr-muted);
+  line-height: 1;
+}
+
+.weather-units {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25ch;
+}
+
+.weather-controls-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.75ch;
+}
+
+.weather-crumb {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.14s ease, text-shadow 0.2s ease;
+}
+
+.weather-crumb:hover { color: var(--cr-accent); }
+
+html[data-system-theme="dark"] .weather-crumb:hover {
+  text-shadow: 0 0 10px var(--cr-glow);
+}
+
+.weather-block {
+  margin-top: 1.75rem;
+}
+
+.weather-block:first-of-type {
+  margin-top: 1.25rem;
+}
+
+
+.weather-line {
+  font-size: 0.875rem;
+  font-weight: 460;
+  line-height: 1.625rem;
+  color: var(--cr-secondary);
+  letter-spacing: -0.00563rem;
+}
+
+.weather-line + .weather-line {
+  margin-top: 0.125rem;
+}
+
+.weather-prompt {
+  display: inline-block;
+  width: 1ch;
+  margin-right: 0.75ch;
+  color: var(--cr-accent);
+}
+
+.weather-value { color: var(--cr-text); }
+.weather-muted { color: var(--cr-muted); }
+.weather-muted-line { color: var(--cr-muted); }
+.weather-sep {
+  color: var(--cr-muted);
+  margin: 0 0.35ch;
+}
+
+.weather-now {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.weather-now-temp {
+  color: var(--cr-text);
+  font-size: 2.5rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.weather-now-unit {
+  color: var(--cr-muted);
+  font-size: 1.25rem;
+  font-weight: 460;
+  margin-left: 0.1em;
+}
+
+.weather-now-glyph {
+  color: var(--cr-text);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.weather-now-label {
+  color: var(--cr-secondary);
+  font-size: 0.9375rem;
+  font-weight: 460;
+  letter-spacing: -0.00563rem;
+}
+
+.weather-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--cr-border);
+  padding-top: 0.5rem;
+}
+
+.weather-row {
+  display: grid;
+  grid-template-columns: 5ch minmax(7ch, 9ch) 2ch 1fr 5ch;
+  gap: 0.75ch;
+  align-items: baseline;
+  font-size: 0.875rem;
+  font-weight: 460;
+  letter-spacing: -0.00563rem;
+  line-height: 1.625rem;
+  color: var(--cr-secondary);
+  padding: 0.0625rem 0;
+  border-bottom: 1px solid transparent;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.weather-row:hover {
+  background: rgba(124, 196, 255, 0.04);
+}
+
+html[data-system-theme="dark"] .weather-row:hover {
+  background: rgba(124, 196, 255, 0.06);
+}
+
+.weather-col {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather-col-time,
+.weather-col-day {
+  color: var(--cr-muted);
+}
+
+.weather-col-temp {
+  color: var(--cr-text);
+}
+
+.weather-col-glyph {
+  color: var(--cr-text);
+  text-align: center;
+}
+
+.weather-col-uv {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-col-pop {
+  color: var(--cr-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-toggle {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cr-muted);
+  cursor: pointer;
+  transition: color 0.18s ease, text-shadow 0.2s ease;
+}
+
+.weather-toggle[data-active="true"] { color: var(--cr-text); }
+.weather-toggle:hover { color: var(--cr-text); }
+
+.weather-toggle-sep {
+  color: var(--cr-muted);
+  margin: 0 0.4ch;
+}
+
+html[data-system-theme="dark"] .weather-toggle:hover,
+html[data-system-theme="dark"] .weather-toggle[data-active="true"] {
+  text-shadow: 0 0 10px var(--cr-glow);
+}
+
+.weather-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0 0.25ch;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cr-accent);
+  cursor: pointer;
+  transition: opacity 0.15s ease, text-shadow 0.2s ease;
+}
+
+.weather-link:hover { opacity: 0.7; }
+.weather-link:disabled { opacity: 0.5; cursor: default; }
+
+html[data-system-theme="dark"] .weather-link:hover {
+  text-shadow: 0 0 10px var(--cr-glow);
+  opacity: 1;
+}
+
+.weather-search { display: block; }
+
+.weather-search-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75ch;
+  border-top: 1px solid var(--cr-border);
+  padding-top: 0.5rem;
+  margin: 0;
+}
+
+.weather-input {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cr-text);
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 60%;
+  caret-color: var(--cr-accent);
+}
+
+.weather-input::placeholder { color: var(--cr-muted); opacity: 0.7; }
+
+.weather-search-results {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--cr-border);
+}
+
+.weather-search-result {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--cr-border);
+  padding: 0.5rem 0;
+  margin: 0;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  color: var(--cr-secondary);
+  transition: color 0.14s ease, background 0.14s ease;
+}
+
+.weather-search-result:last-child { border-bottom: 0; }
+.weather-search-result:hover { color: var(--cr-text); }
+
+.weather-search-name { color: var(--cr-text); }
+.weather-search-region { color: var(--cr-muted); }
+
+.weather-error { color: #d97a6c; }
+html[data-system-theme="dark"] .weather-error { color: #ff8a72; }
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-page > * { animation: none; }
+}

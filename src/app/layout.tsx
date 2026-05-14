@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -15,6 +15,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Cade Ross",
   description: "Designer & Developer",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#3e9fff" },
+    { media: "(prefers-color-scheme: dark)", color: "#6aa8ff" },
+  ],
 };
 
 export default function RootLayout({
