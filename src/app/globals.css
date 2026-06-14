@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 /* ─── Custom properties ──────────────────────────────── */
 
 :root {
@@ -34,7 +38,7 @@
   --cr-secondary: rgba(10, 10, 10, 0.55);
   --cr-border: #e5e5e5;
   --cr-accent: #000000;
-  --cr-font-body: var(--font-source-serif-4, Georgia, serif);
+  --cr-font-body: var(--font-geist-mono, ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace);
 
   --ease-snappy: cubic-bezier(0.175, 0.885, 0.32, 1.1);
   --ease-swift:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -42,31 +46,29 @@
 }
 /* ─── Base ───────────────────────────────────────────── */
 
-@layer base {
-  html {
-    background: var(--cr-bg);
-    color: var(--cr-text);
-    font-family: var(--cr-font-body);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
-    text-rendering: optimizeLegibility;
-  }
-
-  body {
-    background: var(--cr-bg);
-    font-family: var(--cr-font-body);
-    min-height: 100vh;
-    overflow-y: scroll;
-  }
-
-  ::selection { background: #ededed; color: #111; }
-
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: transparent; border-radius: 100px; }
-  :hover::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
+html {
+  background: var(--cr-bg);
+  color: var(--cr-text);
+  font-family: var(--cr-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
 }
+
+body {
+  background: var(--cr-bg);
+  font-family: var(--cr-font-body);
+  min-height: 100vh;
+  overflow-y: scroll;
+}
+
+::selection { background: #ededed; color: #111; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: transparent; border-radius: 100px; }
+:hover::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
 
 /* ─── Utilities ──────────────────────────────────────── */
 
