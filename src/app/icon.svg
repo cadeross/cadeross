@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <style>
-    line { stroke: #3e9fff; stroke-width: 3.2; stroke-linecap: round; }
+    line { stroke: #000000; stroke-width: 3.2; stroke-linecap: round; }
     @media (prefers-color-scheme: dark) {
-      line { stroke: #6aa8ff; }
+      line { stroke: #ffffff; }
     }
   </style>
   <g transform="translate(16 16)">

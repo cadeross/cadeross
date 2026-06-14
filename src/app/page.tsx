@@ -68,16 +68,7 @@ export default function Home() {
             <ArchiveLink className="about-link" />
           </p>
           <p>
-            I am on{" "}
-            <a
-              href="https://x.com/cadeross"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              X
-            </a>
-            , and you can reach me on{" "}
+            You can reach me on{" "}
             <a
               href="https://t.me/cadeross"
               className="about-link"
