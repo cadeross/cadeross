@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cade Ross — Design & Development Portfolio
 
-## Getting Started
+An interactive, high-performance design and development portfolio built with Next.js, React, and TypeScript. The site is styled with a sleek, monochromatic greyscale interface supporting system theme detection, fluid animations, and a custom infinite panning archive workspace.
 
-First, run the development server:
+## 🛠️ Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+*   **Framework**: [Next.js](https://nextjs.org/) (App Router)
+*   **Language**: [TypeScript](https://www.typescriptlang.org/)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/) & Vanilla CSS
+*   **Typography**: Source Serif 4 (loaded via Google Fonts) & Geist Mono
+*   **Icons & Assets**: Custom inline SVG elements
+
+## ✨ Key Features
+
+### 1. Monochromatic Design System
+A responsive greyscale design system that seamlessly adapts to the user's system preferences (Light/Dark mode). The browser viewport metadata matches the page backgrounds (`#ffffff` / `#0a0a0a`) for native browser integration.
+
+### 2. Interactive Infinite Archive Canvas (`/archive`)
+A full-screen interactive space mapping design works and code studies across 2D coordinates:
+*   **Buttery Smooth Navigation**: Custom translation calculations bypass React rendering loops during drags for 60fps/120fps motion.
+*   **Inertia Deceleration**: Tracks drag velocity to slide canvas smoothly with physics-based friction on mouse/touch release.
+*   **Dual-Rendering Cards**: High-resolution image cards for key projects, and dashed wireframe blueprints (CAD style) for conceptual work.
+*   **Lightbox View**: An immersive backdrop-blur modal to expand and view high-resolution mockups.
+*   **Dynamic Layering**: Cards slightly scale, straighten, and automatically lift to the top of the z-index stack on hover.
+*   **HUD Controls**: Recenter button, item count badges, and subtle parallax grid backgrounds.
+
+### 3. Micro-Animations & FX
+*   **Background Sparkles**: Subtle, procedurally placed terminal sparkles twinkling behind page layouts.
+*   **Chronological Flow**: Entrance animations and biography structured in reverse chronological order.
+
+## 📂 Project Structure
+
+```
+├── public/                 # Static assets
+│   └── images/             # High-resolution project mockups
+├── src/
+│   ├── app/                # Next.js page router
+│   │   ├── archive/        # Infinite canvas page
+│   │   ├── globals.css     # Global styles & monochromatic design tokens
+│   │   ├── layout.tsx      # Root HTML layout and viewport configuration
+│   │   └── page.tsx        # Portfolio homepage / biography layout
+│   ├── components/         # Reusable React components
+│   │   ├── ArchiveLink.tsx # Interactive archive entrance
+│   │   └── BackgroundSparkles.tsx # Sparkle overlay element
+│   └── lib/
+│       └── projects.ts     # Central projects/works database
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/cadeross/cadeross.git
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Navigate into the project directory:
+   ```bash
+   cd cadeross
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Install the dependencies:
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+### Development Server
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run the local development server:
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the portfolio.
+
+### Build and Optimization
+
+To build the application for production deployment:
+```bash
+npm run build
+```
+
+This generates an optimized static export ready for deployment.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
