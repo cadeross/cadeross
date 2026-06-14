@@ -3685,10 +3685,11 @@ html[data-system-theme="dark"] .weather-error { color: #ff8a72; }
   position: absolute;
   inset: -300%;
   pointer-events: none;
-  background-image: radial-gradient(var(--cr-border) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background-image: radial-gradient(var(--cr-border) 1.5px, transparent 1.5px);
+  background-size: 60px 60px;
   z-index: 0;
   will-change: transform;
+  opacity: 0.35;
 }
 
 .archive-canvas-wrapper {
@@ -3709,8 +3710,8 @@ html[data-system-theme="dark"] .weather-error { color: #ff8a72; }
   position: absolute;
   background: var(--cr-bg);
   border: 1px solid var(--cr-border);
-  border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
   user-select: none;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
@@ -3718,8 +3719,7 @@ html[data-system-theme="dark"] .weather-error { color: #ff8a72; }
 }
 
 .archive-card:hover {
-  transform: scale(1.04) rotate(0deg) !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 0 1px var(--cr-text);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12), 0 0 1px var(--cr-text);
   border-color: var(--cr-text);
   z-index: 100 !important;
 }
@@ -3727,14 +3727,13 @@ html[data-system-theme="dark"] .weather-error { color: #ff8a72; }
 /* Card image layout */
 .archive-card--image {
   width: 340px;
-  padding: 8px;
+  padding: 0;
 }
 
 .archive-image-container {
   width: 100%;
-  aspect-ratio: 16 / 10;
   background: color-mix(in srgb, var(--cr-bg) 95%, var(--cr-text) 5%);
-  border-radius: 2px;
+  border-radius: 0;
   overflow: hidden;
   position: relative;
 }
@@ -3754,7 +3753,8 @@ html[data-system-theme="dark"] .weather-error { color: #ff8a72; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  padding: 12px 14px;
+  margin-top: 0;
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.015em;

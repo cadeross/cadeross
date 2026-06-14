@@ -6,30 +6,62 @@ import Image from "next/image";
 import { archiveItems, ArchiveItem } from "@/lib/projects";
 
 const itemPositions: { [key: string]: { x: number; y: number; rotate: number } } = {
-  "openwrit-reading": { x: -350, y: -250, rotate: -2 },
-  "openwrit-library": { x: 100, y: -500, rotate: 3 },
-  "baylor-platform": { x: -650, y: -550, rotate: 1 },
-  "baylor-marketing": { x: -100, y: -200, rotate: -3 },
-  "notion-calendar": { x: 350, y: -300, rotate: -4 },
-  "solana-education": { x: -500, y: 150, rotate: 2 },
-  "solana-docs": { x: -150, y: 350, rotate: -1 },
-  "vlyss-identity": { x: 250, y: 100, rotate: 4 },
-  "vlyss-site": { x: 600, y: -100, rotate: -2 },
-  "the-prayer-app": { x: -950, y: -200, rotate: 3 },
-  "study-typography": { x: -800, y: 100, rotate: -3 },
-  "study-grid": { x: -450, y: -900, rotate: 2 },
-  "study-motion": { x: 800, y: -500, rotate: 5 },
-  "wallet-concept": { x: -950, y: -650, rotate: -4 },
-  "reader-app": { x: 750, y: 250, rotate: 3 },
-  "essay-layout": { x: 950, y: -350, rotate: -2 },
-  "marketplace": { x: -300, y: 700, rotate: 1 },
-  "dashboard-study": { x: 150, y: 600, rotate: -3 },
-  "icon-set": { x: 500, y: 550, rotate: 2 },
-  "type-specimen": { x: -750, y: 500, rotate: -2 },
-  "color-system": { x: -1300, y: -100, rotate: 4 },
-  "portfolio-v2": { x: -1150, y: -500, rotate: -3 },
-  "portfolio-v1": { x: 1100, y: -650, rotate: 1 },
-  "first-site": { x: -100, y: -950, rotate: -5 },
+  // Column 1 (x: -960)
+  "study-typography": { x: -960, y: -650, rotate: 0 },
+  "solana-docs": { x: -960, y: -250, rotate: 0 },
+  "solana-education": { x: -960, y: 20, rotate: 0 },
+  "type-specimen": { x: -960, y: 400, rotate: 0 },
+  "color-system": { x: -960, y: 850, rotate: 0 },
+  // Column 2 (x: -480)
+  "wallet-concept": { x: -480, y: -800, rotate: 0 },
+  "baylor-platform": { x: -480, y: -400, rotate: 0 },
+  "baylor-marketing": { x: -480, y: -130, rotate: 0 },
+  "the-prayer-app": { x: -480, y: 260, rotate: 0 },
+  "portfolio-v2": { x: -480, y: 650, rotate: 0 },
+  // Column 3 (x: 0)
+  "openwrit-reading": { x: 0, y: -550, rotate: 0 },
+  "openwrit-library": { x: 0, y: -50, rotate: 0 },
+  "study-grid": { x: 0, y: 400, rotate: 0 },
+  "marketplace": { x: 0, y: 730, rotate: 0 },
+  // Column 4 (x: 480)
+  "dashboard-study": { x: 480, y: -750, rotate: 0 },
+  "notion-calendar": { x: 480, y: -420, rotate: 0 },
+  "reader-app": { x: 480, y: 30, rotate: 0 },
+  "essay-layout": { x: 480, y: 540, rotate: 0 },
+  "first-site": { x: 480, y: 925, rotate: 0 },
+  // Column 5 (x: 960)
+  "study-motion": { x: 960, y: -680, rotate: 0 },
+  "vlyss-site": { x: 960, y: -410, rotate: 0 },
+  "vlyss-identity": { x: 960, y: -80, rotate: 0 },
+  "icon-set": { x: 960, y: 310, rotate: 0 },
+  "portfolio-v1": { x: 960, y: 640, rotate: 0 },
+};
+
+const itemAspectRatios: { [key: string]: string } = {
+  "openwrit-reading": "3 / 4",
+  "openwrit-library": "3 / 4",
+  "baylor-platform": "16 / 10",
+  "baylor-marketing": "16 / 10",
+  "notion-calendar": "1 / 1",
+  "solana-education": "16 / 10",
+  "solana-docs": "16 / 10",
+  "vlyss-identity": "1 / 1",
+  "vlyss-site": "16 / 10",
+  "the-prayer-app": "3 / 4",
+  "study-typography": "3 / 4",
+  "study-grid": "1 / 1",
+  "study-motion": "16 / 10",
+  "wallet-concept": "3 / 4",
+  "reader-app": "3 / 4",
+  "essay-layout": "3 / 4",
+  "marketplace": "16 / 10",
+  "dashboard-study": "16 / 10",
+  "icon-set": "1 / 1",
+  "type-specimen": "3 / 4",
+  "color-system": "1 / 1",
+  "portfolio-v2": "16 / 10",
+  "portfolio-v1": "16 / 10",
+  "first-site": "16 / 10",
 };
 
 export default function ArchivePage() {
@@ -323,6 +355,7 @@ export default function ArchivePage() {
             const pos = itemPositions[item.id] || { x: 0, y: 0, rotate: 0 };
             const isImage = !!item.src;
             const isActive = activeId === item.id;
+            const aspect = itemAspectRatios[item.id] || "16 / 10";
 
             return (
               <div
@@ -333,7 +366,7 @@ export default function ArchivePage() {
                 style={{
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
-                  transform: `translate(-50%, -50%) rotate(${isActive ? 0 : pos.rotate}deg)`,
+                  transform: `translate3d(-50%, -50%, 0) scale(${isActive ? 1.04 : 1})`,
                   zIndex: isActive ? 10 : 1,
                 }}
                 onMouseEnter={() => setActiveId(item.id)}
@@ -346,7 +379,7 @@ export default function ArchivePage() {
               >
                 {isImage ? (
                   <>
-                    <div className="archive-image-container">
+                    <div className="archive-image-container" style={{ aspectRatio: aspect }}>
                       <Image
                         src={item.src!}
                         alt={item.title}
