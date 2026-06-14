@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { archiveItems, ArchiveItem } from "@/lib/projects";
 
 const itemPositions: { [key: string]: { x: number; y: number; rotate: number } } = {
@@ -353,16 +352,13 @@ export default function ArchivePage() {
 
           {archiveItems.map((item) => {
             const pos = itemPositions[item.id] || { x: 0, y: 0, rotate: 0 };
-            const isImage = !!item.src;
             const isActive = activeId === item.id;
             const aspect = itemAspectRatios[item.id] || "16 / 10";
 
             return (
               <div
                 key={item.id}
-                className={`archive-card ${
-                  isImage ? "archive-card--image" : "archive-card--wireframe"
-                }`}
+                className="archive-card archive-card--image"
                 style={{
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
@@ -371,43 +367,27 @@ export default function ArchivePage() {
                 }}
                 onMouseEnter={() => setActiveId(item.id)}
                 onMouseLeave={() => setActiveId(null)}
-                onClick={() => {
-                  if (isImage) {
-                    setSelectedItem(item);
-                  }
-                }}
+                onClick={() => setSelectedItem(item)}
               >
-                {isImage ? (
-                  <>
-                    <div className="archive-image-container" style={{ aspectRatio: aspect }}>
-                      <Image
-                        src={item.src!}
-                        alt={item.title}
-                        fill
-                        className="archive-image"
-                        sizes="(max-width: 768px) 240px, 320px"
-                        priority={item.id === "openwrit-reading"}
-                      />
-                    </div>
-                    <div className="archive-card-meta">
-                      <span className="archive-card-title">{item.title}</span>
-                      <span className="archive-card-year">{item.year}</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="archive-wireframe-bg" />
-                    <div className="archive-wireframe-border" />
-                    <div className="archive-wireframe-header">
-                      <span className="archive-wireframe-tech">Wireframe // CAD</span>
-                      <div className="archive-wireframe-crosshair" />
-                    </div>
-                    <div className="archive-wireframe-body">
-                      <div className="archive-wireframe-title">{item.title}</div>
-                      <div className="archive-wireframe-year">{item.year}</div>
-                    </div>
-                  </>
-                )}
+                {/* Corner wedge frames */}
+                <div className="archive-card-corner top-left" />
+                <div className="archive-card-corner top-right" />
+                <div className="archive-card-corner bottom-left" />
+                <div className="archive-card-corner bottom-right" />
+
+                <div className="archive-image-container" style={{ aspectRatio: aspect }}>
+                  <div className="archive-placeholder-shape">
+                    <svg className="archive-placeholder-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <line x1="0" y1="0" x2="100" y2="100" stroke="var(--cr-border)" strokeWidth="0.5" />
+                      <line x1="100" y1="0" x2="0" y2="100" stroke="var(--cr-border)" strokeWidth="0.5" />
+                    </svg>
+                    <div className="archive-placeholder-cross" />
+                  </div>
+                </div>
+                <div className="archive-card-meta">
+                  <span className="archive-card-title">{item.title}</span>
+                  <span className="archive-card-year">{item.year}</span>
+                </div>
               </div>
             );
           })}
@@ -428,7 +408,7 @@ export default function ArchivePage() {
 
         {/* Hover instructions HUD */}
         <div className="archive-hud-instructions">
-          Scroll/Drag to pan. Pinch/Cmd+Scroll to zoom. Click image cards to expand.
+          Scroll/Drag to pan. Pinch/Cmd+Scroll to zoom. Click cards to expand.
         </div>
       </div>
 
@@ -441,6 +421,7 @@ export default function ArchivePage() {
           <div
             className="archive-lightbox-content"
             onClick={(e) => e.stopPropagation()}
+            style={{ borderRadius: "0px" }}
           >
             <button
               className="archive-lightbox-close"
@@ -448,15 +429,33 @@ export default function ArchivePage() {
             >
               [close]
             </button>
-            <div className="archive-lightbox-image-wrap">
-              <Image
-                src={selectedItem.src!}
-                alt={selectedItem.title}
-                width={1200}
-                height={750}
-                className="archive-lightbox-image"
-                priority
-              />
+            
+            {/* Corner wedge frames for lightbox */}
+            <div className="archive-card-corner top-left" style={{ borderWidth: "2px", width: "16px", height: "16px" }} />
+            <div className="archive-card-corner top-right" style={{ borderWidth: "2px", width: "16px", height: "16px" }} />
+            <div className="archive-card-corner bottom-left" style={{ borderWidth: "2px", width: "16px", height: "16px" }} />
+            <div className="archive-card-corner bottom-right" style={{ borderWidth: "2px", width: "16px", height: "16px" }} />
+
+            <div className="archive-lightbox-image-wrap" style={{ aspectRatio: itemAspectRatios[selectedItem.id] || "16 / 10" }}>
+              <div className="archive-placeholder-shape" style={{ height: "100%", position: "relative" }}>
+                <svg className="archive-placeholder-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <line x1="0" y1="0" x2="100" y2="100" stroke="var(--cr-border)" strokeWidth="0.5" />
+                  <line x1="100" y1="0" x2="0" y2="100" stroke="var(--cr-border)" strokeWidth="0.5" />
+                </svg>
+                <div className="archive-placeholder-cross" style={{ width: "24px", height: "24px" }} />
+                
+                {/* Tech blueprint lines / text */}
+                <div className="absolute inset-4 flex flex-col justify-between pointer-events-none font-mono text-[9px] opacity-40 uppercase tracking-widest">
+                  <div className="flex justify-between">
+                    <span>CAD // PLOT SCALE 1:1</span>
+                    <span>DRG. NO: {selectedItem.id.toUpperCase()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>DO NOT SCALE FROM DRAWING</span>
+                    <span>REF: CADE ROSS ARCHIVE</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="archive-lightbox-footer">
               <span className="archive-lightbox-title">{selectedItem.title}</span>
