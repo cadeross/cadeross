@@ -12,6 +12,22 @@ export default function Home() {
         <section className="about-section">
           <p>I&apos;m an interaction and experience designer.</p>
           <p>
+            Currently, I am exploring new design opportunities while building
+            personal projects.
+          </p>
+          <p>
+            Recently, I launched{" "}
+            <a
+              href="https://openwrit.com"
+              className="about-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              OpenWrit
+            </a>
+            , an intentional, distractionless way to read the Bible.
+          </p>
+          <p>
             Previously, I founded{" "}
             <a
               href="https://vlyss.com"
@@ -41,22 +57,6 @@ export default function Home() {
               Baylor University
             </a>{" "}
             to bring their visions to life.
-          </p>
-          <p>
-            Recently, I launched{" "}
-            <a
-              href="https://openwrit.com"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              OpenWrit
-            </a>
-            , an intentional, distractionless way to read the Bible.
-          </p>
-          <p>
-            Currently, I am exploring new design opportunities while building
-            personal projects.
           </p>
           <p>
             Beyond design and craft, I am learning Portuguese, and I thoroughly
