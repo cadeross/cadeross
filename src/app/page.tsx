@@ -55,6 +55,19 @@ export default function Home() {
             , an intentional, distractionless way to read the Bible.
           </p>
           <p>
+            I also built{" "}
+            <a
+              href="https://github.com/cadeross/Harbor"
+              className="about-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Harbor
+            </a>
+            , a macOS menu bar app for pinning project folders and managing
+            localhost servers.
+          </p>
+          <p>
             Currently, I am exploring new design opportunities while building
             personal projects.
           </p>
