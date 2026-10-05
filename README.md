@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+### Cade Ross
 
-## Getting Started
+Interaction and experience designer in the United States.
 
-First, run the development server:
+Previously, I founded [Vlyss](https://vlyss.com), a design and development firm focused on blockchain and edtech initiatives. We partnered with companies such as [Solana](https://solana.com) and [Baylor University](https://baylor.edu) to bring their visions to life.
+
+Currently, I'm exploring new design opportunities while building personal projects.
+
+Beyond design and craft, I'm learning Portuguese, and I thoroughly enjoy a match of tennis or a good sci-fi/fantasy novel — recommendations welcome.
+
+#### Building
+
+|  |  |
+|---|---|
+| **[OpenWrit](https://github.com/cadeross/OpenWrit)** | An intentional, distraction-free way to read the Bible. Daily Mass readings, a liturgical calendar, highlights and notes. Next.js, Convex. · [openwrit.com](https://openwrit.com) |
+| **[Harbor](https://github.com/cadeross/Harbor)** | A Liquid Glass macOS menu bar app for pinning project folders and managing localhost servers. Swift. |
+| **[cadeross.com](https://github.com/cadeross/cadeross)** | My personal site — this repo. Next.js. · [cadeross.com](https://www.cadeross.com) |
+
+#### Elsewhere
+
+[cadeross.com](https://www.cadeross.com) · [Archive](https://www.cadeross.com/archive) · [X](https://x.com/cadeross) · [Telegram](https://t.me/cadeross) · [Email](mailto:cadeross33@gmail.com)
+
+<br />
+
+<details>
+<summary><sub>About this repository</sub></summary>
+<br />
+
+This repo is both my GitHub profile README and the source for [cadeross.com](https://www.cadeross.com), built with Next.js and deployed on Vercel.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</details>
