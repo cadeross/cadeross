@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import ClockDial from "@/components/ClockDial";
 
-const HIDDEN_PATHS = new Set(["/focus", "/archive"]);
+const HIDDEN_PATHS = new Set(["/focus"]);
 
 export default function ClockDialGate() {
   const pathname = usePathname();

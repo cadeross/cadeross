@@ -131,7 +131,7 @@
     animation: bootSequenceType 250ms steps(5, jump-start) 0.55s forwards;
   }
 
-  /* Mirror .archive-cursor exactly. overflow: hidden matches the
+  /* Mirror .chat-cursor exactly. overflow: hidden matches the
      baseline rule used by .boot-sequence-text (per CSS 2.1 §10.8.1
      an inline-block with non-visible overflow baselines at its bottom
      margin edge), so cursor and text align in the same line. */
@@ -160,7 +160,7 @@
      each runs from its own 0% keyframe with its declared delay. */
   html[data-booting="true"] .homepage > .article > header > p,
   html[data-booting="true"] .homepage > .article > .about-section > p,
-  html[data-booting="true"] .homepage .archive-cursor,
+  html[data-booting="true"] .homepage .chat,
   html[data-booting="true"] .homepage > footer,
   html[data-booting="true"] .inner-page > *,
   html[data-booting="true"] .cs-sidebar,
@@ -190,10 +190,62 @@
   .homepage > .article > .about-section > p:nth-child(7) { animation-delay: 1.20s; }
   .homepage > .article > .about-section > p:nth-child(n+8) { animation-delay: 1.33s; }
 
-  /* Blinking cursor for the archive link — appears once the archive line is printed. */
-  .homepage .archive-cursor {
+  /* ── Ask-me chat: a terminal prompt at the end of the about copy.
+        Prints in after the last paragraph, like the lines above it. ── */
+
+  .homepage .chat {
+    margin-top: 0.875rem;
+    animation: terminalPrint 320ms steps(28, end) 1.33s both;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .homepage .chat-log > p + p,
+  .homepage .chat-log > p + .chat-q { margin-top: 0.875rem; }
+
+  .homepage .chat-log > .chat-q + p { margin-top: 0.375rem; }
+
+  /* Each new exchange prints in the same way the page did. */
+  .homepage .chat-log > p {
+    animation: terminalPrint 240ms steps(20, end) both;
+  }
+
+  .homepage .chat-q { color: var(--cr-text); }
+
+  .homepage .chat-a { white-space: pre-wrap; }
+
+  .homepage .chat-log + .chat-line { margin-top: 0.875rem; }
+
+  .homepage .chat-prompt-mark { color: var(--cr-muted); }
+
+  /* The prompt line hosts a transparent <input> laid over the visible
+     mirror text, so taps open the keyboard on touch devices while the
+     line still renders as plain terminal text with a block cursor. */
+  .homepage .chat-line {
+    position: relative;
+    cursor: text;
+  }
+
+  .homepage .chat-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 16px; /* ≥16px stops iOS zooming on focus */
+    cursor: text;
+  }
+
+  .homepage .chat-typed { color: var(--cr-text); white-space: pre-wrap; }
+
+  /* Suggested question — dim to signal Enter will ask it. */
+  .homepage .chat-placeholder { opacity: 0.45; }
+
+  /* Blinking block cursor — appears once the chat line is printed. */
+  .homepage .chat-cursor {
     display: inline-block;
-    margin-left: 0.35em;
     color: var(--cr-accent);
     opacity: 0;
     animation:
@@ -202,40 +254,21 @@
     transform: translateY(-1px);
   }
 
-  /* Overlay variant: the cursor occupies the same column as the next
-     character. Width 0 with overflow lets the glyph render on top of the
-     following placeholder character without shifting layout. The relative
-     position + z-index lifts the block above the slash so the character
-     beneath is fully obscured during the blink-on phase. */
-  .homepage .archive-cursor--overlay {
-    margin: 0;
+  /* Overlay variant: sits in the same column as the next placeholder
+     character. Width 0 with overflow renders the glyph over it without
+     shifting layout. */
+  .homepage .chat-cursor--overlay {
     width: 0;
     overflow: visible;
     position: relative;
     z-index: 1;
   }
 
-  /* End variant: rendered after fully-typed text as a trailing caret. */
-  .homepage .archive-cursor--end {
-    margin-left: 0;
-  }
-
-  /* While the user is actively typing, hold the cursor solid — the blink
-     only resumes after a brief idle. */
-  .homepage .archive-link-wrap[data-typing="true"] .archive-cursor {
+  /* Hold the cursor solid while typing or while an answer streams in. */
+  .homepage .chat[data-typing="true"] .chat-line .chat-cursor,
+  .homepage .chat-cursor--busy {
     animation: none;
     opacity: 1;
-  }
-
-  /* Untyped portion of /archive — dim to signal it can be filled in. */
-  .homepage .archive-placeholder {
-    opacity: 0.45;
-  }
-
-  /* Hover anywhere on the wrap fills both halves of the split link. */
-  .homepage .archive-link-wrap:hover .about-link {
-    background-size: 100% 100%;
-    color: var(--cr-bg);
   }
 
   .homepage > footer { animation: staggerIn 0.5s ease 1.55s both; }
@@ -260,7 +293,12 @@
       animation: none;
       clip-path: none;
     }
-    .homepage .archive-cursor {
+    .homepage .chat,
+    .homepage .chat-log > p {
+      animation: none;
+      clip-path: none;
+    }
+    .homepage .chat-cursor {
       animation: cursorBlink 0.9s steps(2) infinite;
       opacity: 1;
     }
@@ -2165,737 +2203,6 @@ html[data-system-theme="dark"] .bg-sparkle {
     animation: none !important;
     opacity: calc(var(--sp-opacity, 0.4) * 0.5);
   }
-}
-
-/* ══════════════════════════════════════════════════════
-   ARCHIVE — TUI-style framed terminal with pan canvas
-   ══════════════════════════════════════════════════════ */
-
-.archive-page {
-  --frame-border: color-mix(in oklab, var(--cr-text) 22%, var(--cr-bg));
-  --frame-border-soft: color-mix(in oklab, var(--cr-text) 14%, var(--cr-bg));
-  position: fixed;
-  inset: 0;
-  background: var(--cr-bg);
-  color: var(--cr-text);
-  overflow: hidden;
-  z-index: 0;
-  user-select: none;
-}
-
-.archive-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(1400px 900px at 14% -8%, color-mix(in oklab, var(--cr-accent) 12%, transparent), transparent 60%),
-    radial-gradient(1100px 800px at 86% 110%, color-mix(in oklab, var(--cr-accent) 9%, transparent), transparent 55%);
-  z-index: 0;
-}
-
-/* ── Outer terminal frame ─────────────────────────── */
-
-.archive-frame {
-  position: absolute;
-  inset: 1.5rem;
-  border: 1px solid var(--frame-border);
-  display: grid;
-  grid-template-columns: 12rem 1fr;
-  grid-template-rows: 1fr 6.5rem;
-  z-index: 2;
-  animation: archiveFrameIn 200ms ease both;
-}
-
-@keyframes archiveFrameIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.archive-frame-title {
-  position: absolute;
-  top: -0.55rem;
-  left: 1.5rem;
-  background: var(--cr-bg);
-  padding: 0 0.5rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: var(--cr-text);
-  text-decoration: none;
-  z-index: 5;
-  transition: color 160ms ease;
-  animation: archiveTypeIn 280ms steps(10, end) 80ms both;
-}
-
-.archive-frame-title:hover { color: var(--cr-accent); }
-
-@keyframes archiveTypeIn {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0 0 0); }
-}
-
-/* ── Panes ────────────────────────────────────────── */
-
-.archive-pane {
-  position: relative;
-}
-
-.archive-pane--years {
-  grid-column: 1;
-  grid-row: 1;
-  border-right: 1px solid var(--frame-border);
-  border-bottom: 1px solid var(--frame-border);
-  padding: 1.25rem 0.75rem 1rem;
-  overflow-y: auto;
-}
-
-.archive-pane--main {
-  grid-column: 2;
-  grid-row: 1;
-  border-bottom: 1px solid var(--frame-border);
-  overflow: hidden;
-}
-
-.archive-pane--meta {
-  grid-column: 1 / span 2;
-  grid-row: 2;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
-}
-
-.archive-pane-label {
-  position: absolute;
-  top: -0.55rem;
-  left: 1rem;
-  background: var(--cr-bg);
-  padding: 0 0.5rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: color-mix(in oklab, var(--cr-text) 70%, var(--cr-bg));
-  z-index: 3;
-  font-feature-settings: "tnum";
-  animation: archiveTypeIn 240ms steps(10, end) 200ms both;
-}
-
-.archive-pane--years .archive-pane-label { animation-delay: 200ms; }
-.archive-pane--main  .archive-pane-label { animation-delay: 280ms; }
-.archive-pane--meta  .archive-pane-label { animation-delay: 380ms; }
-
-/* ── Years sidebar ────────────────────────────────── */
-
-.archive-years {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.0625rem;
-}
-
-.archive-years li {
-  animation: archiveBootFade 240ms ease both;
-}
-
-.archive-years li:nth-child(1)  { animation-delay: 320ms; }
-.archive-years li:nth-child(2)  { animation-delay: 360ms; }
-.archive-years li:nth-child(3)  { animation-delay: 400ms; }
-.archive-years li:nth-child(4)  { animation-delay: 440ms; }
-.archive-years li:nth-child(5)  { animation-delay: 480ms; }
-.archive-years li:nth-child(6)  { animation-delay: 520ms; }
-.archive-years li:nth-child(7)  { animation-delay: 560ms; }
-.archive-years li:nth-child(8)  { animation-delay: 600ms; }
-.archive-years li:nth-child(n+9){ animation-delay: 640ms; }
-
-.archive-year {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 0.3125rem 0.5rem;
-  font: inherit;
-  color: var(--cr-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  text-align: left;
-  transition: color 120ms ease, background 120ms ease;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.005rem;
-}
-
-.archive-year:hover {
-  color: var(--cr-text);
-  background: color-mix(in oklab, var(--cr-text) 4%, transparent);
-}
-
-.archive-year[data-active="true"] {
-  color: var(--cr-accent);
-}
-
-.archive-year-marker {
-  width: 1ch;
-  display: inline-block;
-  color: var(--cr-accent);
-  text-align: center;
-}
-
-.archive-year-label { flex: 1; }
-
-.archive-year-count {
-  color: color-mix(in oklab, var(--cr-text) 32%, var(--cr-bg));
-  font-size: 0.75rem;
-}
-
-.archive-year[data-active="true"] .archive-year-count {
-  color: color-mix(in oklab, var(--cr-accent) 70%, var(--cr-bg));
-}
-
-/* ── Search input ─────────────────────────────────── */
-
-.archive-search {
-  position: absolute;
-  top: 1rem;
-  left: 1.25rem;
-  right: 1.25rem;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  background: color-mix(in oklab, var(--cr-bg) 88%, transparent);
-  border: 1px solid var(--frame-border-soft);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  animation: archiveBootFade 320ms ease 320ms both;
-}
-
-.archive-search-arrow {
-  color: var(--cr-muted);
-  font-size: 0.875rem;
-}
-
-.archive-search-input {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  outline: none;
-  font: inherit;
-  font-size: 0.8125rem;
-  color: var(--cr-text);
-  caret-color: var(--cr-accent);
-  letter-spacing: -0.005rem;
-}
-
-.archive-search-input::placeholder {
-  color: color-mix(in oklab, var(--cr-text) 35%, var(--cr-bg));
-}
-
-.archive-search-clear {
-  background: none;
-  border: none;
-  color: var(--cr-muted);
-  cursor: pointer;
-  font-size: 1rem;
-  font-family: inherit;
-  padding: 0 0.25rem;
-  line-height: 1;
-  transition: color 120ms ease;
-}
-
-.archive-search-clear:hover { color: var(--cr-text); }
-
-/* ── Pan surface + world ──────────────────────────── */
-
-.archive-surface {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  cursor: grab;
-  touch-action: none;
-  overscroll-behavior: contain;
-}
-
-.archive-surface[data-dragging="true"] { cursor: grabbing; }
-
-.archive-world {
-  position: absolute;
-  inset: 0;
-  will-change: transform;
-}
-
-/* ── Faint world markers (sparkles in space) ─────── */
-
-.archive-markers {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.archive-marker {
-  position: absolute;
-  display: block;
-  border-radius: 50%;
-  background: color-mix(in oklab, var(--cr-accent) 22%, transparent);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 6px color-mix(in oklab, var(--cr-accent) 18%, transparent);
-  opacity: 0;
-  animation: archiveMarkerIn 600ms ease 200ms both;
-}
-
-@keyframes archiveMarkerIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* ── Faint grid lines (between tile rows + columns) ─ */
-
-.archive-gridlines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.archive-gridline {
-  position: absolute;
-  background: color-mix(in oklab, var(--cr-text) 7%, transparent);
-}
-
-.archive-gridline--v {
-  width: 1px;
-  height: var(--grid-h, 100%);
-  top: 50%;
-  transform: translate(-50%, -50%) scaleY(0);
-  animation: archiveGridDrawV 520ms cubic-bezier(0.65, 0, 0.35, 1) 80ms both;
-}
-
-.archive-gridline--h {
-  height: 1px;
-  width: var(--grid-w, 100%);
-  left: 50%;
-  transform: translate(-50%, -50%) scaleX(0);
-  animation: archiveGridDrawH 520ms cubic-bezier(0.65, 0, 0.35, 1) 80ms both;
-}
-
-@keyframes archiveGridDrawV {
-  from { transform: translate(-50%, -50%) scaleY(0); opacity: 0; }
-  to   { transform: translate(-50%, -50%) scaleY(1); opacity: 1; }
-}
-
-@keyframes archiveGridDrawH {
-  from { transform: translate(-50%, -50%) scaleX(0); opacity: 0; }
-  to   { transform: translate(-50%, -50%) scaleX(1); opacity: 1; }
-}
-
-/* ── Tiles (rectangular media cards) ─────────────── */
-
-.archive-tile {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 240px;
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  outline: none;
-  opacity: 0;
-  animation: archiveTileBoot 380ms steps(22, end) var(--tile-delay, 0ms) both;
-}
-
-@keyframes archiveTileBoot {
-  from { opacity: 0; clip-path: inset(0 100% 0 0); }
-  to   { opacity: 1; clip-path: inset(0 0 0 0); }
-}
-
-.archive-tile-frame {
-  display: block;
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border: 1px solid var(--cr-border);
-  overflow: hidden;
-  background-color: var(--cr-border);
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--cr-accent) calc(7% + (var(--tile-i, 0) * 1) * 0.6%), var(--cr-bg)),
-    color-mix(in oklab, var(--cr-text) calc(4% + (var(--tile-i, 0) * 1) * 0.3%), var(--cr-bg))
-  );
-  transition: border-color 220ms ease, transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.1);
-}
-
-.archive-tile:hover .archive-tile-frame {
-  border-color: color-mix(in oklab, var(--cr-text) 40%, var(--cr-bg));
-  transform: translateY(-2px);
-}
-
-/* While dragging the canvas, suppress hover lift so tiles don't twitch. */
-.archive-surface[data-dragging="true"] .archive-tile:hover .archive-tile-frame {
-  transform: none;
-  border-color: var(--cr-border);
-}
-
-.archive-tile:focus-visible .archive-tile-frame {
-  outline: 1px solid var(--cr-accent);
-  outline-offset: 3px;
-}
-
-.archive-tile[data-dim="true"] {
-  opacity: 0.18;
-  pointer-events: none;
-}
-
-.archive-tile-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.archive-tile-placeholder {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 1.75rem;
-  color: color-mix(in oklab, var(--cr-text) 35%, transparent);
-  font-weight: 400;
-  user-select: none;
-  line-height: 0;
-}
-
-.archive-tile-badge {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  display: grid;
-  place-items: center;
-  font-size: 0.625rem;
-  border-radius: 9999px;
-  background: color-mix(in oklab, var(--cr-bg) 70%, transparent);
-  color: var(--cr-text);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  pointer-events: none;
-}
-
-/* ── Hint, compass (inside main pane) ─────────────── */
-
-.archive-hint {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--cr-muted);
-  font-size: 0.6875rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  pointer-events: none;
-  transition: opacity 600ms ease, transform 800ms ease;
-  animation:
-    archiveTypeIn 360ms steps(36, end) 700ms both,
-    archiveHintBreath 3.4s ease-in-out 1100ms infinite;
-  z-index: 4;
-}
-
-.archive-hint[data-hidden="true"] {
-  opacity: 0;
-  transform: translateX(-50%) translateY(8px);
-}
-
-@keyframes archiveHintBreath {
-  0%, 100% { opacity: 0.95; }
-  50%      { opacity: 0.55; }
-}
-
-@keyframes archiveBootFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.archive-compass {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 4;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: color-mix(in oklab, var(--cr-bg) 82%, transparent);
-  border: 1px solid var(--frame-border-soft);
-  color: var(--cr-muted);
-  cursor: pointer;
-  font: inherit;
-  opacity: 0;
-  transform: scale(0.85);
-  transition:
-    opacity 260ms ease,
-    transform 260ms cubic-bezier(0.175, 0.885, 0.32, 1.1),
-    border-color 200ms ease,
-    color 200ms ease;
-}
-
-.archive-compass[data-visible="true"] {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.archive-compass:hover {
-  border-color: color-mix(in oklab, var(--cr-text) 35%, var(--cr-bg));
-  color: var(--cr-text);
-}
-
-/* ── Metadata strip ───────────────────────────────── */
-
-.archive-meta {
-  display: flex;
-  gap: 2.5rem;
-  margin: 0;
-  padding: 0;
-  flex-wrap: wrap;
-  animation: archiveBootFade 280ms ease 700ms both;
-}
-
-.archive-meta > div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.archive-meta dt {
-  font-size: 0.625rem;
-  letter-spacing: 0.18em;
-  color: color-mix(in oklab, var(--cr-text) 45%, var(--cr-bg));
-  margin: 0;
-  font-weight: 500;
-}
-
-.archive-meta dd {
-  font-size: 0.875rem;
-  color: var(--cr-text);
-  margin: 0;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.005rem;
-}
-
-.archive-meta-empty {
-  color: var(--cr-muted);
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
-  margin: 0;
-  font-style: normal;
-  animation: archiveBootFade 280ms ease 700ms both;
-}
-
-/* ── Status bar (bottom-right of frame) ───────────── */
-
-.archive-statusbar {
-  position: absolute;
-  bottom: -0.55rem;
-  right: 1.5rem;
-  background: var(--cr-bg);
-  padding: 0 0.5rem;
-  font-size: 0.6875rem;
-  color: color-mix(in oklab, var(--cr-text) 55%, var(--cr-bg));
-  letter-spacing: 0.04em;
-  font-variant-numeric: tabular-nums;
-  display: flex;
-  gap: 1rem;
-  z-index: 5;
-  white-space: pre;
-  animation: archiveBootFade 280ms ease 800ms both;
-}
-
-.archive-statusbar-coords {
-  color: var(--cr-muted);
-}
-
-/* ── Lightbox ─────────────────────────────────────── */
-
-.archive-lightbox {
-  position: fixed;
-  inset: 0;
-  background: color-mix(in oklab, var(--cr-bg) 88%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-  cursor: zoom-out;
-  animation: archiveLightboxIn 200ms ease both;
-}
-
-@keyframes archiveLightboxIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.archive-lightbox-figure {
-  position: relative;
-  max-width: min(1100px, 100%);
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-  cursor: default;
-  animation: archiveLightboxFigIn 280ms cubic-bezier(0.175, 0.885, 0.32, 1.05) both;
-}
-
-@keyframes archiveLightboxFigIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.archive-lightbox-img {
-  display: block;
-  max-width: 100%;
-  max-height: 80vh;
-  width: auto;
-  height: auto;
-  border-radius: 4px;
-  border: 1px solid var(--cr-border);
-  background: var(--cr-bg);
-}
-
-.archive-lightbox-placeholder {
-  width: min(72vw, 900px);
-  aspect-ratio: 4 / 3;
-  display: grid;
-  place-items: center;
-  font-size: 4rem;
-  line-height: 0;
-  color: color-mix(in oklab, var(--cr-text) 35%, transparent);
-  background-color: var(--cr-border);
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--cr-accent) calc(8% + (var(--tile-i, 0) * 1) * 0.6%), var(--cr-bg)),
-    color-mix(in oklab, var(--cr-text) calc(5% + (var(--tile-i, 0) * 1) * 0.3%), var(--cr-bg))
-  );
-  border: 1px solid var(--cr-border);
-  border-radius: 4px;
-}
-
-.archive-lightbox-caption {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.8125rem;
-  color: var(--cr-muted);
-  letter-spacing: -0.005rem;
-}
-
-.archive-lightbox-caption span:last-child {
-  color: var(--cr-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.6875rem;
-}
-
-.archive-lightbox-nav,
-.archive-lightbox-close {
-  position: absolute;
-  background: var(--cr-bg);
-  color: var(--cr-muted);
-  border: 1px solid var(--cr-border);
-  border-radius: 9999px;
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: color 160ms ease, border-color 160ms ease, transform 160ms ease;
-  font-family: inherit;
-}
-
-.archive-lightbox-nav:hover,
-.archive-lightbox-close:hover {
-  color: var(--cr-text);
-  border-color: color-mix(in oklab, var(--cr-text) 35%, var(--cr-bg));
-}
-
-.archive-lightbox-prev { left: 2rem; top: 50%; transform: translateY(-50%); }
-.archive-lightbox-next { right: 2rem; top: 50%; transform: translateY(-50%); }
-.archive-lightbox-close { right: 1.5rem; top: 1.5rem; font-size: 1.25rem; }
-
-.archive-lightbox-prev:hover { transform: translateY(-50%) translateX(-2px); }
-.archive-lightbox-next:hover { transform: translateY(-50%) translateX(2px); }
-
-@media (max-width: 860px) {
-  .archive-frame {
-    inset: 0.75rem;
-    grid-template-columns: 9rem 1fr;
-    grid-template-rows: 1fr 5.5rem;
-  }
-  .archive-frame-title { left: 1rem; }
-  .archive-pane--years { padding: 1rem 0.5rem; }
-  .archive-search { left: 0.875rem; right: 0.875rem; top: 0.75rem; }
-  .archive-tile { width: 200px; }
-  .archive-statusbar { right: 1rem; gap: 0.625rem; }
-  .archive-statusbar-coords { display: none; }
-  .archive-meta { gap: 1.5rem; }
-}
-
-@media (max-width: 600px) {
-  .archive-frame {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr 5.5rem;
-  }
-  .archive-pane--years {
-    grid-column: 1;
-    grid-row: 1;
-    border-right: none;
-    border-bottom: 1px solid var(--frame-border);
-    max-height: 7rem;
-  }
-  .archive-pane--main { grid-column: 1; grid-row: 2; }
-  .archive-pane--meta { grid-column: 1; grid-row: 3; }
-  .archive-years {
-    flex-direction: row;
-    gap: 0.5rem;
-    overflow-x: auto;
-  }
-  .archive-years li { flex: 0 0 auto; }
-  .archive-year { padding: 0.25rem 0.5rem; }
-  .archive-lightbox { padding: 1.5rem; }
-  .archive-lightbox-prev { left: 0.5rem; }
-  .archive-lightbox-next { right: 0.5rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .archive-frame,
-  .archive-frame-title,
-  .archive-pane-label,
-  .archive-years li,
-  .archive-search,
-  .archive-meta,
-  .archive-meta-empty,
-  .archive-statusbar,
-  .archive-tile,
-  .archive-gridline--v,
-  .archive-gridline--h,
-  .archive-marker,
-  .archive-hint { animation: none; opacity: 1; transform: none; }
-  .archive-gridline--v { transform: translate(-50%, -50%); }
-  .archive-gridline--h { transform: translate(-50%, -50%); }
-  .archive-tile { transform: translate(-50%, -50%); clip-path: none; }
-  .archive-tile-frame,
-  .archive-lightbox-nav,
-  .archive-lightbox-close { transition: none; }
-  .archive-lightbox,
-  .archive-lightbox-figure { animation: none; }
 }
 
 /* ══════════════════════════════════════════════════════

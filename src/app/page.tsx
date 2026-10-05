@@ -1,4 +1,4 @@
-import ArchiveLink from "@/components/ArchiveLink";
+import Chat from "@/components/Chat";
 
 export default function Home() {
   return (
@@ -77,10 +77,6 @@ export default function Home() {
             know if you have any recs!
           </p>
           <p>
-            A small archive of my work lives at{" "}
-            <ArchiveLink className="about-link" />
-          </p>
-          <p>
             You can reach me on{" "}
             <a
               href="https://t.me/cadeross"
@@ -96,6 +92,7 @@ export default function Home() {
             </a>
             .
           </p>
+          <Chat />
         </section>
       </article>
     </div>
