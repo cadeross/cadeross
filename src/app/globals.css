@@ -169,26 +169,20 @@
     animation-play-state: paused;
   }
 
-  /* ── Terminal-style entrance: homepage ── */
+  /* ── Reveal: elements marked [data-reveal] stay hidden until
+        <Reveal/> sets [data-revealed] as they scroll into view, with a
+        per-element animation-delay so each batch prints in order. Text
+        prints left to right like a terminal; media fades up. ── */
 
-  .homepage > .article > header > p,
-  .homepage > .article > .about-section > p {
+  [data-reveal]:not([data-revealed]) { opacity: 0; }
+
+  [data-reveal][data-revealed] {
     animation: terminalPrint 320ms steps(28, end) both;
-    clip-path: inset(0 100% 0 0);
-    opacity: 1;
   }
 
-  .homepage > .article > header > p:nth-child(1) { animation-delay: 0.02s; }
-  .homepage > .article > header > p:nth-child(2) { animation-delay: 0.18s; }
-
-  .homepage > .article > .about-section > p:nth-child(1) { animation-delay: 0.42s; }
-  .homepage > .article > .about-section > p:nth-child(2) { animation-delay: 0.55s; }
-  .homepage > .article > .about-section > p:nth-child(3) { animation-delay: 0.68s; }
-  .homepage > .article > .about-section > p:nth-child(4) { animation-delay: 0.81s; }
-  .homepage > .article > .about-section > p:nth-child(5) { animation-delay: 0.94s; }
-  .homepage > .article > .about-section > p:nth-child(6) { animation-delay: 1.07s; }
-  .homepage > .article > .about-section > p:nth-child(7) { animation-delay: 1.20s; }
-  .homepage > .article > .about-section > p:nth-child(n+8) { animation-delay: 1.33s; }
+  [data-reveal="fade"][data-revealed] {
+    animation: staggerIn 0.5s ease both;
+  }
 
   /* Blinking cursor for the archive link — appears once the archive line is printed. */
   .homepage .archive-cursor {
@@ -255,11 +249,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .homepage > .article > header > p,
-    .homepage > .article > .about-section > p {
-      animation: none;
-      clip-path: none;
-    }
+    [data-reveal] { opacity: 1; animation: none !important; }
     .homepage .archive-cursor {
       animation: cursorBlink 0.9s steps(2) infinite;
       opacity: 1;
@@ -635,7 +625,401 @@
     color: var(--cr-bg);
   }
 
+  /* ── Mark: the favicon asterisk above the name ── */
+
+  .mark {
+    position: relative;
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 0 1.25rem -0.25rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--cr-text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mark:focus-visible { outline: 1px solid var(--cr-muted); outline-offset: 4px; }
+
+  .mark-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+  .mark-spin {
+    transform-origin: 16px 16px;
+    transition: transform 0.7s var(--ease-swift);
+  }
+
+  .mark-ray {
+    stroke: currentColor;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  /* The mark joins the reveal sequence, but draws its rays out from the
+     centre instead of printing. */
+  .mark[data-reveal][data-revealed] { animation: none; }
+  .mark[data-revealed] .mark-ray {
+    animation: markDraw 0.42s var(--ease-smooth) both;
+  }
+  .mark:not([data-revealed]) .mark-ray { stroke-dashoffset: 1; }
+
+  .mark:active .mark-svg { transform: scale(0.9); }
+  .mark-svg { transition: transform 0.15s ease; }
+
+  .mark-sparkle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 0.75rem;
+    line-height: 1;
+    color: var(--cr-muted);
+    pointer-events: none;
+    animation: markSparkle 0.8s var(--ease-smooth) forwards;
+  }
+
+  html[data-system-theme="dark"] .mark { filter: drop-shadow(0 0 6px var(--cr-glow-soft)); }
+
+  @keyframes markDraw {
+    from { stroke-dashoffset: 1; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  @keyframes markSparkle {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0.5rem) rotate(calc(-1 * var(--angle)));
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateX(2.75rem) rotate(calc(-1 * var(--angle))) scale(0.6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mark-spin { transition: none; }
+    .mark .mark-ray { animation: none; stroke-dashoffset: 0; }
+    .mark-sparkle { display: none; }
+  }
+
+  /* ── Homepage menu: [1] work  [2] explorations  [3] about ── */
+
+  .home-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin-top: 2.5rem;
+    font-size: 0.875rem;
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+  }
+
+  .home-menu-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5ch;
+    color: var(--cr-muted);
+    text-decoration: none;
+    transition: color 0.14s ease;
+  }
+
+  .home-menu-key { opacity: 0.6; transition: opacity 0.14s ease; }
+
+  /* Label fills in as an inverted block when selected — the same fill
+     .about-link uses on hover. */
+  .home-menu-label {
+    padding: 0 0.3ch;
+    margin: 0 -0.3ch;
+    background-image: linear-gradient(var(--cr-text), var(--cr-text));
+    background-size: 100% 0;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition:
+      background-size 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+      color 0.18s ease 0.04s;
+  }
+
+  .home-menu-item:hover { color: var(--cr-text); }
+  .home-menu-item:hover .home-menu-key { opacity: 1; }
+  .home-menu-item:hover .home-menu-label { background-size: 100% 1px; }
+
+  .home-menu-item[aria-selected="true"] { color: var(--cr-text); }
+  .home-menu-item[aria-selected="true"] .home-menu-key { opacity: 1; }
+  .home-menu-item[aria-selected="true"] .home-menu-label {
+    color: var(--cr-bg);
+    background-size: 100% 100%;
+  }
+
+  html[data-system-theme="dark"] .home-menu-item:hover,
+  html[data-system-theme="dark"] .home-menu-item[aria-selected="true"] .home-menu-key {
+    text-shadow: 0 0 12px var(--cr-glow-soft);
+  }
+
+  /* ── Prompt: ~/work█ — retypes on every switch ── */
+
+  .home-prompt {
+    display: flex;
+    align-items: baseline;
+    margin-top: 1.75rem;
+    font-size: 0.875rem;
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+    color: var(--cr-text);
+    white-space: pre;
+  }
+
+  .home-prompt-path { color: var(--cr-muted); }
+
+  .home-prompt-cursor {
+    color: var(--cr-accent);
+    animation: cursorBlink 0.9s steps(2) infinite;
+  }
+
+  /* Solid while typing; blinks once idle. */
+  .home-prompt-cursor[data-active="true"] { animation: none; }
+
+  .home-prompt-hint {
+    margin-left: auto;
+    color: var(--cr-muted);
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  @media (hover: none), screen and (max-width: 520px) {
+    .home-prompt-hint { display: none; }
+  }
+
+  /* ── Panel ── */
+
+  .home-panel {
+    padding-top: 0.75rem;
+    min-height: 18rem;
+    transition: opacity 0.2s ease;
+  }
+
+  /* While the prompt retypes, the outgoing listing dims. */
+  .home-panel[data-pending="true"] { opacity: 0.25; }
+
+  /* ── Listings: 01  Title ........ year ── */
+
+  .home-list { list-style: none; }
+
+  .home-entry {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    padding: 0.65rem 0;
+    font-size: 0.875rem;
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .home-entry-index {
+    flex-shrink: 0;
+    color: var(--cr-muted);
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+    transition: opacity 0.14s ease, color 0.14s ease;
+  }
+
+  .home-entry-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .home-entry-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75ch;
+  }
+
+  .home-entry-title {
+    color: var(--cr-text);
+    padding: 0 0.3ch;
+    margin: 0 -0.3ch;
+    background-image: linear-gradient(var(--cr-text), var(--cr-text));
+    background-size: 100% 0;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition:
+      background-size 0.28s cubic-bezier(0.65, 0, 0.35, 1),
+      color 0.16s ease 0.03s,
+      opacity 0.14s ease;
+  }
+
+  .home-entry-arrow { color: var(--cr-muted); }
+
+  .home-entry-leader {
+    flex: 1;
+    min-width: 2ch;
+    align-self: center;
+    height: 1px;
+    background-image: radial-gradient(circle, var(--cr-muted) 0.75px, transparent 1px);
+    background-size: 6px 2px;
+    background-repeat: repeat-x;
+    background-position: left center;
+    opacity: 0.5;
+    transition: opacity 0.14s ease;
+  }
+
+  .home-entry-year {
+    flex-shrink: 0;
+    color: var(--cr-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .home-entry-summary {
+    color: var(--cr-muted);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    transition: color 0.14s ease, opacity 0.14s ease;
+  }
+
+  /* Hover or keyboard focus selects a row: the title inverts, its index
+     and leader come forward, and the summary reads in full contrast. */
+  .home-entry:hover .home-entry-title,
+  .home-entry:focus-visible .home-entry-title {
+    color: var(--cr-bg);
+    background-size: 100% 100%;
+  }
+
+  .home-entry:hover .home-entry-index,
+  .home-entry:focus-visible .home-entry-index {
+    color: var(--cr-text);
+    opacity: 1;
+  }
+
+  .home-entry:hover .home-entry-leader,
+  .home-entry:focus-visible .home-entry-leader { opacity: 1; }
+
+  .home-entry:hover .home-entry-summary,
+  .home-entry:focus-visible .home-entry-summary { color: var(--cr-secondary); }
+
+  @media screen and (min-width: 520px) {
+    .home-list:hover .home-entry:not(:hover) .home-entry-title,
+    .home-list:hover .home-entry:not(:hover) .home-entry-summary { opacity: 0.45; }
+  }
+
+  @media screen and (max-width: 520px) {
+    .home-entry { gap: 0.875rem; }
+  }
+
+  /* ── Homepage about panel ── */
+
+  .home-about { padding-top: 0.5rem; }
+
+  .home-about p {
+    font-size: 0.875rem;
+    font-weight: 460;
+    line-height: 1.625rem;
+    color: var(--cr-secondary);
+    letter-spacing: -0.00563rem;
+  }
+
+  .home-about p + p { margin-top: 0.875rem; }
+
+  .home-about .home-connect {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin-top: 1.5rem;
+    scroll-margin-top: 5rem;
+  }
+
+  .home-connect > span[aria-hidden] { color: var(--cr-muted); }
+
   /* ── Case study ── */
+
+  .cs-contact {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .cs-main .cs-contact + .cs-section,
+  .cs-main .cs-contact + .cs-gallery { margin-top: 1rem; }
+
+  .cs-section-body p + p { margin-top: 0.875rem; }
+
+  .cs-media {
+    display: block;
+    width: 100%;
+    margin-top: 1.75rem;
+    border-radius: 10px;
+  }
+
+  .cs-media--placeholder {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border: 1px dashed var(--cr-border);
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 460;
+    line-height: 1.5;
+    color: var(--cr-muted);
+    letter-spacing: -0.00563rem;
+  }
+
+  .cs-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    padding: 2.5rem 0;
+  }
+
+  .cs-figure .cs-media { margin-top: 0; }
+
+  .cs-next {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 1rem;
+    padding: 1.5rem 0 3rem;
+    border-top: 1px solid var(--cr-border);
+    font-size: 0.875rem;
+    font-weight: 460;
+    letter-spacing: -0.00563rem;
+    text-decoration: none;
+  }
+
+  .cs-next-label { color: var(--cr-muted); font-size: 0.75rem; }
+
+  .cs-next-title { color: var(--cr-text); }
+
+  .cs-next-title::after {
+    content: "→";
+    display: inline-block;
+    margin-left: 0.6ch;
+    color: var(--cr-muted);
+    transition: transform 0.2s var(--ease-snappy), color 0.14s ease;
+  }
+
+  .cs-next:hover .cs-next-title::after {
+    transform: translateX(0.4ch);
+    color: var(--cr-text);
+  }
+
+  .cs-next-summary { color: var(--cr-muted); font-size: 0.8125rem; }
+
+  .cs-section { scroll-margin-top: 4rem; }
+
+  .cs-caption {
+    margin-top: 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 460;
+    color: var(--cr-muted);
+    letter-spacing: -0.00563rem;
+  }
 
   .cs-meta {
     display: flex;
@@ -776,7 +1160,6 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    animation: staggerIn 0.5s ease 0s both;
   }
 
   /* ── Main content column ── */
@@ -790,17 +1173,6 @@
   .cs-main .cs-meta  { margin-top: 1.25rem; }
   .cs-main .cs-hero  { margin-top: 2rem; }
   .cs-main section#overview { margin-top: 2rem; }
-
-  /* Stagger: main content children */
-  .cs-main > :nth-child(1)   { animation: staggerIn 0.5s ease 0.05s both; }
-  .cs-main > :nth-child(2)   { animation: staggerIn 0.5s ease 0.1s both; }
-  .cs-main > :nth-child(3)   { animation: staggerIn 0.5s ease 0.15s both; }
-  .cs-main > :nth-child(4)   { animation: staggerIn 0.5s ease 0.2s both; }
-  .cs-main > :nth-child(5)   { animation: staggerIn 0.5s ease 0.25s both; }
-  .cs-main > :nth-child(6)   { animation: staggerIn 0.5s ease 0.3s both; }
-  .cs-main > :nth-child(7)   { animation: staggerIn 0.5s ease 0.35s both; }
-  .cs-main > :nth-child(8)   { animation: staggerIn 0.5s ease 0.4s both; }
-  .cs-main > :nth-child(n+9) { animation: staggerIn 0.5s ease 0.45s both; }
 
   /* ── Table of Contents ── */
 
@@ -843,7 +1215,7 @@
       gap: 1rem;
     }
     .cs-toc { display: none; }
-    .cs-main { max-width: 100%; }
+    .cs-main { max-width: 100%; align-self: stretch; }
   }
 }
 

@@ -1,102 +1,121 @@
-import ArchiveLink from "@/components/ArchiveLink";
+import Link from "next/link";
+import HomeTabs from "@/components/HomeTabs";
+import Mark from "@/components/Mark";
+import { EMAIL, explorations, workItems } from "@/lib/portfolio";
+import { parseSection } from "@/lib/sections";
 
-export default function Home() {
+type Props = {
+  searchParams: Promise<{ section?: string | string[] }>;
+};
+
+type Entry = { title: string; summary: string; year: string };
+
+function External({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="about-link">
+      {children}
+    </a>
+  );
+}
+
+/* One row of a listing: index, title, dotted leader, year, then the summary. */
+function EntryBody({ entry, index, external }: { entry: Entry; index: number; external?: boolean }) {
+  return (
+    <>
+      <span className="home-entry-index" aria-hidden="true">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <span className="home-entry-body">
+        <span className="home-entry-line">
+          <span className="home-entry-title">{entry.title}</span>
+          {external && (
+            <span className="home-entry-arrow" aria-hidden="true">
+              ↗
+            </span>
+          )}
+          <span className="home-entry-leader" aria-hidden="true" />
+          <span className="home-entry-year">{entry.year}</span>
+        </span>
+        <span className="home-entry-summary">{entry.summary}</span>
+      </span>
+    </>
+  );
+}
+
+const workPanel = (
+  <ul className="home-list">
+    {workItems.map((item, i) => (
+      <li key={item.slug} data-reveal>
+        <Link href={`/work/${item.slug}`} className="home-entry">
+          <EntryBody entry={item} index={i} />
+        </Link>
+      </li>
+    ))}
+  </ul>
+);
+
+const explorationsPanel = (
+  <ul className="home-list">
+    {explorations.map((item, i) => (
+      <li key={item.title} data-reveal>
+        <a href={item.href} className="home-entry" target="_blank" rel="noopener noreferrer">
+          <EntryBody entry={item} index={i} external />
+        </a>
+      </li>
+    ))}
+  </ul>
+);
+
+const aboutPanel = (
+  <div className="home-about">
+    <p data-reveal>
+      I design products end to end and build them into working software with AI tools. Right
+      now I&apos;m building{" "}
+      <External href="https://www.geteverdeck.com">Everdeck</External>, a study app that turns
+      notes into flashcards and practice exams. Before that I launched{" "}
+      <External href="https://openwrit.com">OpenWrit</External>, an intentional way to read the
+      Bible, and founded <External href="https://vlyss.com">Vlyss</External>, a design and
+      development studio that worked with teams like Solana and Baylor University.
+    </p>
+    <p data-reveal>I&apos;m open to fully remote design roles starting in January.</p>
+    <p data-reveal>
+      Outside of design, I&apos;m learning Portuguese, playing tennis and reading sci-fi and
+      fantasy. Recommendations welcome.
+    </p>
+    <p id="connect" className="home-connect" data-reveal>
+      <a href={`mailto:${EMAIL}`} className="about-link">
+        Email
+      </a>
+      <span aria-hidden="true">·</span>
+      <span>LinkedIn [url]</span>
+      <span aria-hidden="true">·</span>
+      <span>Resume [PDF link]</span>
+      <span aria-hidden="true">·</span>
+      <External href="https://t.me/cadeross">Telegram</External>
+    </p>
+  </div>
+);
+
+export default async function Home({ searchParams }: Props) {
+  const { section } = await searchParams;
+
   return (
     <div className="homepage">
       <article className="article">
         <header>
-          <p className="page-name">Cade Ross</p>
-          <p className="page-greeting">United States</p>
+          <Mark />
+          <p className="page-name" data-reveal>
+            Cade Ross
+          </p>
+          <p className="page-greeting" data-reveal>
+            Product and interaction designer
+          </p>
         </header>
 
-        <section className="about-section">
-          <p>I&apos;m an interaction and experience designer.</p>
-          <p>
-            Previously, I founded{" "}
-            <a
-              href="https://vlyss.com"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Vlyss
-            </a>
-            , a design and development firm focused on blockchain and edtech initiatives.
-            We partnered with companies such as{" "}
-            <a
-              href="https://solana.com"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Solana
-            </a>{" "}
-            and{" "}
-            <a
-              href="https://baylor.edu"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Baylor University
-            </a>{" "}
-            to bring their visions to life.
-          </p>
-          <p>
-            Recently, I launched{" "}
-            <a
-              href="https://openwrit.com"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              OpenWrit
-            </a>
-            , an intentional, distractionless way to read the Bible.
-          </p>
-          <p>
-            I also built{" "}
-            <a
-              href="https://github.com/cadeross/Harbor"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Harbor
-            </a>
-            , a macOS menu bar app for pinning project folders and managing
-            localhost servers.
-          </p>
-          <p>
-            Currently, I am exploring new design opportunities while building
-            personal projects.
-          </p>
-          <p>
-            Beyond design and craft, I am learning Portuguese, and I thoroughly
-            enjoy a match of tennis or a good sci-fi/fantasy novel. Let me
-            know if you have any recs!
-          </p>
-          <p>
-            A small archive of my work lives at{" "}
-            <ArchiveLink className="about-link" />
-          </p>
-          <p>
-            You can reach me on{" "}
-            <a
-              href="https://t.me/cadeross"
-              className="about-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Telegram
-            </a>{" "}
-            or by{" "}
-            <a href="mailto:cadeross33@gmail.com" className="about-link">
-              email
-            </a>
-            .
-          </p>
-        </section>
+        <HomeTabs
+          initial={parseSection(section)}
+          panels={{ work: workPanel, explorations: explorationsPanel, about: aboutPanel }}
+        />
       </article>
     </div>
   );
