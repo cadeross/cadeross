@@ -14,6 +14,7 @@ Beyond design and craft, I'm learning Portuguese, and I thoroughly enjoy a match
 |---|---|
 | **[OpenWrit](https://github.com/cadeross/OpenWrit)** | An intentional, distraction-free way to read the Bible. Daily Mass readings, a liturgical calendar, highlights and notes. Next.js, Convex. · [openwrit.com](https://openwrit.com) |
 | **[Harbor](https://github.com/cadeross/Harbor)** | A Liquid Glass macOS menu bar app for pinning project folders and managing localhost servers. Swift. |
+| **[Spyglass](https://github.com/cadeross/Spyglass)** | A Liquid Glass macOS menu bar app that records your screen and camera, then puts the video on your clipboard. Swift. |
 | **[cadeross.com](https://github.com/cadeross/cadeross)** | My personal site — this repo. Next.js. · [cadeross.com](https://www.cadeross.com) |
 
 #### Elsewhere

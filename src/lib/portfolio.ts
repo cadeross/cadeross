@@ -206,6 +206,12 @@ export const explorations: Exploration[] = [
     summary: "A macOS menu bar app for project folders and localhost servers",
     href: "https://github.com/cadeross/Harbor",
   },
+  {
+    title: "Spyglass",
+    year: "[year]",
+    summary: "A macOS menu bar app for recording your screen and camera",
+    href: "https://github.com/cadeross/Spyglass",
+  },
 ];
 
 export function getWorkItem(slug: string) {
