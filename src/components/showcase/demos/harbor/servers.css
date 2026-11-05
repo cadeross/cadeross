@@ -1,0 +1,180 @@
+/* Harbor's panel, from PanelView, FolderRow, ServerChip and KeepAwakeRow:
+   rows 8pt apart in a 12pt inset, 30pt folder icons, small glass chips.
+   Shared by the servers demo and the keep-awake close-up. */
+
+.hb {
+  .hb-panel {
+    top: 30px;
+    right: 14px;
+  }
+
+  .hb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 12px 12px;
+  }
+
+  .hb-row {
+    padding: 12px;
+  }
+
+  .hb-row__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hb-row__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hb-folder {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    color: #86c4f3;
+  }
+
+  .hb-row__server {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding-top: 10px;
+  }
+
+  .hb-chip {
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hb-chip__arrow {
+    opacity: 0.58;
+  }
+
+  .hb-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--mac-green);
+    box-shadow: 0 0 4px rgba(48, 209, 88, 0.7);
+  }
+
+  .hb-stop {
+    gap: 5px;
+    color: var(--mac-red);
+    font-weight: 600;
+  }
+
+  .hb-stop .ss-spinner {
+    width: 10px;
+    height: 10px;
+    color: var(--mac-red);
+  }
+
+  .hb-stop__square {
+    width: 8px;
+    height: 8px;
+    border-radius: 1.5px;
+    background: currentColor;
+  }
+
+  /* Keep Mac awake: its own glass row above the footer. */
+  .hb-awake {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 12px 10px;
+    padding: 10px 12px;
+    transition: background-color 0.35s ease;
+  }
+
+  .hb-awake__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    color: var(--mac-secondary);
+  }
+
+  .hb-awake[data-on="true"] {
+    background: rgba(255, 159, 10, 0.12);
+  }
+
+  .hb-toast {
+    position: absolute;
+    left: 50%;
+    bottom: 112px;
+    z-index: 3;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px;
+    background: rgba(60, 74, 120, 0.72);
+    backdrop-filter: blur(16px);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.9);
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .hb-toast[data-show] {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  /* The terminal that runs aurora-web, behind the panel. */
+  .hb-term {
+    position: absolute;
+    z-index: 10;
+    top: 56px;
+    left: 16px;
+    width: 300px;
+    height: 460px;
+    box-shadow: 0 18px 44px rgba(4, 8, 24, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+  }
+
+  .hb-term .ss-window__body {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Bottom-pinned: older lines scroll off the top as new ones arrive. */
+  .hb-term__lines {
+    position: absolute;
+    inset: 0 0 auto 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 310px;
+    overflow: hidden;
+    padding: 10px 12px 12px;
+    font-size: 10.5px;
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  .hb-term__lines [data-fresh] {
+    animation: hb-line 0.22s ease-out both;
+  }
+
+  & .ss-stage[data-layout="compact"] {
+    .mac-wide { display: none; }
+    .hb-panel { right: 15px; }
+    .hb-term { top: 462px; left: 15px; width: 360px; z-index: 25; }
+    .hb-term__lines { height: 110px; }
+  }
+}
+
+@keyframes hb-line {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

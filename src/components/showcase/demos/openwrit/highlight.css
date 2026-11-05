@@ -1,0 +1,273 @@
+/* OpenWrit's reader, sepia theme, from its globals.css and components:
+   --background #f5e8d0, ink #5b4a32, muted #8a7858, glass-subtle pills,
+   Geist for the interface and Geist Serif for the text. */
+
+.ow {
+  & .ss-stage {
+    --ow-bg: #f5e8d0;
+    --ow-ink: #5b4a32;
+    --ow-muted: #8a7858;
+    --ow-popover: #fbf3df;
+    --ow-shadow-card: 0 1px 3px rgba(60, 40, 20, 0.06), 0 1px 2px rgba(60, 40, 20, 0.04);
+    --ow-shadow-elevated: 0 8px 30px rgba(60, 40, 20, 0.1), 0 2px 8px rgba(60, 40, 20, 0.05);
+    --ow-sans: var(--font-geist-sans), Geist, ui-sans-serif, system-ui, sans-serif;
+    --ow-serif: var(--font-geist-serif-regular), "Times New Roman", Times, serif;
+
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--ow-bg);
+    color: var(--ow-ink);
+    font-family: var(--ow-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* .glass-subtle on sepia */
+  .ow-glass,
+  .ow-pill {
+    background: color-mix(in srgb, #ebdbb8 80%, transparent);
+    backdrop-filter: blur(20px) saturate(1.5);
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.07),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -0.5px 0 rgba(0, 0, 0, 0.05),
+      var(--ow-shadow-card);
+  }
+
+  .ow-top {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ow-round {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--ow-ink);
+  }
+
+  .ow-seg {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 999px;
+  }
+
+  .ow-seg__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--ow-ink) 60%, transparent);
+  }
+
+  .ow-seg__item[data-on="true"] {
+    background: var(--ow-popover);
+    box-shadow: 0 1px 2px rgba(60, 40, 20, 0.08);
+    color: var(--ow-ink);
+  }
+
+  .ow-pills {
+    position: absolute;
+    top: 72px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .ow-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+
+  .ow-pill[data-hover],
+  .ow-pill[data-open] {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.09),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.85),
+      var(--ow-shadow-elevated);
+  }
+
+  .ow-pill[data-pressed] {
+    transform: scale(0.97);
+  }
+
+  .ow-pill--muted {
+    color: color-mix(in srgb, var(--ow-ink) 75%, transparent);
+  }
+
+  .ow-pill__chev {
+    color: var(--ow-muted);
+    opacity: 0.8;
+  }
+
+  .ow-head {
+    position: absolute;
+    top: 134px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--ow-serif);
+  }
+
+  .ow-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 28.8px;
+    letter-spacing: -0.45px;
+  }
+
+  .ow-edition {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 19.2px;
+    color: var(--ow-muted);
+  }
+
+  .ow-text {
+    position: absolute;
+    top: 214px;
+    left: 40px;
+    right: 40px;
+    font-family: var(--ow-serif);
+    font-size: 18px;
+    line-height: 28.8px;
+    mask-image: linear-gradient(180deg, #000 calc(100% - 90px), transparent);
+    height: 240px;
+    overflow: hidden;
+  }
+
+  .ow-verse {
+    position: relative;
+    margin: 0 -2px;
+    padding: 0 2px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+  }
+
+  .ow-verse[data-selected] {
+    background: rgba(255, 215, 114, 0.42);
+  }
+
+  .ow-num {
+    margin-right: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6em;
+    color: color-mix(in srgb, var(--ow-muted) 60%, transparent);
+    vertical-align: 0.55em;
+    line-height: 0;
+  }
+
+  /* The verse menu: DropdownMenuContent, .glass on sepia, rounded-xl, p-1. */
+  .ow-menu {
+    --ss-popover-bg: color-mix(in srgb, var(--ow-popover) 88%, transparent);
+    --ss-popover-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), inset 0 0.5px 0 rgba(255, 255, 255, 0.9), var(--ow-shadow-elevated);
+    position: absolute;
+    z-index: 20;
+    width: 200px;
+    padding: 4px;
+    border-radius: 12px;
+    backdrop-filter: blur(28px) saturate(1.8);
+    font-family: var(--ow-sans);
+  }
+
+  .ow-dots {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 8px;
+  }
+
+  .ow-dotcell {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+  }
+
+  .ow-dot {
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .ow-dot[data-hot] {
+    transform: scale(1.2);
+  }
+
+  .ow-dot[data-active] {
+    box-shadow: 0 0 0 2px rgba(91, 74, 50, 0.2);
+  }
+
+  .ow-dot__x {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .ow-dot[data-active] .ow-dot__x {
+    opacity: 1;
+  }
+
+  .ow-sep {
+    height: 1px;
+    margin: 0 4px;
+    background: rgba(91, 74, 50, 0.06);
+  }
+
+  .ow-items {
+    padding: 2px 0;
+  }
+
+  .ow-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .ow-item svg {
+    color: var(--ow-muted);
+  }
+
+  & .ss-stage[data-layout="compact"] {
+    .ow-top { left: 12px; right: 12px; }
+    .ow-seg__item { padding: 0 11px; }
+    .ow-pills { top: 66px; gap: 6px; }
+    .ow-head { top: 126px; }
+    .ow-text { top: 204px; left: 22px; right: 22px; height: 340px; }
+  }
+}

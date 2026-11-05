@@ -19,7 +19,7 @@ Beyond design and craft, I'm learning Portuguese, and I thoroughly enjoy a match
 
 #### Elsewhere
 
-[cadeross.com](https://www.cadeross.com) · [Archive](https://www.cadeross.com/archive) · [X](https://x.com/cadeross) · [Telegram](https://t.me/cadeross) · [Email](mailto:cadeross33@gmail.com)
+[cadeross.com](https://www.cadeross.com) · [Archive](https://www.cadeross.com/archive) · [X](https://x.com/cadeross) · [Telegram](https://t.me/cadeross) · [Email](mailto:cade@cadeross.com)
 
 <br />
 

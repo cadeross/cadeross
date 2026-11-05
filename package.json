@@ -9,8 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@highlighters/core": "^2.0.0",
     "agentation": "^3.0.2",
     "agentation-mcp": "^1.2.0",
+    "geist": "^1.9.0",
+    "lucide-react": "^0.468.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -1,0 +1,225 @@
+/* The Anki import's two steps: the drop zone, then what comes across beside
+   CreateTicket (a 28pt grey panel, "In this file", the pile, the facts
+   between hairlines). */
+
+.ed-import {
+  .ed-import__body {
+    display: grid;
+    margin-top: 22px;
+  }
+
+  .ed-import__upload,
+  .ed-import__preview {
+    grid-area: 1 / 1;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ed-import__body[data-step="upload"] .ed-import__preview,
+  .ed-import__body[data-step="preview"] .ed-import__upload {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+
+  .ed-drop--anki {
+    height: 200px;
+    margin-top: 0;
+  }
+
+  .ed-drop__icon--tint {
+    background: color-mix(in srgb, var(--ed-accent) 10%, transparent);
+    color: var(--ed-accent-deep);
+  }
+
+  .ed-import__preview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 216px;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .ed-cover {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ed-cover__row {
+    display: flex;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ed-import__body[data-step="preview"] .ed-cover__row {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ed-cover__mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: #e2f7ec;
+    color: #248a3d;
+  }
+
+  .ed-cover__title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ed-cover__detail {
+    margin-top: 2px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--ed-text-2);
+  }
+
+  .ed-ticket {
+    padding: 18px;
+    border-radius: 28px;
+    background: var(--ed-secondary);
+  }
+
+  .ed-ticket__head {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ed-text-3);
+  }
+
+  .ed-pile {
+    position: relative;
+    width: 150px;
+    height: 104px;
+    margin: 22px auto 20px;
+  }
+
+  .ed-pile__under,
+  .ed-pile__top {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--ed-border);
+  }
+
+  .ed-pile__top {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 0 0 1px var(--ed-border), 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .ed-pile__count {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 14px 14px 0;
+  }
+
+  .ed-pile__count .ed-display {
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  .ed-pile__unit {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ed-text-2);
+  }
+
+  .ed-pile__bar {
+    height: 6px;
+    margin: 0 14px 14px;
+    border-radius: 999px;
+    background: #d1d1d6;
+  }
+
+  .ed-facts {
+    margin: 0;
+    border-top: 1px solid var(--ed-border);
+  }
+
+  .ed-fact {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ed-border);
+  }
+
+  .ed-fact:last-child {
+    border-bottom: 0;
+  }
+
+  .ed-fact dt {
+    font-size: 12px;
+    color: var(--ed-text-2);
+  }
+
+  .ed-fact dd {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ed-import__foot {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+  }
+
+  .ed-back {
+    padding: 6px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ed-text-2);
+  }
+
+  & .ss-stage[data-layout="compact"] {
+    .ed-import__preview {
+      grid-template-columns: minmax(0, 1fr) 150px;
+      gap: 14px;
+    }
+
+    .ed-ticket {
+      padding: 14px 12px;
+      border-radius: 22px;
+    }
+
+    .ed-pile {
+      width: 118px;
+      height: 84px;
+      margin: 16px auto 14px;
+    }
+
+    .ed-pile__count .ed-display {
+      font-size: 26px;
+    }
+
+    .ed-fact {
+      flex-direction: column;
+      gap: 0;
+      padding: 6px 0;
+    }
+
+    .ed-pill {
+      font-size: 13px;
+      padding: 0 14px;
+    }
+  }
+}

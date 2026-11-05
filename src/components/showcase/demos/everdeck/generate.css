@@ -1,0 +1,470 @@
+/* Everdeck's create flows (GeneratePageShell, CreatePageShell, the import
+   page) and BuildStatus: steps along the top, a Fraunces headline, a lead,
+   the dashed drop zone, a 50pt-style accent pill, the striped bar. */
+
+.ed-gen,
+.ed-import {
+  .ed-page {
+    position: absolute;
+    top: 26px;
+    left: 64px;
+    right: 64px;
+  }
+
+  .ed-steps {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .ed-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--ed-text-3);
+  }
+
+  .ed-step__dot {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--ed-border);
+    font-family: var(--ed-serif);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .ed-step[data-state="done"] .ed-step__dot {
+    background: #e2f7ec;
+    box-shadow: none;
+    color: #248a3d;
+  }
+
+  .ed-step[data-state="done"] {
+    color: var(--ed-text-2);
+  }
+
+  .ed-step[data-state="now"] {
+    color: var(--ed-text);
+  }
+
+  .ed-step[data-state="now"] .ed-step__dot {
+    background: var(--ed-text);
+    box-shadow: none;
+    color: #fff;
+  }
+
+  .ed-steps__close {
+    margin-left: auto;
+    color: var(--ed-text-2);
+  }
+
+  .ed-display {
+    margin: 0;
+    font-family: var(--ed-serif);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ed-text);
+  }
+
+  .ed-gen__head,
+  .ed-import__head {
+    display: block;
+    margin-top: 26px;
+  }
+
+  .ed-gen__head .ed-display,
+  .ed-import__head .ed-display {
+    font-size: 38px;
+    line-height: 1.1;
+  }
+
+  .ed-lead {
+    max-width: 520px;
+    margin: 12px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ed-text-2);
+  }
+
+  .ed-seg {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--ed-secondary);
+  }
+
+  .ed-seg__item {
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ed-text-2);
+  }
+
+  .ed-seg__item[data-on="true"] {
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    color: var(--ed-text);
+  }
+
+  /* The drop zone: dashed, a round icon, a title and its hints. */
+  .ed-drop {
+    position: relative;
+    display: grid;
+    margin-top: 16px;
+    height: 170px;
+    border-radius: 22px;
+    transition: background-color 0.2s ease;
+  }
+
+  .ed-drop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed var(--ed-border);
+    border-radius: inherit;
+    transition: border-color 0.2s ease;
+  }
+
+  .ed-drop[data-over] {
+    background: color-mix(in srgb, var(--ed-accent) 6%, transparent);
+  }
+
+  .ed-drop[data-over]::before {
+    border-color: var(--ed-accent);
+  }
+
+  .ed-drop__empty,
+  .ed-drop__file {
+    grid-area: 1 / 1;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ed-drop__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .ed-drop__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: var(--ed-secondary);
+    color: var(--ed-text-2);
+  }
+
+  .ed-drop__title {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .ed-drop__hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ed-text-3);
+  }
+
+  .ed-drop__anki {
+    margin-top: 6px;
+  }
+
+  .ed-drop__file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: center;
+    margin: 0 22px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--ed-border), 0 2px 8px rgba(0, 0, 0, 0.04);
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .ed-drop[data-full] .ed-drop__empty {
+    opacity: 0;
+  }
+
+  .ed-drop[data-full] .ed-drop__file {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ed-file__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #fde6ee;
+    color: #d9608a;
+  }
+
+  .ed-file__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ed-file__name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .ed-file__meta {
+    font-size: 12px;
+    color: var(--ed-text-3);
+  }
+
+  .ed-file__x {
+    color: var(--ed-text-3);
+  }
+
+  .ed-gen__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+  }
+
+  .ed-paste {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ed-text-2);
+  }
+
+  .ed-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: var(--ed-accent-deep);
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 600;
+    transition: opacity 0.25s ease, transform 0.15s ease;
+  }
+
+  .ed-pill[data-off] {
+    opacity: 0.4;
+  }
+
+  .ed-pill[data-pressed] {
+    transform: scale(0.97);
+  }
+
+  /* The two steps share the body; the one not showing fades out under. */
+  .ed-gen__body {
+    display: grid;
+    margin-top: 22px;
+  }
+
+  .ed-gen__materials,
+  .ed-gen__writing {
+    grid-area: 1 / 1;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ed-gen__body[data-step="materials"] .ed-gen__writing,
+  .ed-gen__body[data-step="writing"] .ed-gen__materials {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+
+  /* ---- BuildStatus ---- */
+
+  .ed-gen__writing {
+    padding-top: 12px;
+  }
+
+  .ed-build__line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .ed-build__what {
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .ed-build__pct {
+    flex: none;
+    font-size: 26px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ed-build__bar {
+    position: relative;
+  }
+
+  .ed-build__track {
+    height: 16px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--ed-secondary);
+  }
+
+  .ed-build__fill {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--ed-accent);
+    transition: width 1.2s cubic-bezier(0, 0, 0.58, 1);
+  }
+
+  .ed-build__stripes {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.22) 0 8px, transparent 8px 16px);
+    background-size: 22.6px 100%;
+    animation: ed-stripes 0.7s linear infinite;
+  }
+
+  .ed-build__pencil {
+    position: absolute;
+    top: 50%;
+    transition: left 1.2s cubic-bezier(0, 0, 0.58, 1);
+  }
+
+  .ed-build__pencil-in {
+    width: 58px;
+    margin: -30px 0 0 -52px;
+    transform: rotate(32deg);
+    transform-origin: 100% 100%;
+    animation: ed-scribble 0.5s ease-in-out infinite;
+  }
+
+  .ed-build__marks {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    margin-top: 18px;
+    padding: 0 6px;
+  }
+
+  .ed-build__mark {
+    display: block;
+    filter: grayscale(1);
+    opacity: 0.35;
+    transition: filter 0.3s ease, opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .ed-build__mark[data-state="done"] {
+    filter: none;
+    opacity: 1;
+  }
+
+  .ed-build__mark[data-state="now"] {
+    filter: none;
+    opacity: 1;
+    animation: ed-bob 1.2s ease-in-out infinite;
+  }
+
+  .ed-build__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--ed-text-3);
+  }
+
+  .ed-build__cancel {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 500;
+    color: var(--ed-text-2);
+    transition: background-color 0.15s ease;
+  }
+
+  .ed-build__cancel[data-hover] {
+    background: var(--ed-secondary);
+  }
+
+  /* A file held over the page, as macOS drags one. */
+  .ed-carry {
+    position: absolute;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    color: #d9608a;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-18px, -16px) rotate(-3deg);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .ed-carry span {
+    color: var(--ed-text);
+  }
+
+  .ed-carry[data-show] {
+    opacity: 1;
+  }
+
+  & .ss-stage[data-layout="compact"] {
+    .ed-page { left: 20px; right: 20px; top: 22px; }
+    .ed-steps { gap: 14px; font-size: 13px; }
+    .ed-step:not([data-state="now"]) { font-size: 0; gap: 0; }
+    .ed-gen__head .ed-display,
+    .ed-import__head .ed-display { font-size: 32px; }
+    .ed-lead { font-size: 14px; }
+    .ed-drop { height: 190px; }
+    .ed-drop__hint { padding: 0 18px; }
+  }
+}
+
+@keyframes ed-stripes {
+  from { background-position: 0 0; }
+  to { background-position: 22.6px 0; }
+}
+
+@keyframes ed-scribble {
+  0%, 100% { translate: 0 0; }
+  25% { translate: -2px -2px; }
+  50% { translate: 1px -1px; }
+  75% { translate: -1px 1px; }
+}
+
+@keyframes ed-bob {
+  50% { transform: translateY(-4px); }
+}

@@ -1,0 +1,455 @@
+/* The watercolor version. Everything here is scoped to
+   <html data-version="watercolor">; the light version is untouched.
+
+   The site sits on one sheet of cold-press paper (a tile lit by the
+   watercolor engine, laid as the page's background), the painting is
+   multiplied onto it, and the type is set in serifs: Instrument Serif for
+   display, Newsreader for reading. Wide screens give the right half to
+   the painting; narrower ones paint across the top of the page. */
+
+html[data-paint] {
+  --paper-base: #f4efe4;
+  --paper: #f4efe4;
+  --ink: #2a2622;
+  --ink-soft: #5d564d;
+  --muted: #8e867a;
+  --faint: #c6bdae;
+  --rule: rgb(42 38 34 / 0.15);
+  --font-sans: var(--font-newsreader), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-mono: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+  --font-display: var(--font-instrument), var(--font-newsreader), Georgia, serif;
+  --text-body: min(calc(0.38vw + 1.06rem), 1.56rem);
+  --text-h1: calc(var(--text-body) * 1.62);
+  --gutter-right: var(--gutter);
+  --wc-band: 58svh;
+  background: var(--paper-base);
+  font-family: var(--font-sans);
+}
+
+@media (min-width: 64rem) {
+  html[data-version="watercolor"] {
+    --gutter: max(3.5rem, calc((50vw - 38rem) / 2));
+    --gutter-right: calc(50vw + 3rem);
+  }
+}
+
+html[data-paint] body {
+  background: var(--paper-base) var(--wc-paper, none) 0 0 / 512px 512px repeat;
+  font-weight: 400;
+  line-height: 1.44;
+  letter-spacing: 0;
+  font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+  font-optical-sizing: auto;
+}
+
+@media (min-width: 64rem) {
+  html[data-version="watercolor"] body {
+    background-attachment: fixed;
+  }
+}
+
+html[data-paint] ::selection {
+  background: color-mix(in oklab, var(--f2) 55%, var(--paper-base));
+  color: var(--ink);
+}
+
+/* ─── The painting ───────────────────────────────────────────────────── */
+
+html[data-paint] .field-panel {
+  display: none !important;
+}
+
+.wc {
+  display: none;
+}
+
+html[data-paint] .wc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: var(--wc-band);
+  pointer-events: none;
+  user-select: none;
+  /* Paint is subtractive: the canvas multiplies onto the paper, so the
+     tooth shows through every wash. */
+  mix-blend-mode: multiply;
+}
+
+@media (min-width: 64rem) {
+  html[data-version="watercolor"] .wc {
+    position: fixed;
+    height: 100lvh;
+  }
+}
+
+.wc-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.wc-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* No WebGL2: a still, soft wash in the live palette. */
+.wc[data-fallback] .wc-canvas {
+  display: none;
+}
+
+html[data-paint] .wc[data-fallback] {
+  background:
+    radial-gradient(60% 40% at 70% 22%, color-mix(in srgb, var(--f0) 80%, transparent), transparent 70%),
+    radial-gradient(55% 35% at 78% 50%, color-mix(in srgb, var(--f1) 70%, transparent), transparent 70%),
+    radial-gradient(50% 32% at 72% 72%, color-mix(in srgb, var(--f2) 60%, transparent), transparent 72%),
+    radial-gradient(50% 28% at 80% 90%, color-mix(in srgb, var(--f3) 70%, transparent), transparent 72%);
+}
+
+/* ─── Page column ────────────────────────────────────────────────────── */
+
+html[data-paint] .page {
+  z-index: 1;
+}
+
+/* The painting as a plate across the top: the watercolor on narrow
+   screens, the Monet pond everywhere. The page starts under it. */
+@media (max-width: 63.99rem) {
+  html[data-version="watercolor"] .page {
+    padding-top: calc(var(--wc-band) - 4rem);
+  }
+
+  html[data-version="watercolor"] .hero {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 2rem;
+  }
+
+  html[data-version="watercolor"] .case-head {
+    padding-top: 0;
+  }
+}
+
+html[data-version="monet"] .page {
+  padding-top: calc(var(--wc-band) + 1.5rem);
+}
+
+html[data-version="monet"] .hero {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 2rem;
+}
+
+html[data-version="monet"] .case-head {
+  padding-top: 0;
+}
+
+/* A centred reading column under the plate. */
+html[data-version="monet"] {
+  /* The plate: a wide view, about 2.6 : 1 (1.6 : 1 on phones), at most
+     1040px wide, plus the header. Matches layoutFor in Watercolor.tsx. */
+  --wc-band: calc(min(84vw, 1040px) / 2.6 + 7rem);
+}
+
+@media (max-width: 39.99rem) {
+  html[data-version="monet"] {
+    --wc-band: calc(90vw / 1.6 + 6.25rem);
+  }
+}
+
+/* The scene's living layer sits exactly over the painting. */
+.wc-life {
+  display: none;
+}
+
+html[data-version="monet"] .wc-life {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: var(--wc-band);
+  pointer-events: none;
+}
+
+html.wc-pointing body {
+  cursor: pointer;
+}
+
+html[data-version="monet"] .page {
+  padding-top: calc(var(--wc-band) + 1.5rem);
+}
+
+html[data-version="monet"] .hero {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 2rem;
+}
+
+html[data-version="monet"] .case-head {
+  padding-top: 0;
+}
+
+/* A centred reading column under the plate. */
+html[data-version="monet"] {
+  /* The plate: about 2.15 : 1 (1.45 : 1 on phones), at most 1000px wide,
+     plus the header. Matches layoutFor in Watercolor.tsx. */
+  --wc-band: calc(min(84vw, 1000px) / 2.15 + 7rem);
+}
+
+@media (max-width: 39.99rem) {
+  html[data-version="monet"] {
+    --wc-band: calc(90vw / 1.45 + 6.25rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  html[data-version="monet"] {
+    --wc-band: calc(min(80vw, 1040px, 56svh * 2.6) / 2.6 + 7.25rem);
+    --gutter: max(4rem, calc((100vw - 47.6rem) / 2));
+    --gutter-right: var(--gutter);
+  }
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────── */
+
+html[data-paint] .site-header-fade {
+  background: var(--paper-base) var(--wc-paper, none) 0 0 / 512px 512px repeat;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, rgb(0 0 0 / 0.85) 66%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 50%, rgb(0 0 0 / 0.85) 66%, transparent 100%);
+}
+
+@media (min-width: 64rem) {
+  html[data-version="watercolor"] .site-header-fade {
+    right: auto;
+    width: 50vw;
+    background-attachment: fixed;
+  }
+}
+
+html[data-paint] .wordmark {
+  gap: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+html[data-paint] .wordmark-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+html[data-paint] .wordmark-mark line {
+  stroke-width: 2.2;
+}
+
+html[data-paint] .crumb {
+  font-style: italic;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+/* ─── Type ───────────────────────────────────────────────────────────── */
+
+html[data-paint] .hero-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.006em;
+}
+
+html[data-paint] .intro-name {
+  font-style: italic;
+}
+
+html[data-paint] .intro-chip {
+  text-decoration-thickness: 0.035em;
+  text-underline-offset: 0.14em;
+}
+
+html[data-paint] .label,
+html[data-paint] .next-label {
+  font-style: italic;
+  color: var(--muted);
+}
+
+html[data-paint] .row-title {
+  font-family: var(--font-display);
+  font-size: 1.32em;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+html[data-paint] .row-year {
+  font-style: italic;
+}
+
+html[data-paint] .row-blurb {
+  margin-top: 0.3rem;
+}
+
+html[data-paint] .steps-n {
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+html[data-paint] .contact-title {
+  font-family: var(--font-display);
+  font-size: 2.3em;
+  line-height: 1;
+}
+
+html[data-paint] .case-title {
+  font-family: var(--font-display);
+  font-size: calc(var(--text-body) * 3);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+}
+
+html[data-paint] .case-meta,
+html[data-paint] .peek-note,
+html[data-paint] .lost .label {
+  font-style: italic;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+html[data-paint] .lost-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+html[data-paint] .site-footer {
+  font-size: 1rem;
+}
+
+html[data-paint] .site-footer-id > span:first-child {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+html[data-paint] .site-footer-id > span + span {
+  font-style: italic;
+}
+
+/* An outlined button, filled with ink on hover. */
+html[data-paint] .button {
+  padding: 0.55em 1.15em 0.6em;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0;
+  box-shadow: none;
+  transition: transform 0.16s var(--ease-out), background-color 0.25s ease, color 0.25s ease;
+}
+
+html[data-paint] .button:hover {
+  background: var(--ink);
+  color: var(--paper-base);
+  box-shadow: none;
+}
+
+/* ─── Swatches and tiles as little paintings ─────────────────────────── */
+
+/* The swatch beside a project's name: a dab of its colours with a ragged
+   edge, multiplied onto the paper. */
+html[data-paint] .intro-swatch {
+  border-radius: 46% 54% 50% 50% / 55% 45% 55% 45%;
+  background: radial-gradient(120% 120% at 30% 25%, var(--t0) 0%, var(--t1) 35%, var(--t2) 75%, var(--t3) 110%);
+  box-shadow: inset 0 0 0 0.06em color-mix(in oklab, var(--t2) 70%, transparent);
+  filter: url(#wc-edge);
+  mix-blend-mode: multiply;
+}
+
+html[data-paint] .intro-chip:hover .intro-swatch,
+html[data-paint] .intro-chip[data-active] .intro-swatch {
+  box-shadow: inset 0 0 0 0.06em color-mix(in oklab, var(--t2) 70%, transparent);
+}
+
+html[data-paint] .tile {
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  isolation: auto;
+}
+
+html[data-paint] .tile::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: 0;
+  border-radius: 12px 9px 14px 8px / 9px 13px 8px 12px;
+  background:
+    radial-gradient(90% 70% at 25% 15%, color-mix(in oklab, var(--t0) 90%, transparent), transparent 70%),
+    linear-gradient(168deg, var(--t0) 0%, var(--t1) 36%, var(--t2) 74%, var(--t3) 104%);
+  /* A darker rim where the pigment pooled as it dried. */
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, var(--t2) 55%, transparent),
+    inset 0 0 12px -2px color-mix(in oklab, var(--t2) 45%, transparent);
+  opacity: 0.92;
+  filter: url(#wc-edge);
+  mix-blend-mode: multiply;
+}
+
+html[data-paint] .tile-grain {
+  display: none;
+}
+
+html[data-paint] .tile-shot {
+  box-shadow: 0 0 0 0.5px rgb(40 30 20 / 0.1), 0 2px 4px rgb(40 30 20 / 0.08), 0 12px 26px -8px rgb(40 30 20 / 0.28);
+}
+
+html[data-paint] .tile[data-size="lg"] {
+  box-shadow: none;
+}
+
+html[data-paint] .tile[data-size="lg"]::before {
+  inset: 4px;
+  border-radius: 16px 12px 18px 11px / 12px 17px 11px 16px;
+}
+
+html[data-paint] .tile-initial {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0;
+}
+
+html[data-paint] .to-top-swatch {
+  border-radius: 46% 54% 50% 50% / 55% 45% 55% 45%;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--f2) 60%, transparent);
+  mix-blend-mode: multiply;
+}
+
+html[data-paint] .notice {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--paper-base) 55%, transparent);
+}
+
+html[data-paint] .copy-email-address {
+  font-family: var(--font-display);
+  font-size: 1.25em;
+}
+
+/* Figures on project pages: the plate becomes a pale wash on the paper. */
+html[data-paint] .sc-plate {
+  mix-blend-mode: multiply;
+}
+
+/* ─── Switches ───────────────────────────────────────────────────────── */
+
+html[data-paint] .layout-switch {
+  font-size: 0.8125rem;
+  font-style: italic;
+  letter-spacing: 0;
+  background: color-mix(in srgb, var(--paper-base) 80%, transparent);
+}

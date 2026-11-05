@@ -1,0 +1,56 @@
+/* Close-up: the foot of Harbor's panel at 1.5x, its last folder row cut by
+   the top of the stage, the panel's bottom edge whole. */
+
+.hb-awake-demo {
+  .hb-zoom {
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    width: 360px;
+    transform: translateX(-50%) scale(1.5);
+    transform-origin: 50% 100%;
+  }
+
+  .hb-zoom__panel {
+    position: relative;
+    padding-top: 12px;
+  }
+
+  .hb-awake__icon {
+    position: relative;
+  }
+
+  .hb-awake__moon,
+  .hb-awake__bino {
+    position: absolute;
+    transition: opacity 0.2s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .hb-awake__bino {
+    color: var(--mac-orange);
+    opacity: 0;
+    transform: scale(0.5) rotate(-20deg);
+  }
+
+  .hb-awake__icon[data-on="true"] .hb-awake__moon {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .hb-awake__icon[data-on="true"] .hb-awake__bino {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hb-awake__line {
+    display: block;
+  }
+
+  .hb-awake__line[data-tint] {
+    color: #4aa3ff;
+  }
+
+  & .ss-stage[data-layout="compact"] .hb-zoom {
+    transform: translateX(-50%) scale(1.04);
+  }
+}

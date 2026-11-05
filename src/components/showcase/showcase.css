@@ -1,0 +1,183 @@
+/* Figures on the project pages: a plate, the media, a caption with the speed
+   switch. After benji.org's article figures. The plate is a pale wash of the
+   field's live colours, so every figure sits in its project's light. */
+
+.sc-figure {
+  --sc-muted: var(--muted, #8a8983);
+  --sc-text: var(--ink, #1a1b18);
+  margin: 2rem 0 0;
+}
+
+.sc-plate {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in oklab, var(--f0, #ddd) 42%, var(--paper, #f4f3f0)) 0%,
+      color-mix(in oklab, var(--f1, #ddd) 34%, var(--paper, #f4f3f0)) 55%,
+      color-mix(in oklab, var(--f3, #ddd) 30%, var(--paper, #f4f3f0)) 100%
+    );
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.045);
+  isolation: isolate;
+}
+
+.sc-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.045);
+  pointer-events: none;
+}
+
+/* Videos and images sit inside the plate with air around them. */
+.sc-figure:is([data-kind="video"], [data-kind="image"]) .sc-plate:not([data-placeholder]) {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 3.75rem;
+}
+
+.sc-video,
+.sc-image {
+  display: block;
+  width: 100%;
+  max-width: 28.5rem;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06), 0 24px 48px -16px rgba(0, 0, 0, 0.28);
+}
+
+/* A live demo is the plate: the stage fills it edge to edge. The aspect holds
+   the space until the scene has loaded on the client. */
+.sc-stage {
+  aspect-ratio: var(--sc-aspect);
+}
+
+.sc-stage:has(.ss-fit) {
+  aspect-ratio: auto;
+}
+
+.sc-stage .ss-fit {
+  display: block;
+}
+
+.sc-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  padding: 2rem;
+  text-align: center;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--sc-muted);
+}
+
+.sc-plate[data-placeholder] {
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed var(--rule, rgba(0, 0, 0, 0.14));
+}
+
+.sc-plate[data-placeholder]::after {
+  display: none;
+}
+
+.sc-caption {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  color: var(--sc-muted);
+}
+
+.sc-speed {
+  position: relative;
+  flex: none;
+  width: 2.25rem;
+  height: 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sc-muted);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.sc-speed span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sc-speed span[data-active="true"] {
+  opacity: 1;
+}
+
+.sc-speed:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--sc-text);
+}
+
+.sc-speed:active {
+  transform: scale(0.94);
+}
+
+.sc-speed:focus-visible {
+  outline: 1px solid var(--sc-muted);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .sc-figure:is([data-kind="video"], [data-kind="image"]) .sc-plate:not([data-placeholder]) {
+    padding: 1.5rem;
+  }
+}
+
+/* Phones: figures run edge to edge, so a demo's phone layout (390 wide) shows
+   at its real size, and images get the full width too. */
+@media (max-width: 640px) {
+  .sc-figure {
+    margin-inline: calc(-1 * var(--gutter, 1rem));
+  }
+
+  .sc-plate {
+    border-radius: 0;
+  }
+
+  .sc-plate::after {
+    border-radius: 0;
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .sc-stage {
+    aspect-ratio: var(--sc-aspect-compact, var(--sc-aspect));
+  }
+
+  .sc-figure .ss-stage {
+    border-radius: 0 !important;
+  }
+
+  .sc-caption {
+    padding-inline: var(--gutter, 1rem);
+  }
+
+  .sc-video,
+  .sc-image {
+    max-width: none;
+  }
+}

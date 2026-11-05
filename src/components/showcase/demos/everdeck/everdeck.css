@@ -1,0 +1,405 @@
+/* Everdeck, light theme, from its globals.css, landing.css and study
+   components: Open Runde for everything, Fraunces for the wordmark and big
+   figures, ink on white, hairlines, the Ocean tint for the main action. */
+
+.ed {
+  & .ss-stage {
+    --ed-canvas: #ffffff;
+    --ed-secondary: #f5f5f7;
+    --ed-elevated: #fafafa;
+    --ed-text: #1d1d1f;
+    --ed-text-2: #6e6e73;
+    --ed-text-3: #8e8e93;
+    --ed-border: #e5e5ea;
+    --ed-border-subtle: #f5f5f5;
+    --ed-accent: #3a98b9;
+    --ed-accent-deep: #2a7c9a;
+    --ed-again: #ff3b30;
+    --ed-hard: #b25000;
+    --ed-good: #248a3d;
+    --ed-easy: #007aff;
+    --ed-sans: var(--font-open-runde), ui-rounded, -apple-system, BlinkMacSystemFont, sans-serif;
+    --ed-serif: var(--font-fraunces), Georgia, serif;
+
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--ed-canvas);
+    color: var(--ed-text);
+    font-family: var(--ed-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ed-key {
+    display: inline-grid;
+    place-items: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px var(--ed-border);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ed-text-3);
+  }
+
+  .ed-key--word {
+    height: 18px;
+    padding: 0 6px;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* ---- Study screen ---- */
+
+.ed-review {
+  .ed-segbar {
+    position: absolute;
+    inset: 0 0 auto;
+    display: flex;
+    gap: 3px;
+    height: 3px;
+  }
+
+  .ed-segbar > span {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ed-segbar__now {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: #2f80ed;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ed-bar {
+    position: absolute;
+    top: 14px;
+    left: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .ed-wordmark {
+    font-family: var(--ed-serif);
+    font-size: 17px;
+    font-weight: 600;
+    color: #c7c7cc;
+  }
+
+  .ed-slash {
+    color: #d1d1d6;
+  }
+
+  .ed-deck {
+    font-weight: 600;
+  }
+
+  .ed-of {
+    margin-left: -4px;
+    color: var(--ed-text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ed-bar__right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: auto;
+    color: var(--ed-text-2);
+  }
+
+  .ed-timer {
+    margin-right: 6px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ed-text-3);
+  }
+
+  .ed-combo {
+    position: absolute;
+    top: 62px;
+    right: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ed-text-2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .ed-combo[data-show] {
+    opacity: 1;
+  }
+
+  .ed-cards {
+    position: absolute;
+    top: 96px;
+    left: 0;
+    right: 0;
+    height: 260px;
+  }
+
+  .ed-card {
+    position: absolute;
+    top: 0;
+    left: 80px;
+    width: 560px;
+    will-change: transform;
+    transition:
+      transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.12s,
+      opacity 0.3s ease 0.12s;
+  }
+
+  .ed-card[data-pos="left"] {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition-delay: 0s;
+    transition-duration: 0.3s, 0.16s;
+  }
+
+  .ed-card[data-pos="right"] {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  .ed-label {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ed-text-3);
+  }
+
+  .ed-q {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.625;
+  }
+
+  .ed-a {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.625;
+  }
+
+  .ed-a--extra {
+    color: var(--ed-text-2);
+  }
+
+  /* The rule draws in from the left (my-8 h-px bg-canvas-secondary). */
+  .ed-rule {
+    display: block;
+    height: 1px;
+    margin: 24px 0;
+    background: var(--ed-border);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+  }
+
+  .ed-answer .ed-label,
+  .ed-answer .ed-a,
+  .ed-extra .ed-a {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease 0.25s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.25s;
+  }
+
+  .ed-answer[data-show] .ed-rule,
+  .ed-extra[data-show] .ed-rule {
+    transform: none;
+  }
+
+  .ed-answer[data-show] .ed-label,
+  .ed-answer[data-show] .ed-a,
+  .ed-extra[data-show] .ed-a {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Cloze: the blank waits in the tint; the answer lands in it and washes. */
+  .ed-cloze-blank {
+    display: inline-block;
+    padding: 0.05em 0.45em;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--ed-accent) 12%, transparent);
+    color: var(--ed-accent);
+    font-weight: 600;
+    animation: ed-cloze-wait 2.6s ease-in-out infinite;
+  }
+
+  .ed-cloze {
+    border-radius: 6px;
+    color: var(--ed-accent);
+    font-weight: 600;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    animation: ed-cloze-wash 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ---- Answer controls ---- */
+
+  .ed-controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 64px;
+    display: grid;
+    justify-items: center;
+    height: 80px;
+  }
+
+  .ed-show,
+  .ed-rate {
+    grid-area: 1 / 1;
+    align-self: end;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ed-show[data-show],
+  .ed-rate[data-show] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ed-show {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ed-text-3);
+  }
+
+  .ed-rate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ed-answers {
+    display: grid;
+    grid-template-columns: repeat(4, 72px);
+  }
+
+  .ed-ans {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px;
+    border-radius: 8px;
+    opacity: 0.8;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .ed-ans[data-hover] { opacity: 1; }
+  .ed-ans[data-pressed] { opacity: 1; transform: scale(0.97); }
+
+  .ed-ans__label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .ed-ans[data-tone="again"] .ed-ans__label { color: var(--ed-again); }
+  .ed-ans[data-tone="hard"] .ed-ans__label { color: var(--ed-hard); }
+  .ed-ans[data-tone="good"] .ed-ans__label { color: var(--ed-good); }
+  .ed-ans[data-tone="easy"] .ed-ans__label { color: var(--ed-easy); }
+
+  .ed-ans__when {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ed-text-3);
+  }
+
+  .ed-examnote {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ed-text-3);
+  }
+
+  /* ---- Quick asks along the bottom ---- */
+
+  .ed-asks {
+    position: absolute;
+    left: 20px;
+    right: 24px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--ed-text-2);
+  }
+
+  .ed-asks__tools {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    color: var(--ed-text-2);
+  }
+
+  .ed-asks__chips {
+    display: flex;
+    gap: 6px;
+  }
+
+  .ed-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 11px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--ed-border);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ed-text-2);
+    white-space: nowrap;
+  }
+
+  .ed-asks__ask {
+    white-space: nowrap;
+    font-size: 13px;
+    color: var(--ed-text-3);
+  }
+
+  /* Phones get the same screen, one column wide, with Explain only. */
+  & .ss-stage[data-layout="compact"] {
+    .ed-bar { left: 16px; right: 16px; }
+    .ed-bar__right { gap: 16px; }
+    .ed-bar__right svg:nth-of-type(2) { display: none; }
+    .ed-combo { right: 16px; }
+    .ed-cards { top: 92px; }
+    .ed-card { left: 20px; width: 350px; }
+    .ed-q { font-size: 19px; }
+    .ed-a { font-size: 16px; }
+    .ed-controls { bottom: 62px; }
+    .ed-answers { grid-template-columns: repeat(4, 80px); }
+    .ed-asks { left: 0; right: 0; justify-content: center; }
+  }
+}
+
+@keyframes ed-cloze-wait {
+  50% { background-color: color-mix(in srgb, #3a98b9 20%, transparent); }
+}
+
+@keyframes ed-cloze-wash {
+  from { opacity: 0; filter: blur(4px); background-color: color-mix(in srgb, #3a98b9 26%, transparent); }
+  35% { opacity: 1; filter: blur(0); background-color: color-mix(in srgb, #3a98b9 26%, transparent); }
+  to { background-color: transparent; }
+}

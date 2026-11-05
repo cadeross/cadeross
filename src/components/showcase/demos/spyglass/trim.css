@@ -1,0 +1,127 @@
+/* The review window alone on the desktop, and AVKit's trim bar over its
+   player: a filmstrip in a yellow frame with handles, Cancel and Trim. */
+
+.sg-trim-demo {
+  .sg-review {
+    top: 30px;
+  }
+
+  .sg-trimbar {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(30, 30, 32, 0.82);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.15), 0 8px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .sg-trimbar[data-show] {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .sg-trimbar__strip {
+    position: relative;
+    display: flex;
+    width: 300px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+
+  .sg-trimbar__frame {
+    flex: 1;
+    background:
+      linear-gradient(180deg, transparent 0 22%, rgba(91, 74, 50, 0.22) 22% 26%, transparent 26% 40%, rgba(91, 74, 50, 0.16) 40% 43%, transparent 43% 56%, rgba(91, 74, 50, 0.16) 56% 59%, transparent 59%),
+      #f5e8d0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.15);
+  }
+
+  .sg-trimbar__dim {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .sg-trimbar__sel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border: 3px solid #ffcc00;
+    border-inline-width: 10px;
+    border-radius: 6px;
+  }
+
+  .sg-trimbar__handle {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 10px;
+  }
+
+  .sg-trimbar__handle::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 3.5px;
+    width: 3px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .sg-trimbar__handle--l { left: -10px; }
+  .sg-trimbar__handle--r { right: -10px; }
+
+  .sg-trimbar__btn {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    padding: 0 12px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .sg-trimbar__btn--ok {
+    background: var(--sg-blue);
+    font-weight: 600;
+  }
+
+  .sg-trimbar__btn--ok[data-pressed] {
+    filter: brightness(0.92);
+  }
+
+  .sg-trim-busy {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .sg-trim-busy .ss-spinner {
+    width: 28px;
+    height: 28px;
+    color: #fff;
+  }
+
+  & .ss-stage[data-layout="compact"] .sg-review {
+    left: 15px;
+    top: 30px;
+    zoom: 0.6923;
+  }
+}
