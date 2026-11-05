@@ -88,7 +88,7 @@ function layoutFor(canvas: HTMLCanvasElement, mode: PaintMode) {
   const h = canvas.clientHeight;
   const wide = window.matchMedia("(min-width: 64rem)").matches;
   if (mode === "scene") {
-    // A wide, low plate at the top of the page, under the wordmark: a view
+    // A wide, low plate at the top of the page, under the header: a view
     // across a valley rather than a close-up. Taller on phones so the
     // scene still reads. Matches --wc-band in watercolor.css.
     const top = wide ? 100 : 82;

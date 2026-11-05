@@ -230,20 +230,12 @@ html[data-paint] .site-header-fade {
   }
 }
 
-html[data-paint] .wordmark {
-  gap: 0.6rem;
+html[data-paint] .home-link {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
   font-weight: 400;
   letter-spacing: 0;
-}
-
-html[data-paint] .wordmark-name {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
   line-height: 1;
-}
-
-html[data-paint] .wordmark-mark line {
-  stroke-width: 2.2;
 }
 
 html[data-paint] .crumb {

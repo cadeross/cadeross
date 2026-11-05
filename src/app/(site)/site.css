@@ -636,39 +636,23 @@ html[data-paint] .layout-switch-layout {
   animation: fade-in 0.8s ease 0.05s both;
 }
 
-.wordmark {
+/* Back home, on every page but the homepage. */
+.home-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.4rem;
   pointer-events: auto;
-  font-weight: 520;
-  letter-spacing: -0.025em;
+  font-weight: 480;
+  letter-spacing: -0.02em;
 }
 
-.wordmark-spin {
-  display: block;
-  transition: transform 0.7s var(--ease-out);
+.home-link-arrow {
+  display: inline-block;
+  transition: transform 0.35s var(--ease-out);
 }
 
-.wordmark:hover .wordmark-spin {
-  transform: rotate(60deg);
-}
-
-.wordmark:active .wordmark-spin {
-  transform: rotate(60deg) scale(0.88);
-  transition-duration: 0.2s;
-}
-
-.wordmark-mark {
-  width: 1.05rem;
-  height: 1.05rem;
-  overflow: visible;
-}
-
-.wordmark-mark line {
-  stroke: var(--ink);
-  stroke-width: 2.7;
-  stroke-linecap: round;
+.home-link:hover .home-link-arrow {
+  transform: translateX(-3px);
 }
 
 .crumb {
@@ -1646,7 +1630,7 @@ html[data-paint] .layout-switch-layout {
   .tile-initial,
   .tile-mark,
   .row-arrow,
-  .wordmark-spin,
+  .home-link-arrow,
   .crumb,
   .copy-icon,
   .copy-icon-tick path,
