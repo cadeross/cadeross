@@ -1,3 +1,4 @@
+import { composeEverdeck, composeOpenWrit } from "./productScenes";
 import {
   rng,
   type Composition,
@@ -39,8 +40,20 @@ export type SceneFeatures = {
   pond: { x: number; y: number; rx: number; ry: number };
   perches: [number, number][];
   horizon: number;
-  /* Where the rabbit sits, under the near bush. */
-  rabbit: [number, number];
+  /* Where the rabbit sits, under the near bush (none on the project
+     pages' scenes). */
+  rabbit: [number, number] | null;
+  /* What drifts through the air: snow (the default), petals, or nothing
+     indoors. */
+  fall?: "snow" | "petals" | "none";
+  /* What rises from the chimney point: smoke (the default), a mug's
+     steam, or nothing. */
+  smoke?: "chimney" | "steam" | "none";
+  /* Where the stars and moon can be, if not the whole sky above the
+     horizon (the window, indoors). */
+  sky?: Region;
+  /* The colour of what a shaken tree lets fall, if not snow. */
+  grain?: [number, number, number];
 };
 
 export type Scene = Composition & { features: SceneFeatures };
@@ -521,4 +534,12 @@ export function composeScene(region: Region, seed: number, delay = 0): Scene {
     length: t - delay,
     features: { sun, cabin, trees, pond, perches, horizon: hz, rabbit: [bushX - 16 * u * dir, bushY + 3 * u] },
   };
+}
+
+/* The painting for a page: the project pages get their own scenes, every
+   other page the valley. */
+export function composeFor(pathname: string, region: Region, seed: number, delay = 0): Scene {
+  if (pathname.startsWith("/work/everdeck")) return composeEverdeck(region, seed, delay);
+  if (pathname.startsWith("/work/openwrit")) return composeOpenWrit(region, seed, delay);
+  return composeScene(region, seed, delay);
 }

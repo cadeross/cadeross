@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CaseStudy from "@/components/site/CaseStudy";
-import { getWorkItem, workItems } from "@/lib/portfolio";
+import { getWorkItem, showcaseItems } from "@/lib/portfolio";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 export function generateStaticParams() {
-  return workItems.map((item) => ({ slug: item.slug }));
+  return showcaseItems.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -32,8 +32,8 @@ export default async function WorkPage({ params }: Props) {
 
   if (!item) notFound();
 
-  const index = workItems.indexOf(item);
-  const next = workItems[(index + 1) % workItems.length];
+  const index = showcaseItems.indexOf(item);
+  const next = showcaseItems[(index + 1) % showcaseItems.length];
 
   return (
     <CaseStudy

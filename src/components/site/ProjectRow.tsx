@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { Thumb } from "@/lib/portfolio";
+import Emblem, { hasEmblem } from "./Emblems";
 import { FieldHover } from "./FieldVoice";
 import { PALETTES, type PaletteKey } from "./palettes";
 
@@ -70,8 +71,10 @@ export default function ProjectRow({
   return (
     <li data-reveal data-field={palette}>
       <FieldHover palette={palette} className="row-hover">
-        <Link href={href} className="row">
+        <Link href={href} className="row" data-emblem={hasEmblem(palette) || undefined}>
           <Tile palette={palette} thumb={thumb} title={title} />
+          {/* Handwritten mode paints the project's own mark instead. */}
+          <Emblem palette={palette} />
           <span className="row-text">
             <span className="row-head">
               <span className="row-title">{title}</span>

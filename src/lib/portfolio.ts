@@ -477,8 +477,15 @@ export function getApp(slug: string) {
   return app;
 }
 
+/* The projects with a page of their own. Everything else (client work
+   and the Mac apps) is mentioned on the homepage with a link out; their
+   old pages redirect there (next.config.ts). The entries above stay as a
+   record but aren't shown. */
+const SHOWCASE = ["everdeck", "openwrit"];
+export const showcaseItems = workItems.filter((item) => SHOWCASE.includes(item.slug));
+
 export function getWorkItem(slug: string) {
-  return workItems.find((item) => item.slug === slug);
+  return showcaseItems.find((item) => item.slug === slug);
 }
 
 export function sectionId(heading: string) {

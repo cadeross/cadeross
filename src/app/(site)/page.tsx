@@ -5,9 +5,9 @@ import HeroFade from "@/components/site/HeroFade";
 import HeroIntro, { type HeroProject } from "@/components/site/HeroIntro";
 import LetterClose from "@/components/site/LetterClose";
 import ProjectRow, { Tile } from "@/components/site/ProjectRow";
-import { EMAIL, explorations, workItems } from "@/lib/portfolio";
+import { EMAIL, showcaseItems } from "@/lib/portfolio";
 
-const work = (slug: string) => workItems.find((w) => w.slug === slug)!;
+const work = (slug: string) => showcaseItems.find((w) => w.slug === slug)!;
 
 const project = (
   item: {
@@ -142,7 +142,7 @@ export default function Home() {
           Selected work
         </h2>
         <ul className="rows">
-          {workItems.map((item) => (
+          {showcaseItems.map((item) => (
             <ProjectRow
               key={item.slug}
               href={`/work/${item.slug}`}
@@ -154,30 +154,22 @@ export default function Home() {
             />
           ))}
         </ul>
-      </section>
-
-      <section
-        id="explorations"
-        className="block"
-        aria-labelledby="explorations-label"
-        data-tick="Explorations"
-      >
-        <h2 id="explorations-label" className="label" data-reveal>
-          Explorations
-        </h2>
-        <ul className="rows">
-          {explorations.map((item) => (
-            <ProjectRow
-              key={item.title}
-              href={item.href}
-              title={item.title}
-              year={item.year}
-              blurb={item.blurb}
-              palette={item.palette}
-              thumb={item.thumb}
-            />
-          ))}
-        </ul>
+        {/* The rest of the work, in passing, with links out. */}
+        <p className="work-also" data-reveal>
+          Along the way I&apos;ve done platform and web design for{" "}
+          <External href="https://www.baylor.edu">Baylor University</External>{" "}
+          and brand design with the{" "}
+          <External href="https://solana.com">Solana</External> team, both
+          through Vlyss, and made two small Mac apps that are free and open
+          source:{" "}
+          <External href="https://github.com/cadeross/Harbor">Harbor</External>,
+          which keeps project folders and localhost servers in check, and{" "}
+          <External href="https://github.com/cadeross/Spyglass">
+            Spyglass
+          </External>
+          , which records your screen and camera and puts the video on your
+          clipboard.
+        </p>
       </section>
 
       <section
@@ -221,7 +213,18 @@ export default function Home() {
         <h2 id="elsewhere-label" className="label" data-reveal>
           Elsewhere
         </h2>
-        <ul className="grid-list">
+        {/* Handwritten: the same places, said in a sentence. */}
+        <p className="elsewhere-line" data-reveal data-hand-only>
+          You can also find me on{" "}
+          <External href="https://t.me/cadeross">Telegram</External>,{" "}
+          <External href="https://github.com/cadeross">GitHub</External> and{" "}
+          <span className="placeholder">LinkedIn [url]</span>, read my{" "}
+          <span className="placeholder">resume [PDF link]</span>, or try{" "}
+          <External href="https://www.geteverdeck.com">Everdeck</External> and{" "}
+          <External href="https://openwrit.com">OpenWrit</External> for
+          yourself.
+        </p>
+        <ul className="grid-list" data-set-only>
           {ELSEWHERE.map((item) => (
             <li key={item.label} data-reveal>
               {item.href ? (

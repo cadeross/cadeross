@@ -33,11 +33,13 @@ export default function Reveal() {
         a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
       );
       pending.clear();
+      // Handwritten mode's soak-in runs a little longer (hand.css).
+      const duration = document.documentElement.dataset.type === "hand" ? 1450 : DURATION;
       batch.forEach((el, i) => {
         const delay = Math.min(i * STEP, MAX);
         (el as HTMLElement).style.setProperty("--reveal-delay", `${delay}ms`);
         el.setAttribute("data-in", "");
-        timers.push(window.setTimeout(() => el.setAttribute("data-done", ""), delay + DURATION));
+        timers.push(window.setTimeout(() => el.setAttribute("data-done", ""), delay + duration));
       });
     };
 

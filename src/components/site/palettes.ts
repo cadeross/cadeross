@@ -11,7 +11,9 @@ export type PaletteKey =
   | "baylor"
   | "solana"
   | "harbor"
-  | "spyglass";
+  | "spyglass"
+  | "desk"
+  | "cathedral";
 
 export type Palette = readonly [string, string, string, string];
 
@@ -26,6 +28,21 @@ export const PALETTES: Record<PaletteKey, Palette> = {
   solana: ["#dcc8ff", "#a88aff", "#64cfcc", "#a2f4c2"],
   harbor: ["#d3e2ff", "#8fb2f4", "#4a6fc4", "#ffae6b"],
   spyglass: ["#ffe1d3", "#ffa088", "#ec5a4e", "#ffd39c"],
+  // The project pages' scenes in their own, natural colours rather than
+  // the project's (watercolor/productScenes.ts). The desk: cool wall and
+  // window light, a soft teal for the cards, the mug and the garden, slate
+  // for line and shade, honey for the wood and the highlighter.
+  desk: ["#e1e6e6", "#7fb3bc", "#3e4c56", "#d9a65e"],
+  // The cathedral: a pale morning sky, warm sunlit stone and fields, a
+  // cool green-grey for shade, grass and trees, red-brown for roofs and
+  // poppies.
+  cathedral: ["#d6e1ec", "#e6c48c", "#62806f", "#a65845"],
+};
+
+/* Which palette a project page's painting is painted in. */
+export const SCENE_PALETTE: Partial<Record<PaletteKey, PaletteKey>> = {
+  everdeck: "desk",
+  openwrit: "cathedral",
 };
 
 export function isPaletteKey(value: unknown): value is PaletteKey {

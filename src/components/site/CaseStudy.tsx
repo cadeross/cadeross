@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Showcase from "@/components/showcase/Showcase";
 import { sectionId, type GalleryItem, type Thumb, type WorkMedia, type WorkSection } from "@/lib/portfolio";
-import { FieldHover, FieldPage } from "./FieldVoice";
+import { FieldPage } from "./FieldVoice";
 import Footer from "./Footer";
-import type { PaletteKey } from "./palettes";
+import { SCENE_PALETTE, type PaletteKey } from "./palettes";
 import { Tile } from "./ProjectRow";
 
 /* The page every project shares: title and a line under it, the actions,
@@ -55,7 +55,8 @@ export default function CaseStudy({
 }) {
   return (
     <main className="case">
-      <FieldPage palette={palette} />
+      {/* The painting keeps its scene's own colours, not the project's. */}
+      <FieldPage palette={SCENE_PALETTE[palette] ?? palette} />
 
       <header id="overview" className="case-head" data-tick="Overview">
         <h1 className="case-title" data-reveal>
@@ -112,7 +113,7 @@ export default function CaseStudy({
         </section>
       )}
 
-      <FieldHover palette={next.palette} className="next-wrap" reveal>
+      <div className="next-wrap" data-reveal>
         <Link href={next.href} className="notice next">
           <Tile palette={next.palette} thumb={next.thumb} title={next.title} size="sm" />
           <span className="notice-body">
@@ -123,7 +124,7 @@ export default function CaseStudy({
             <span className="notice-cta gradient-text next-summary">{next.summary}</span>
           </span>
         </Link>
-      </FieldHover>
+      </div>
 
       <Footer />
     </main>

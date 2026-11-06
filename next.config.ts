@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
     return [
       // About lives on the homepage.
       { source: "/about", destination: "/#about", permanent: false },
+      // Only Everdeck and OpenWrit have pages; the rest link out.
+      { source: "/work/baylor", destination: "https://www.baylor.edu", permanent: false },
+      { source: "/work/solana", destination: "https://solana.com", permanent: false },
+      { source: "/harbor", destination: "https://github.com/cadeross/Harbor", permanent: false },
+      { source: "/spyglass", destination: "https://github.com/cadeross/Spyglass", permanent: false },
     ];
   },
 };

@@ -858,6 +858,15 @@ svg {
   transition: transform 0.2s var(--ease-out);
 }
 
+/* ─── Home: the rest of the work, in passing ─────────────────────────── */
+
+.work-also {
+  max-width: 36em;
+  margin-top: 2.5rem;
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
 /* ─── Home: steps, grid list, contact ───────────────────────────────── */
 
 .steps {

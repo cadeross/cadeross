@@ -17,7 +17,7 @@ import {
   type Engine,
 } from "./watercolor/engine";
 import { createLife, type Life } from "./watercolor/life";
-import { composeScene } from "./watercolor/scene";
+import { composeFor } from "./watercolor/scene";
 import { hashString, type Region } from "./watercolor/strokes";
 
 /* The site's painting: a Monet-style winter valley in a plate across the
@@ -27,7 +27,9 @@ import { hashString, type Region } from "./watercolor/strokes";
    Its colours answer the site: pointing at a project bleeds that
    project's palette through the scene from where you pointed, reading a
    project in a list does the same, and opening one washes the sheet and
-   paints the valley again in that project's colours. The living layer on
+   paints the page's scene in that project's colours: the valley on most
+   pages, and on Everdeck's and OpenWrit's pages a scene of their own
+   (watercolor/productScenes.ts). The living layer on
    top (snow, smoke, the lamp, birds, the rabbit) answers the cursor.
 
    In dark mode it's night: see the night section below. */
@@ -226,7 +228,7 @@ export default function Watercolor() {
     /* ── Painting ── */
     const paintPage = (instant: boolean) => {
       if (!engine) return;
-      const c = composeScene(geo.current.region, hashString(pathRef.current));
+      const c = composeFor(pathRef.current, geo.current.region, hashString(pathRef.current));
       const now = instant || reduced();
       if (now) engine.paintInstant(c);
       else engine.paint(c);
@@ -378,7 +380,8 @@ export default function Watercolor() {
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const c = composeScene(
+    const c = composeFor(
+      pathname,
       geo.current.region,
       hashString(pathname),
       reduced ? 0 : 0.35,

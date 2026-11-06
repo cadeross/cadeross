@@ -10,7 +10,7 @@ import { nightScript } from "@/components/site/nightScript";
 import { typeScript } from "@/components/site/typeScript";
 import Reveal from "@/components/site/Reveal";
 import Watercolor from "@/components/site/Watercolor";
-import { apps, workItems } from "@/lib/portfolio";
+import { showcaseItems } from "@/lib/portfolio";
 
 const title = "Cade Ross — Product and interaction designer";
 /* While the remote-roles lines are hidden (see SHOW_CONTACT_NOTE in
@@ -40,10 +40,9 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
-const crumbs: Record<string, string> = Object.fromEntries([
-  ...workItems.map((item) => [`/work/${item.slug}`, item.title]),
-  ...apps.map((app) => [`/${app.slug}`, app.title]),
-]);
+const crumbs: Record<string, string> = Object.fromEntries(
+  showcaseItems.map((item) => [`/work/${item.slug}`, item.title]),
+);
 
 export default function SiteLayout({
   children,

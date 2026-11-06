@@ -92,7 +92,10 @@ html[data-paint][data-type="hand"] :is(
     .sign-off,
     .valediction,
     .signature,
-    .ps
+    .ps,
+    .elsewhere-line,
+    .margin-note,
+    .work-also
   ) {
   filter: url(#wc-ink);
   mix-blend-mode: multiply;
@@ -116,7 +119,10 @@ html[data-paint][data-type="hand"][data-night] :is(
     .sign-off,
     .valediction,
     .signature,
-    .ps
+    .ps,
+    .elsewhere-line,
+    .margin-note,
+    .work-also
   ) {
   mix-blend-mode: normal;
 }
@@ -286,6 +292,428 @@ html.js[data-paint][data-type="hand"] .intro[data-write="underline"] .intro-swas
   from {
     stroke-dashoffset: 1;
   }
+}
+
+/* ─── The body of the letter ──────────────────────────────────────────── */
+
+/* Hand-drawn marks used below, as masks filled with the ink colour. */
+html[data-paint][data-type="hand"] {
+  --mark-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'%3E%3Cpath d='M3 5c9-3 20-1 29 9M32 14l-7-1.5M32 14l-.6-7' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --mark-ring: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M24 5.5C13 3 4.5 10 5 20.5s9.5 15 18 14c9-1 13-8 12-16S27 5 18.5 7.5' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  --mark-break: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20'%3E%3Cpath d='M4 12c10-7 18-7 26 0s16 7 26 0c6-4 10-5 14-3 5 2 3 7-1 6-5-1-2-8 6-9 10-1 18 6 26 5 7-1 12-4 15-6' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* Paragraphs open with an indent, as on a written page, rather than a
+   gap between blocks. */
+html[data-paint][data-type="hand"] .prose > p + p {
+  text-indent: 1.6em;
+}
+
+/* Section headings become notes in the margin: written small and at a
+   slant, with an arrow to what they're about. On narrower screens there's
+   no margin, so they sit above the section instead. */
+html[data-paint][data-type="hand"] .home .label {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 0.6rem;
+  color: var(--ink-soft);
+  font-family: var(--hand-display);
+  font-style: normal;
+  font-size: calc(1.15em * var(--hand-display-scale) / var(--hand-scale));
+  line-height: 1.1;
+  rotate: -3deg;
+  transform-origin: left bottom;
+  filter: url(#wc-ink);
+  mix-blend-mode: multiply;
+}
+
+html[data-paint][data-type="hand"][data-night] .home .label {
+  mix-blend-mode: normal;
+}
+
+html[data-paint][data-type="hand"] .home .label::after {
+  content: "";
+  display: inline-block;
+  width: 1.6em;
+  height: 1em;
+  margin-left: 0.25em;
+  vertical-align: -0.55em;
+  background: currentColor;
+  -webkit-mask: var(--mark-arrow) center / contain no-repeat;
+  mask: var(--mark-arrow) center / contain no-repeat;
+  opacity: 0.75;
+  rotate: 18deg;
+}
+
+@media (min-width: 64rem) {
+  html[data-paint][data-type="hand"] .home .label {
+    position: absolute;
+    top: 0.1rem;
+    right: calc(100% + 1.6rem);
+    width: max-content;
+    max-width: 10rem;
+    margin: 0;
+    text-align: right;
+    rotate: -6deg;
+    transform-origin: right top;
+  }
+
+  html[data-paint][data-type="hand"] .home .label::after {
+    rotate: -8deg;
+    vertical-align: -0.35em;
+  }
+
+  /* In the margin, the note no longer takes up a line of the section. */
+  html[data-paint][data-type="hand"] .home .label + .rows {
+    margin-top: 0;
+  }
+}
+
+/* A small ink flourish between the parts of the letter. */
+html[data-paint][data-type="hand"] .home :is(#work, #how, #elsewhere, .letter-close)::before {
+  content: "";
+  position: absolute;
+  top: -2.4rem;
+  left: 50%;
+  width: 4.2rem;
+  height: 0.8rem;
+  translate: -50% 0;
+  background: var(--ink-soft);
+  -webkit-mask: var(--mark-break) center / contain no-repeat;
+  mask: var(--mark-break) center / contain no-repeat;
+  opacity: 0.55;
+}
+
+html[data-paint][data-type="hand"] .home .letter-close {
+  position: relative;
+}
+
+@media (max-width: 47.99rem) {
+  html[data-paint][data-type="hand"] .home :is(#work, #how, #elsewhere, .letter-close)::before {
+    top: -1.8rem;
+  }
+}
+
+/* ─── The work, tucked into the letter ───────────────────────────────── */
+
+/* Each project is a small watercolour with a print of it taped on, set
+   at a slight angle, alternating sides down the page like a sketchbook;
+   its name and a line or two written beside it. */
+html[data-paint][data-type="hand"] .rows {
+  gap: 2.6rem;
+}
+
+html[data-paint][data-type="hand"] .rows > li {
+  position: relative;
+}
+
+@media (min-width: 40rem) {
+  html[data-paint][data-type="hand"] .rows > li:nth-child(even) .row {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+
+  html[data-paint][data-type="hand"] .rows > li:nth-child(even) .row-text {
+    padding-left: 0.6rem;
+  }
+}
+
+html[data-paint][data-type="hand"] .rows > li .tile {
+  rotate: -2.5deg;
+}
+
+/* Stacked on phones: the sketches still swap sides down the page. */
+@media (max-width: 39.99rem) {
+  html[data-paint][data-type="hand"] .rows > li:nth-child(even) .tile {
+    align-self: flex-end;
+    margin-right: 0.4rem;
+  }
+}
+
+html[data-paint][data-type="hand"] .rows > li:nth-child(even) .tile {
+  rotate: 2deg;
+}
+
+html[data-paint][data-type="hand"] .rows > li:nth-child(3n) .tile {
+  rotate: -1deg;
+}
+
+/* A looser wash: paler, bleeding a little past where the print sits. */
+html[data-paint][data-type="hand"] .rows .tile::before {
+  inset: -2px;
+  border-radius: 34% 26% 30% 38% / 28% 36% 30% 34%;
+  opacity: 0.78;
+}
+
+/* The print: a little paper border, tilted against the wash. */
+html[data-paint][data-type="hand"] .rows .tile-shot {
+  border: 2.5px solid #fbf8f1;
+  border-radius: 2px;
+  rotate: 3deg;
+  box-shadow: 0 1px 2px rgb(60 45 30 / 0.12), 0 6px 14px -6px rgb(60 45 30 / 0.3);
+}
+
+html[data-paint][data-type="hand"] .rows > li:nth-child(even) .tile-shot {
+  rotate: -2.5deg;
+}
+
+/* Projects with a mark of their own (Emblems.tsx) are painted with it
+   instead of a screenshot. */
+.emblem {
+  display: none;
+}
+
+html[data-paint][data-type="hand"] .row[data-emblem] .tile {
+  display: none;
+}
+
+html[data-paint][data-type="hand"] .emblem {
+  display: block;
+  flex-shrink: 0;
+  width: 6rem;
+  height: 6rem;
+  mix-blend-mode: multiply;
+  rotate: -3deg;
+  transition: rotate 0.6s var(--ease-out), scale 0.6s var(--ease-out);
+}
+
+@media (min-width: 40rem) {
+  html[data-paint][data-type="hand"] .emblem {
+    width: 8rem;
+    height: 8rem;
+  }
+}
+
+html[data-paint][data-type="hand"] .rows > li:nth-child(even) .emblem {
+  rotate: 3deg;
+}
+
+@media (max-width: 39.99rem) {
+  html[data-paint][data-type="hand"] .rows > li:nth-child(even) .emblem {
+    align-self: flex-end;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-paint][data-type="hand"] .row:hover .emblem {
+    rotate: 0deg;
+    scale: 1.04;
+  }
+}
+
+html[data-paint][data-type="hand"][data-night] .emblem {
+  mix-blend-mode: normal;
+}
+
+.emblem svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Everdeck: the iOS icon's deck, in its teal, yellow and white. */
+.em-card-back {
+  fill: #3a98b9;
+  opacity: 0.5;
+}
+
+.em-card-middle {
+  fill: #86cfe1;
+  opacity: 0.62;
+}
+
+.em-card-front {
+  fill: #fdfbf5;
+  stroke: #3a98b9;
+  stroke-width: 0.7;
+  stroke-opacity: 0.75;
+}
+
+.em-highlight {
+  fill: #ffd84d;
+  opacity: 0.85;
+}
+
+.em-e {
+  fill: #237495;
+}
+
+/* OpenWrit: the favicon's dark disc, lighter where the light catches it. */
+.em-ow-light {
+  stop-color: #5d5d66;
+}
+
+.em-ow-dark {
+  stop-color: #17171b;
+}
+
+.em-ow-wash {
+  opacity: 0.94;
+}
+
+html[data-night] .em-card-front {
+  fill: #e9e5db;
+}
+
+html[data-night] .em-ow-light {
+  stop-color: #a3a6b0;
+}
+
+html[data-night] .em-ow-dark {
+  stop-color: #5b5e68;
+}
+
+/* A strip of tape across its top edge. */
+html[data-paint][data-type="hand"] .rows .tile:has(.tile-shot)::after {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  z-index: 2;
+  width: 44%;
+  height: 0.85rem;
+  translate: -50% 0;
+  rotate: -4deg;
+  background: rgb(222 208 180 / 0.78);
+  box-shadow: 0 0.5px 1px rgb(60 45 30 / 0.12);
+  clip-path: polygon(0 8%, 4% 0, 8% 10%, 13% 2%, 100% 0, 97% 30%, 100% 55%, 96% 78%, 100% 100%, 6% 100%, 0 88%, 3% 60%, 0 34%);
+  pointer-events: none;
+}
+
+html[data-paint][data-type="hand"][data-night] .rows .tile:has(.tile-shot)::after {
+  background: rgb(200 192 175 / 0.45);
+}
+
+html[data-paint][data-type="hand"][data-night] .rows .tile-shot {
+  border-color: #d9d2c2;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-paint][data-type="hand"] .row:hover .tile-shot {
+    rotate: 1deg;
+  }
+}
+
+/* The arrow on hover is drawn with the pen. */
+html[data-paint][data-type="hand"] .row-arrow {
+  opacity: 1;
+  transform: none;
+  stroke-width: 1.3;
+}
+
+html[data-paint][data-type="hand"] .row-arrow path {
+  stroke-dasharray: 24 26;
+  stroke-dashoffset: 24;
+  transition: stroke-dashoffset 0.45s cubic-bezier(0.5, 0.05, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-paint][data-type="hand"] .row:is(:hover, :focus-visible) .row-arrow path {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The year as a note in the margin on wide screens. */
+@media (min-width: 64rem) {
+  html[data-paint][data-type="hand"] .rows .row-year {
+    position: absolute;
+    /* Low in the row, clear of the section's own note at its top. */
+    bottom: 0.4rem;
+    right: calc(100% + 1.6rem);
+    color: var(--muted);
+    font-family: var(--hand-display);
+    font-style: normal;
+    font-size: calc(1em * var(--hand-display-scale) / var(--hand-scale));
+    rotate: -7deg;
+  }
+}
+
+/* ─── How I work, said rather than listed ────────────────────────────── */
+
+html[data-paint][data-type="hand"] .steps {
+  display: block;
+  margin: 0;
+}
+
+html[data-paint][data-type="hand"] .steps li {
+  display: inline;
+}
+
+html[data-paint][data-type="hand"] .steps li + li::before {
+  content: " ";
+}
+
+/* Each point's number, circled by hand, as a note in the running text. */
+html[data-paint][data-type="hand"] .steps-n {
+  position: relative;
+  display: inline-block;
+  width: 1.5em;
+  margin-right: 0.2em;
+  color: var(--ink-soft);
+  font-size: 0.8em;
+  text-align: center;
+  vertical-align: 0.1em;
+}
+
+html[data-paint][data-type="hand"] .steps-n::before {
+  content: "";
+  position: absolute;
+  inset: -0.2em -0.1em -0.25em;
+  background: currentColor;
+  -webkit-mask: var(--mark-ring) center / 100% 100% no-repeat;
+  mask: var(--mark-ring) center / 100% 100% no-repeat;
+  opacity: 0.8;
+}
+
+/* ─── Elsewhere and the footer ───────────────────────────────────────── */
+
+html[data-paint][data-type="hand"] .elsewhere-line .placeholder {
+  color: var(--muted);
+}
+
+/* "Top" goes with a pen-drawn arrow instead of a dab. */
+html[data-paint][data-type="hand"] .to-top-swatch {
+  background: none;
+  box-shadow: none;
+  mix-blend-mode: normal;
+}
+
+html[data-paint][data-type="hand"] .to-top-swatch svg {
+  scale: 1.35;
+  stroke: var(--ink);
+  stroke-width: 1.3;
+  filter: url(#wc-ink);
+}
+
+/* ─── Paragraphs soak in ─────────────────────────────────────────────── */
+
+/* Rather than lifting out of a blur, what's below the introduction comes
+   in the way ink spreads into paper: a soft, uneven front running across
+   it from the left, and no movement. */
+html.js[data-paint][data-type="hand"] [data-reveal]:not([data-done]) {
+  -webkit-mask-image: linear-gradient(100deg, #000 40%, transparent 62%);
+  mask-image: linear-gradient(100deg, #000 40%, transparent 62%);
+  -webkit-mask-size: 280% 100%;
+  mask-size: 280% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  transition:
+    opacity 1.1s cubic-bezier(0.3, 0, 0.3, 1),
+    -webkit-mask-position 1.3s cubic-bezier(0.35, 0.05, 0.3, 1),
+    mask-position 1.3s cubic-bezier(0.35, 0.05, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.js[data-paint][data-type="hand"] [data-reveal]:not([data-in]) {
+  opacity: 0;
+  transform: none;
+  filter: none;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
 }
 
 /* ─── The letter's close ────────────────────────────────────────────── */

@@ -287,9 +287,11 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       const k = p.age / p.life;
       const a = (0.1 + 0.06 * nightAmt) * Math.sin(Math.PI * Math.min(1, k * 1.2)) * edgeFade(p.x, p.y) * s;
       if (a <= 0) continue;
-      const sr = Math.round(168 + 40 * nightAmt);
-      const sg = Math.round(166 + 46 * nightAmt);
-      const sb = Math.round(170 + 62 * nightAmt);
+      // A mug's steam is whiter and fainter than a chimney's smoke.
+      const steamy = f.smoke === "steam";
+      const sr = steamy ? 250 : Math.round(168 + 40 * nightAmt);
+      const sg = steamy ? 250 : Math.round(166 + 46 * nightAmt);
+      const sb = steamy ? 248 : Math.round(170 + 62 * nightAmt);
       const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
       g.addColorStop(0, `rgba(${sr}, ${sg}, ${sb}, ${a})`);
       g.addColorStop(1, `rgba(${sr}, ${sg}, ${sb}, 0)`);
@@ -397,14 +399,34 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       }
     }
 
-    // Snow sliding off branches.
+    // Snow sliding off branches (or, elsewhere, petals and leaves).
+    const [gr, gg, gb] = f.grain ?? [255, 255, 255];
     for (const p of grains) {
       const a = (1 - p.age / p.life) * 0.95 * edgeFade(p.x, p.y);
       if (a <= 0) continue;
-      ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
+      ctx.fillStyle = `rgba(${gr}, ${gg}, ${gb}, ${a})`;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // Petals drifting down instead of snow: small, warm, turning.
+    if (f.fall === "petals") {
+      const [pr, pg, pb] = f.grain ?? [214, 128, 104];
+      for (const fl of flakes) {
+        const a = fl.a * 0.75 * edgeFade(fl.x, fl.y);
+        if (a <= 0.01) continue;
+        ctx.save();
+        ctx.translate(fl.x, fl.y);
+        ctx.rotate(fl.ph * 0.7);
+        ctx.scale(1, 0.45 + 0.35 * Math.abs(Math.sin(fl.ph)));
+        ctx.fillStyle = `rgba(${pr}, ${pg}, ${pb}, ${a})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, fl.r * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      return;
     }
 
     // Falling snow, with a faint cool edge so it reads on pale paint.
@@ -449,23 +471,25 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       fl.vx *= Math.exp(-dt * 1.5);
       fl.vy *= Math.exp(-dt * 1.5);
       fl.x += (Math.sin(fl.ph) * 5 * u + wind + fl.vx) * dt;
-      fl.y += (fl.fall + fl.vy) * dt;
+      fl.y += (fl.fall * (f.fall === "petals" ? 0.45 : 1) + fl.vy) * dt;
       if (fl.y > R.y1 + 10 || fl.x < R.x0 - 40 || fl.x > R.x1 + 40) Object.assign(fl, makeFlake(true));
     }
 
     // Smoke: steadier and thicker while you point at the cabin.
-    const rate = (hover === "cabin" ? 7 : 2.4) * shown;
+    const smokeKind = f.smoke ?? "chimney";
+    const rate = smokeKind === "none" ? 0 : (hover === "cabin" ? 7 : 2.4) * shown * (smokeKind === "steam" ? 0.8 : 1);
     emitAcc += dt * rate;
     while (emitAcc > 1) {
       emitAcc -= 1;
+      const steam = smokeKind === "steam";
       smoke.push({
-        x: f.cabin.chimney[0] + rnd(-1, 1) * u,
+        x: f.cabin.chimney[0] + rnd(-1, 1) * u * (steam ? 3 : 1),
         y: f.cabin.chimney[1] - 2 * u,
         vx: rnd(-2, 2) * u,
-        vy: -rnd(7, 11) * u,
-        r: 2.5 * u,
+        vy: -rnd(7, 11) * u * (steam ? 0.7 : 1),
+        r: (steam ? 1.6 : 2.5) * u,
         age: 0,
-        life: rnd(6, 9),
+        life: steam ? rnd(2.5, 4) : rnd(6, 9),
       });
     }
     for (let i = smoke.length - 1; i >= 0; i--) {
@@ -533,7 +557,7 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
     }
     if (rabbit) {
       const r = rabbit;
-      const [hx, hy] = f.rabbit;
+      const [hx, hy] = f.rabbit ?? [r.x, r.y];
       if (r.state === "home") {
         r.ear += dt * rnd(0.5, 1.5);
         if (pointer.over && Math.hypot(r.x - pointer.x, r.y - pointer.y) < 60 * u) {
@@ -628,27 +652,33 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       smoke.length = 0;
       grains.length = 0;
       const area = (region.x1 - region.x0) * (region.y1 - region.y0);
-      flakes = Array.from({ length: Math.round(Math.min(150, area / 3800)) }, () => makeFlake(false));
+      const fall = features.fall ?? "snow";
+      const count = fall === "none" ? 0 : fall === "petals" ? Math.min(24, area / 14000) : Math.min(150, area / 3800);
+      flakes = Array.from({ length: Math.round(count) }, () => makeFlake(false));
       makeBirds();
       stars = Array.from({ length: Math.round(Math.min(90, (region.x1 - region.x0) / 11)) }, () => {
         const big = Math.random() < 0.12;
         return {
-          x: rnd(region.x0 + 10, region.x1 - 10),
-          y: rnd(region.y0 + 6, features.horizon - (features.horizon - region.y0) * 0.22),
+          x: features.sky ? rnd(features.sky.x0, features.sky.x1) : rnd(region.x0 + 10, region.x1 - 10),
+          y: features.sky
+            ? rnd(features.sky.y0, features.sky.y1)
+            : rnd(region.y0 + 6, features.horizon - (features.horizon - region.y0) * 0.22),
           r: (big ? rnd(1.1, 1.6) : rnd(0.45, 0.95)) * u,
           ph: Math.random(),
           at: rnd(0.3, 0.92),
         };
       });
-      rabbit = {
-        x: features.rabbit[0],
-        y: features.rabbit[1],
-        state: "home",
-        face: features.rabbit[0] < (region.x0 + region.x1) / 2 ? 1 : -1,
-        hop: 0,
-        wait: 0,
-        ear: Math.random() * 10,
-      };
+      rabbit = features.rabbit
+        ? {
+            x: features.rabbit[0],
+            y: features.rabbit[1],
+            state: "home",
+            face: features.rabbit[0] < (region.x0 + region.x1) / 2 ? 1 : -1,
+            hop: 0,
+            wait: 0,
+            ear: Math.random() * 10,
+          }
+        : null;
       if (reduced()) {
         // Still life: birds already on their perches.
         for (const b of birds) {
