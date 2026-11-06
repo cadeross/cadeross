@@ -51,6 +51,10 @@ const INTRO = {
 /* The "open to remote roles" card under the intro. Hidden for now. */
 const SHOW_NOTICE = false;
 
+/* The "open to fully remote roles" line under the email. Hidden for now;
+   set to true to bring it back. */
+const SHOW_CONTACT_NOTE = false;
+
 const ELSEWHERE: { label: string; href?: string }[] = [
   { label: "Email", href: `mailto:${EMAIL}` },
   { label: "Telegram", href: "https://t.me/cadeross" },
@@ -259,10 +263,12 @@ export default function Home() {
         <div data-reveal>
           <CopyEmail email={EMAIL} />
         </div>
-        <p className="contact-note" data-reveal>
-          I&apos;m open to fully remote design roles starting in January. Email
-          is the fastest way to reach me.
-        </p>
+        {SHOW_CONTACT_NOTE && (
+          <p className="contact-note" data-reveal>
+            I&apos;m open to fully remote design roles starting in January.
+            Email is the fastest way to reach me.
+          </p>
+        )}
       </section>
 
       <Footer />
