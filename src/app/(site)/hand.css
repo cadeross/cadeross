@@ -716,6 +716,16 @@ html.js[data-paint][data-type="hand"] [data-reveal]:not([data-in]) {
   mask-position: 100% 0;
 }
 
+/* Safari can't move a mask without repainting what's under it, and every
+   repaint runs the ink filter again on the CPU: the front crawled across
+   at a few frames a second. There the ink just soaks in, a fade the
+   compositor can do without repainting. */
+html.js[data-paint][data-type="hand"][data-webkit] [data-reveal]:not([data-done]) {
+  -webkit-mask-image: none;
+  mask-image: none;
+  transition-property: opacity;
+}
+
 /* ─── The letter's close ────────────────────────────────────────────── */
 
 /* Content that belongs to one mode only. */

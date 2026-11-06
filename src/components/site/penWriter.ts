@@ -490,6 +490,7 @@ export function writeIntro(intro: HTMLElement, onDone: () => void, selector = ".
       // Lay down the ink the pen has reached.
       const m = p.mctx;
       m.strokeStyle = "#000";
+      const before = p.drawn;
       while (p.drawn < p.segs.length && p.segs[p.drawn].t <= time) {
         const s = p.segs[p.drawn++];
         m.lineWidth = s.w;
@@ -498,13 +499,18 @@ export function writeIntro(intro: HTMLElement, onDone: () => void, selector = ".
         m.lineTo(s.x1, s.y1);
         m.stroke();
       }
-      const c = p.ctx;
-      c.globalCompositeOperation = "source-over";
-      c.clearRect(0, 0, p.canvas.width, p.canvas.height);
-      c.drawImage(p.mask, 0, 0);
-      c.globalCompositeOperation = "source-in";
-      c.drawImage(p.ink, 0, 0);
-      c.globalCompositeOperation = "source-over";
+      // Only touch the canvas when the pen has put down more ink: every
+      // repaint runs the ink filter over the word again, which Safari does
+      // on the CPU.
+      if (p.drawn > before) {
+        const c = p.ctx;
+        c.globalCompositeOperation = "source-over";
+        c.clearRect(0, 0, p.canvas.width, p.canvas.height);
+        c.drawImage(p.mask, 0, 0);
+        c.globalCompositeOperation = "source-in";
+        c.drawImage(p.ink, 0, 0);
+        c.globalCompositeOperation = "source-over";
+      }
 
       if (p.drawn >= p.segs.length && time > p.end + 0.05) finish(p);
     }
