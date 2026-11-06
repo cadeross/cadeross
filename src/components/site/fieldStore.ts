@@ -1,12 +1,12 @@
 import type { PaletteKey } from "./palettes";
 
-/* Who decides the field's colour right now. The most specific voice wins:
+/* Who decides the painting's colours right now. The most specific voice wins:
    a hovered project, then the section you're reading, then the page itself.
-   Kept outside React so the field can read it every frame without
+   Kept outside React so the painting can read it every frame without
    re-rendering anything.
 
-   The field also answers things you do: `ripple` sends a wave of light
-   through it from the height of whatever you just touched. */
+   Things you touch also report where they are: `ripple` tells the painting
+   the point, so a new palette bleeds out from there. */
 
 type Voices = {
   page: PaletteKey;
@@ -34,13 +34,11 @@ export function subscribe(fn: () => void) {
   };
 }
 
-/* `clientX` is optional: the column field only needs the height, but the
-   watercolor uses the point itself. */
 type Ripple = (clientY: number, strength: number, clientX?: number) => void;
 const ripples = new Set<Ripple>();
 
-/* A wave through the field, starting at the panel's inner edge level with
-   `clientY`. Strength 1 is a hover; a copy or a click goes higher. */
+/* A touch on the page at (`clientX`, `clientY`). Strength 1 is a hover; a
+   copy or a click goes higher. */
 export function ripple(clientY: number, strength = 1, clientX?: number) {
   ripples.forEach((fn) => fn(clientY, strength, clientX));
 }

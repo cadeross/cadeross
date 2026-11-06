@@ -17,7 +17,7 @@ import { Tile } from "./ProjectRow";
 
 /* The homepage introduction: who I am in one line, then the things I've
    made, named inline. Each name carries a swatch of its project's colour.
-   Pointing at one tints the field and brings up a small card of the
+   Pointing at one tints the painting and brings up a small card of the
    product that follows the cursor; leaving lets both settle back. */
 
 export type HeroProject = {

@@ -1,34 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Instrument_Serif, Newsreader } from "next/font/google";
 import "./site.css";
 import "./watercolor.css";
-import Backdrop from "@/components/site/Backdrop";
+import { instrument, newsreader } from "@/components/site/fonts";
 import Header from "@/components/site/Header";
-import LayoutToggle from "@/components/site/LayoutToggle";
-import { layoutScript } from "@/components/site/layoutScript";
+import { nightScript } from "@/components/site/nightScript";
 import Reveal from "@/components/site/Reveal";
+import Watercolor from "@/components/site/Watercolor";
 import { apps, workItems } from "@/lib/portfolio";
-
-/* The watercolor version's serifs. Not preloaded: the light version never
-   asks for them. */
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-  variable: "--font-newsreader",
-  display: "swap",
-  preload: false,
-});
-const instrument = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-instrument",
-  display: "swap",
-  preload: false,
-});
 
 const title = "Cade Ross — Product and interaction designer";
 /* While the remote-roles lines are hidden (see SHOW_CONTACT_NOTE in
@@ -51,8 +31,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f7f7f5",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4efe4" },
+    { media: "(prefers-color-scheme: dark)", color: "#141822" },
+  ],
+  colorScheme: "light dark",
 };
 
 const crumbs: Record<string, string> = Object.fromEntries([
@@ -69,11 +52,13 @@ export default function SiteLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} ${newsreader.variable} ${instrument.variable}`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
+      data-paint=""
+      data-version="monet"
     >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js');${layoutScript}`,
+            __html: `document.documentElement.classList.add('js');${nightScript}`,
           }}
         />
       </head>
@@ -81,13 +66,12 @@ export default function SiteLayout({
         <a href="#content" className="skip-link">
           Skip to content
         </a>
-        <Backdrop />
+        <Watercolor />
         <Header crumbs={crumbs} />
         <Reveal />
         <div id="content" className="page">
           {children}
         </div>
-        <LayoutToggle />
       </body>
     </html>
   );

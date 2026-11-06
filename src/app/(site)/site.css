@@ -1,12 +1,11 @@
-/* cadeross.com — paper, ink and a field of colour.
-   Light only. Type is Geist Sans set light and large, Geist Mono for the
-   smallest captions. One column of reading on the left; the field, a tall
-   panel of moving colour, pinned on the right. */
+/* cadeross.com — base styles: tokens, layout, components and motion.
+   The look itself (serif type, the paper, the painting, day and night)
+   lives in watercolor.css, which builds on these. */
 
 /* ─── Tokens ─────────────────────────────────────────────────────────── */
 
 :root {
-  /* The ground is a neutral near-white with a breath of the field's
+  /* The ground is a neutral near-white with a breath of the palette's
      lightest colour in it, so the page itself shifts with each project. */
   --paper-base: #f7f7f5;
   --paper: color-mix(in oklab, var(--paper-base) 93%, var(--f0));
@@ -16,7 +15,7 @@
   --faint: #bdbcb6;
   --rule: rgb(26 27 24 / 0.12);
 
-  /* The field's live colours, rewritten by Field.tsx as palettes cross. */
+  /* The live palette, rewritten by Watercolor.tsx as palettes cross. */
   --f0: #dde6f3;
   --f1: #b4c8ea;
   --f2: #8fb5a4;
@@ -33,25 +32,22 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
 
-  --field: clamp(200px, 17vw, 264px);
+  /* One centred reading column, under the painting. */
   --gutter: 1.5rem;
-  --gutter-right: calc(10px + 1.5rem);
+  --gutter-right: var(--gutter);
   --header-top: 2rem;
-  color-scheme: light;
 }
 
 @media (min-width: 40rem) {
   :root {
     --gutter: 2.5rem;
-    --gutter-right: calc(80px + 2.5rem);
     --header-top: 2.5rem;
   }
 }
 
 @media (min-width: 64rem) {
   :root {
-    --gutter: max(4rem, calc((100vw - var(--field) - 47.6rem) / 2 - 1rem));
-    --gutter-right: calc(var(--field) + 4rem);
+    --gutter: max(4rem, calc((100vw - 47.6rem) / 2));
     --header-top: 3rem;
   }
 }
@@ -243,362 +239,6 @@ svg {
   color: transparent;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-}
-
-/* ─── The field ──────────────────────────────────────────────────────── */
-
-/* A column of colour cut into one band per section of the page. Field.tsx
-   draws the bands and places a button over each; the geometry tokens here
-   are read by the script so each breakpoint can set its own. */
-.field-panel {
-  --seg-gap: 4px;
-  --seg-radius: 5px;
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  z-index: 20;
-  width: 10px;
-  height: calc(100dvh - 24px);
-  user-select: none;
-  animation: field-in 1.3s var(--ease-in-out) both;
-}
-
-@media (min-width: 40rem) {
-  .field-panel {
-    --seg-gap: 6px;
-    --seg-radius: 9px;
-    width: 80px;
-  }
-}
-
-@media (min-width: 64rem) {
-  .field-panel {
-    --seg-gap: 6px;
-    --seg-radius: 14px;
-    width: calc(var(--field) - 24px);
-  }
-}
-
-html:not(.js) .field-panel {
-  border-radius: var(--seg-radius);
-  background: linear-gradient(180deg, var(--f0), var(--f1) 36%, var(--f2) 66%, var(--f3));
-}
-
-@keyframes field-in {
-  from {
-    clip-path: inset(0 0 100% 0 round 14px);
-  }
-  to {
-    clip-path: inset(0 0 0 0 round 14px);
-  }
-}
-
-.field-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: calc(100lvh - 24px);
-  pointer-events: none;
-  animation: fade-in 0.6s ease 0.1s both;
-}
-
-.field-panel[data-fallback] .field-canvas {
-  display: none;
-}
-
-.field-segs {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.field-seg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: var(--seg-radius);
-  background: transparent;
-  color: var(--field-ink, rgb(26 27 24 / 0.72));
-  transition: color 0.6s ease;
-  text-align: left;
-  will-change: transform, height;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.field-panel[data-fallback] .field-seg {
-  background: linear-gradient(180deg, var(--f0), var(--f1) 36%, var(--f2) 66%, var(--f3));
-  opacity: calc(0.6 + var(--a, 1) * 0.4);
-}
-
-@media (min-width: 40rem) and (pointer: fine) {
-  .field-seg:not(:disabled) {
-    pointer-events: auto;
-    cursor: pointer;
-  }
-}
-
-.field-seg:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-/* The band's number and name. Only wide columns have room; the open band
-   shows it, and pointing at any band brings its name up. */
-.field-seg-label {
-  position: absolute;
-  top: 0.95rem;
-  left: 1rem;
-  right: 1rem;
-  display: none;
-  gap: 0.6rem;
-  overflow: hidden;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  opacity: calc((var(--a, 0) - 0.35) * 1.6);
-  transform: translate3d(0, calc((1 - var(--a, 0)) * 4px), 0);
-  transition: opacity 0.25s ease;
-}
-
-.field-seg-n {
-  opacity: 0.55;
-}
-
-@media (min-width: 64rem) {
-  .field-seg-label {
-    display: flex;
-  }
-}
-
-@media (pointer: fine) {
-  .field-seg:hover .field-seg-label,
-  .field-seg:focus-visible .field-seg-label {
-    opacity: 1;
-  }
-}
-
-/* ─── The field as a bar along the top (layout comparison) ────────────── */
-
-/* The same bands, laid left to right across the top of the window. The
-   reading column centres under it and the header drops below it. */
-html[data-layout="top"] {
-  --gutter-right: 1.5rem;
-  --header-top: calc(1.5rem + 14px);
-}
-
-@media (min-width: 40rem) {
-  html[data-layout="top"] {
-    --gutter-right: 2.5rem;
-    --header-top: calc(1.75rem + 56px);
-  }
-}
-
-@media (min-width: 64rem) {
-  html[data-layout="top"] {
-    --gutter: max(4rem, calc((100vw - 47.6rem) / 2));
-    --gutter-right: 4rem;
-    --header-top: calc(1.9rem + 76px);
-  }
-}
-
-html[data-layout="top"] .field-panel {
-  --seg-gap: 3px;
-  --seg-radius: 3px;
-  top: 8px;
-  right: 8px;
-  left: 8px;
-  width: auto;
-  height: 6px;
-  animation-name: field-in-x;
-}
-
-@media (min-width: 40rem) {
-  html[data-layout="top"] .field-panel {
-    --seg-gap: 6px;
-    --seg-radius: 9px;
-    top: 12px;
-    right: 12px;
-    left: 12px;
-    height: 44px;
-  }
-}
-
-@media (min-width: 64rem) {
-  html[data-layout="top"] .field-panel {
-    --seg-radius: 12px;
-    height: 64px;
-  }
-}
-
-@keyframes field-in-x {
-  from {
-    clip-path: inset(0 100% 0 0 round 14px);
-  }
-  to {
-    clip-path: inset(0 0 0 0 round 14px);
-  }
-}
-
-html[data-layout="top"] .field-canvas {
-  width: 100%;
-  height: 100%;
-}
-
-html[data-layout="top"] .field-seg-label {
-  top: 50%;
-  left: 0.9rem;
-  right: 0.9rem;
-  transform: translateY(-50%);
-}
-
-html[data-layout="top"] .block {
-  scroll-margin-top: 9rem;
-}
-
-/* ─── The field as the whole right half (layout comparison) ───────────── */
-
-/* Wide screens only; narrower ones keep the side column. The colour runs
-   edge to edge as one whole piece, and the reading column takes the left
-   half. */
-@media (min-width: 64rem) {
-  html[data-layout="half"] {
-    --gutter: 4rem;
-    --gutter-right: calc(50vw + 4rem);
-  }
-
-  /* One unbroken piece of colour: no bands, no corners, no labels. */
-  html[data-layout="half"] .field-panel {
-    --seg-gap: 0px;
-    --seg-radius: 0px;
-    --seg-whole: 1;
-    top: 0;
-    right: 0;
-    width: 50vw;
-    height: 100dvh;
-    animation-name: field-in-flat;
-  }
-
-  html[data-layout="half"] .field-canvas {
-    height: 100lvh;
-  }
-
-  html[data-layout="half"] .field-segs {
-    display: none;
-  }
-}
-
-@keyframes field-in-flat {
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-/* The comparison switches. Temporary: remove with the version and layout
-   you don't keep. */
-.switches {
-  position: fixed;
-  bottom: 14px;
-  left: 50%;
-  z-index: 45;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  width: max-content;
-  max-width: calc(100vw - 24px);
-  transform: translateX(-50%);
-}
-
-@media (min-width: 64rem) {
-  .switches {
-    bottom: 18px;
-    left: 5.5rem;
-    justify-content: flex-start;
-    transform: none;
-  }
-}
-
-/* The layouts only apply to the light field. */
-html[data-paint] .layout-switch-layout {
-  display: none;
-}
-
-.layout-switch {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 4px 4px 4px 0.85rem;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper) 78%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
-  box-shadow: 0 8px 24px -14px rgb(0 0 0 / 0.3);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.02em;
-}
-
-.layout-switch-label {
-  color: var(--muted);
-}
-
-.layout-switch-track {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(var(--n, 3), 1fr);
-  padding: 2px;
-  border-radius: 999px;
-  background: rgb(26 27 24 / 0.06);
-}
-
-.layout-switch-thumb {
-  position: absolute;
-  inset: 2px auto 2px 2px;
-  width: calc((100% - 4px) / var(--n, 3));
-  border-radius: 999px;
-  background: var(--ink);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
-  transform: translateX(calc(100% * var(--i, 0)));
-  transition: transform 0.45s var(--ease-out);
-}
-
-.layout-switch-track button {
-  position: relative;
-  min-width: 3.8rem;
-  padding: 0.42rem 0.8rem;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--ink-soft);
-  font: inherit;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.layout-switch-track button[aria-pressed="true"] {
-  color: var(--paper);
-}
-
-.layout-switch-track button:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.45s;
-  animation-timing-function: ease;
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────── */
@@ -1610,8 +1250,6 @@ html[data-paint] .layout-switch-layout {
 /* ─── Reduced motion ─────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .field-panel,
-  .field-canvas,
   .site-header-inner,
   .page-enter,
   .crumb-text,
@@ -1636,9 +1274,7 @@ html[data-paint] .layout-switch-layout {
   .copy-icon-tick path,
   .copy-email-tag,
   .notice-cta::after,
-  .to-top-swatch,
-  .layout-switch-thumb,
-  .field-seg-label {
+  .to-top-swatch {
     transition: none;
   }
 
@@ -1650,7 +1286,8 @@ html[data-paint] .layout-switch-layout {
 }
 
 @media print {
-  .field-panel,
+  .wc,
+  .wc-life,
   .site-header-fade {
     display: none;
   }

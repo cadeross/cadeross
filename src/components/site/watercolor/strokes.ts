@@ -1,9 +1,7 @@
-/* The brushwork. A page's painting is laid in the way a wash is painted:
-   a quick pass of clear water at the top, then loaded strokes across the
-   sheet from top to bottom, each one catching the wet lower edge of the
-   last so they bleed together, the colour moving down the palette as it
-   goes. Then a charge or two of the deep colour dropped into the wet,
-   a lighter glaze, and a flick of spatter.
+/* The brushwork: strokes (a brush pulled along a curve, pressing and
+   lifting, running dry at the end) and drops (a single touch of the
+   brush), and the player that turns a composition into dabs a frame at a
+   time. The scene itself is composed in scene.ts.
 
    Positions are CSS pixels from the canvas's top left. */
 
@@ -76,21 +74,6 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-/* How much of each palette stop a stroke carries at a point down the
-   sheet: the same ramp the light field uses, pale at the top, one deep
-   note, a warm landing. */
-export function rampWeights(t: number): Weights {
-  const s1 = smooth(0, 0.36, t);
-  const s2 = smooth(0.3, 0.66, t);
-  const s3 = smooth(0.62, 1, t);
-  return [
-    (1 - s1) * (1 - s2) * (1 - s3),
-    s1 * (1 - s2) * (1 - s3),
-    s2 * (1 - s3),
-    s3,
-  ];
-}
-
 const scale = (w: Weights, k: number): Weights => [
   w[0] * k,
   w[1] * k,
@@ -99,121 +82,6 @@ const scale = (w: Weights, k: number): Weights => [
 ];
 
 export type Composition = { strokes: Stroke[]; drops: Drop[]; length: number };
-
-export function compose(region: Region, seed: number, delay = 0): Composition {
-  const rand = rng(seed);
-  const between = (a: number, b: number) => a + (b - a) * rand();
-  const { x0, y0, x1, y1 } = region;
-  const W = x1 - x0;
-  const H = y1 - y0;
-  const strokes: Stroke[] = [];
-  const drops: Drop[] = [];
-  const tall = H > W * 0.9;
-  const rows = Math.max(3, Math.min(8, Math.round(H / (tall ? 118 : 96))));
-  const rowH = H / rows;
-  const speed = between(1000, 1300);
-  const gap = 0.3;
-  let t = delay;
-
-  /* Clear water over the top, so the first colour softens into it. */
-  const wetRows = Math.max(1, Math.round(rows * 0.4));
-  for (let i = 0; i < wetRows; i++) {
-    const y = y0 + rowH * (i + 0.5);
-    const ltr = i % 2 === 0;
-    const a: [number, number] = [x0 + W * between(0.0, 0.08), y];
-    const b: [number, number] = [x1 - W * between(0.0, 0.1), y + between(-0.2, 0.2) * rowH];
-    strokes.push({
-      t0: t + i * 0.12,
-      dur: W / (speed * 1.6),
-      p: ltr ? [a, [(a[0] + b[0]) / 2, y + between(-0.3, 0.3) * rowH], b] : [b, [(a[0] + b[0]) / 2, y], a],
-      r: rowH * 0.75,
-      water: 0.55,
-      load: [0, 0, 0, 0],
-      dryEnd: 0,
-      wobble: rowH * 0.12,
-      seed: rand() * 100,
-    });
-  }
-  t += wetRows * 0.12 + 0.12;
-
-  /* The wash, row by row. */
-  const density = between(0.5, 0.62);
-  for (let i = 0; i < rows; i++) {
-    const f = (i + 0.5) / rows;
-    const y = y0 + rowH * (i + 0.5) + between(-0.1, 0.1) * rowH;
-    const ltr = i % 2 === 0;
-    // Rows rarely start and stop at the same place.
-    const a: [number, number] = [x0 + W * between(-0.01, 0.13), y];
-    const b: [number, number] = [x1 - W * between(-0.01, 0.15), y + between(-0.28, 0.28) * rowH];
-    const mid: [number, number] = [
-      (a[0] + b[0]) / 2 + between(-0.1, 0.1) * W,
-      y + between(-0.35, 0.35) * rowH,
-    ];
-    const dur = Math.abs(b[0] - a[0]) / speed;
-    strokes.push({
-      t0: t,
-      dur,
-      p: ltr ? [a, mid, b] : [b, mid, a],
-      r: rowH * between(0.6, 0.72),
-      water: between(0.78, 0.92),
-      load: scale(rampWeights(f), density * between(0.85, 1.15) * 0.085),
-      dryEnd: between(0.25, 0.6),
-      wobble: rowH * between(0.06, 0.14),
-      seed: rand() * 100,
-    });
-    t += Math.max(gap, dur * 0.55);
-  }
-  const washEnd = t;
-
-  /* Deep colour dropped into the wet, low on the sheet, where it blooms. */
-  const charges = 2 + Math.floor(rand() * 2);
-  for (let i = 0; i < charges; i++) {
-    const fy = between(0.38, 0.85);
-    drops.push({
-      t0: delay + 0.5 + (washEnd - delay) * fy + between(0.05, 0.25),
-      x: x0 + W * between(0.15, 0.85),
-      y: y0 + H * fy,
-      r: Math.min(W, H) * between(0.05, 0.09),
-      water: 0.6,
-      load: scale(rampWeights(Math.min(1, fy + 0.1)), 0.32),
-    });
-  }
-
-  /* A lighter glaze across the middle while it's still damp. */
-  const gy = y0 + H * between(0.35, 0.6);
-  const ga: [number, number] = [x0 + W * between(0.05, 0.3), gy];
-  const gb: [number, number] = [x1 - W * between(0.05, 0.35), gy + between(-0.5, 0.5) * rowH];
-  strokes.push({
-    t0: washEnd + 0.15,
-    dur: Math.abs(gb[0] - ga[0]) / (speed * 0.9),
-    p: [ga, [(ga[0] + gb[0]) / 2, gy + between(-0.6, 0.6) * rowH], gb],
-    r: rowH * 0.42,
-    water: 0.7,
-    load: scale(rampWeights(between(0.4, 0.6)), 0.05),
-    dryEnd: 0.7,
-    wobble: rowH * 0.1,
-    seed: rand() * 100,
-  });
-
-  /* Spatter, flicked from one corner. */
-  const cx = rand() < 0.5 ? x0 + W * 0.12 : x1 - W * 0.12;
-  const cy = rand() < 0.5 ? y0 + H * 0.2 : y1 - H * 0.18;
-  const flecks = 9 + Math.floor(rand() * 8);
-  for (let i = 0; i < flecks; i++) {
-    const ang = rand() * Math.PI * 2;
-    const dist = Math.pow(rand(), 0.7) * Math.min(W, H) * 0.24;
-    drops.push({
-      t0: washEnd + 0.5 + rand() * 0.18,
-      x: cx + Math.cos(ang) * dist,
-      y: cy + Math.sin(ang) * dist * 0.8,
-      r: between(1.4, 4.8) * (rand() < 0.15 ? 2 : 1),
-      water: 0.7,
-      load: scale(rampWeights(between(0.5, 0.9)), 0.5),
-    });
-  }
-
-  return { strokes, drops, length: washEnd + 0.8 };
-}
 
 /* Plays a composition back as dabs, a frame at a time. */
 export class Player {

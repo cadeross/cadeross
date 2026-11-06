@@ -8,7 +8,6 @@ import {
   hexToRgb,
   isPaletteKey,
   localHour,
-  skyAt,
   type PaletteKey,
 } from "./palettes";
 import {
@@ -18,25 +17,20 @@ import {
   type Engine,
 } from "./watercolor/engine";
 import { createLife, type Life } from "./watercolor/life";
-import { composeScene, type Scene } from "./watercolor/scene";
-import {
-  compose,
-  hashString,
-  rampWeights,
-  type Region,
-  type Weights,
-} from "./watercolor/strokes";
+import { composeScene } from "./watercolor/scene";
+import { hashString, type Region } from "./watercolor/strokes";
 
-/* The watercolor version's painting: a sheet of cold-press paper under the
-   whole site, and on it a wash that paints itself in when a page loads,
-   stroke by stroke, and dries with darker edges and granulated pigment.
+/* The site's painting: a Monet-style winter valley in a plate across the
+   top of every page, on a sheet of cold-press paper that runs under the
+   whole site. It paints itself in, stroke by stroke, when a page loads.
 
-   It listens to the same voices as the light field. Pointing at a project
-   bleeds that project's colours through the painting from the nearest
-   edge and drops water there, which blooms; reading a project in a list
-   does the same. Opening a project washes the sheet and paints it again in
-   that project's palette. Moving the cursor over the painting is a clean
-   wet brush, and clicking drops in colour. */
+   Its colours answer the site: pointing at a project bleeds that
+   project's palette through the scene from where you pointed, reading a
+   project in a list does the same, and opening one washes the sheet and
+   paints the valley again in that project's colours. The living layer on
+   top (snow, smoke, the lamp, birds, the rabbit) answers the cursor.
+
+   In dark mode it's night: see the night section below. */
 
 const css = (c: number[]) =>
   `rgb(${Math.round(c[0] * 255)} ${Math.round(c[1] * 255)} ${Math.round(c[2] * 255)})`;
@@ -45,17 +39,15 @@ const toLinear = (v: number) =>
   v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
 
 /* A colour as pigment: how much of each channel a full-strength layer
-   absorbs. */
-const absorbance = (rgb: number[][]) =>
-  rgb.map((c) => c.map((v) => -Math.log(Math.max(0.006, toLinear(v)))));
+   absorbs. Scaled down so the scene stays light whatever the palette. */
+const pigment = (rgb: number[][]) =>
+  rgb.map((c) => c.map((v) => -Math.log(Math.max(0.006, toLinear(v))) * 0.8));
 
-export type PaintMode = "wash" | "scene";
-
-/* The Monet scene's own colours, in place of the sky: winter, as a
-   painter's series through the day. Pale blue morning, clear noon, a rose
-   and gold late afternoon, lavender dusk, a soft blue night. All of them
-   light and quiet. Stops: sky and snow shadow, distance and ice,
-   evergreens, warmth. (Spring gets its own set.) */
+/* The scene's own colours: winter, as a painter's series through the
+   day. Pale blue morning, clear noon, a rose and gold late afternoon,
+   lavender dusk, a soft blue night. All of them light and quiet. Stops:
+   sky and snow shadow, distance and ice, evergreens, warmth. (Spring gets
+   its own set.) */
 const WINTER: { h: number; pal: string[] }[] = [
   { h: 2, pal: ["#d5dbe8", "#aeb8cf", "#6f7c97", "#d9bfa6"] },
   { h: 8, pal: ["#e7edf4", "#c3cfdd", "#6d8595", "#e6c4b0"] },
@@ -67,19 +59,16 @@ const WINTER: { h: number; pal: string[] }[] = [
 function winterAt(hour: number): number[][] {
   const h = ((hour % 24) + 24) % 24;
   const keys = [...WINTER, { h: WINTER[0].h + 24, pal: WINTER[0].pal }];
+  const hh = h < keys[0].h ? h + 24 : h;
   let i = keys.length - 2;
   for (let j = 0; j < keys.length - 1; j++) {
-    const lo = keys[j].h;
-    const hi = keys[j + 1].h;
-    const hh = h < keys[0].h ? h + 24 : h;
-    if (hh >= lo && hh < hi) {
+    if (hh >= keys[j].h && hh < keys[j + 1].h) {
       i = j;
       break;
     }
   }
   const a = keys[i];
   const b = keys[i + 1];
-  const hh = h < keys[0].h ? h + 24 : h;
   const t = Math.min(1, Math.max(0, (hh - a.h) / (b.h - a.h)));
   return a.pal.map((hex, k) => {
     const ca = hexToRgb(hex);
@@ -88,40 +77,35 @@ function winterAt(hour: number): number[][] {
   });
 }
 
-function layoutFor(canvas: HTMLCanvasElement, mode: PaintMode) {
+/* A wide, low plate at the top of the page, under the header: a view
+   across a valley rather than a close-up. Taller on phones so the scene
+   still reads. Matches --wc-band in watercolor.css. */
+function layoutFor(canvas: HTMLCanvasElement) {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   const wide = window.matchMedia("(min-width: 64rem)").matches;
-  if (mode === "scene") {
-    // A wide, low plate at the top of the page, under the header: a view
-    // across a valley rather than a close-up. Taller on phones so the
-    // scene still reads. Matches --wc-band in watercolor.css.
-    const top = wide ? 100 : 82;
-    // Room below the plate for its ragged edge to fade out.
-    const ph = Math.max(120, h - top - 48);
-    const ratio = w < 640 ? 1.6 : 2.6;
-    const pw = Math.min(w - Math.max(32, w * 0.1), ph * ratio, 1040);
-    const x0 = (w - pw) / 2;
-    const region: Region = { x0, y0: top, x1: x0 + pw, y1: top + ph };
-    return { w, h, wide: false, region };
-  }
-  const region: Region = wide
-    ? { x0: w * 0.515, y0: h * 0.075, x1: w - w * 0.035, y1: h - h * 0.075 }
-    : { x0: w * 0.08, y0: 84, x1: w * 0.92, y1: h - 48 };
-  return { w, h, wide, region };
+  const top = wide ? 100 : 82;
+  // Room below the plate for its ragged edge.
+  const ph = Math.max(120, h - top - 48);
+  const ratio = w < 640 ? 1.6 : 2.6;
+  const pw = Math.min(w - Math.max(32, w * 0.1), ph * ratio, 1040);
+  const x0 = (w - pw) / 2;
+  const region: Region = { x0, y0: top, x1: x0 + pw, y1: top + ph };
+  return { w, h, region };
 }
 
-export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
+const INTERACTIVE = "a, button, input, textarea, select, label";
+
+export default function Watercolor() {
   const pathname = usePathname();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lifeCanvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const lifeRef = useRef<Life | null>(null);
   const pathRef = useRef(pathname);
-  const geo = useRef<{ w: number; h: number; wide: boolean; region: Region }>({
+  const geo = useRef<{ w: number; h: number; region: Region }>({
     w: 1,
     h: 1,
-    wide: true,
     region: { x0: 0, y0: 0, x1: 1, y1: 1 },
   });
   /* The last place the site was touched, for where colour bleeds from. */
@@ -131,7 +115,7 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     pathRef.current = pathname;
   }, [pathname]);
 
-  /* ── The engine, colour, and interaction ───────────────────────────── */
+  /* ── The engine, colour, night and interaction ─────────────────────── */
   useEffect(() => {
     const root = document.documentElement;
     const canvas = canvasRef.current!;
@@ -143,17 +127,7 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     );
     const hour = () => (Number.isFinite(pinned) ? pinned : localHour());
     const resolve = (key: PaletteKey) =>
-      key === "cade"
-        ? mode === "scene"
-          ? winterAt(hour())
-          : skyAt(hour())
-        : PALETTES[key].map(hexToRgb);
-    const composeFor = mode === "scene" ? composeScene : compose;
-    // The pond stays light whatever the palette: its pigment is thinner.
-    const pigment = (rgb: number[][]) =>
-      mode === "scene"
-        ? absorbance(rgb).map((c) => c.map((v) => v * 0.8))
-        : absorbance(rgb);
+      key === "cade" ? winterAt(hour()) : PALETTES[key].map(hexToRgb);
 
     /* The CSS side: --f0…--f3 for the type and tiles, crossing smoothly. */
     let target = resolve(currentPalette());
@@ -180,11 +154,9 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
 
     const engine = createEngine(canvas, { reduced });
     engineRef.current = engine;
-    const scene = mode === "scene";
-    const life =
-      scene && lifeCanvasRef.current
-        ? createLife(lifeCanvasRef.current, { reduced })
-        : null;
+    const life = lifeCanvasRef.current
+      ? createLife(lifeCanvasRef.current, { reduced })
+      : null;
     lifeRef.current = life;
     // No WebGL2: the CSS shows a still wash instead.
     if (!engine) canvas.parentElement?.setAttribute("data-fallback", "");
@@ -196,72 +168,19 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     const clamp = (v: number, a: number, b: number) =>
       Math.min(b, Math.max(a, v));
 
-    /* Where something touched on the page lands on the painting: level
-       with it on the painting's inner edge, or right there if it's over
-       the painting. */
+    /* Where something touched on the page lands on the painting: right
+       there if it's over the plate, otherwise the nearest point on it. */
     const landing = (clientY: number, clientX?: number) => {
-      const { region: R, wide } = geo.current;
-      const p = toCanvas(clientX ?? 0, clientY);
-      const over = p.x >= R.x0 && p.x <= R.x1 && p.y >= R.y0 && p.y <= R.y1;
-      if (wide) {
-        return {
-          x: over ? p.x : R.x0 + 26,
-          y: clamp(p.y, R.y0 + 24, R.y1 - 24),
-        };
-      }
+      const R = geo.current.region;
+      const p = toCanvas(clientX ?? (R.x0 + R.x1) / 2, clientY);
       return {
-        x: clamp(clientX ?? (R.x0 + R.x1) / 2, R.x0 + 24, R.x1 - 24),
+        x: clamp(p.x, R.x0 + 24, R.x1 - 24),
         y: clamp(p.y, R.y0 + 24, R.y1 - 24),
       };
     };
 
-    const paintPage = (instant: boolean, delay = 0) => {
-      if (!engine) return;
-      const c = composeFor(
-        geo.current.region,
-        hashString(pathRef.current),
-        delay,
-      );
-      const now = instant || reduced();
-      if (now) engine.paintInstant(c);
-      else engine.paint(c);
-      if (life && "features" in c) {
-        const { w, h, region } = geo.current;
-        const features = (c as Scene).features;
-        life.setScene(features, region, w, h, now ? 0 : c.length * 0.8);
-        life.setNight(nightNow);
-        engine.setHorizon(features.horizon);
-      }
-    };
-
-    const layout = (first: boolean) => {
-      if (!engine) return;
-      geo.current = layoutFor(canvas, mode);
-      const { w, h, region } = geo.current;
-      engine.resize(w, h, region);
-      engine.palette(pigment(resolve(currentPalette())), null, true);
-      paintPage(!first);
-    };
-
-    /* Two sheets of the same paper, lit for day and for night. */
-    const paperURLs: string[] = [];
-    let alive = true;
-    const tile = async (
-      prop: string,
-      base?: [number, number, number],
-      amp?: number,
-    ) => {
-      const url = await engine?.paperURL(base, amp);
-      if (!url) return;
-      if (!alive) return URL.revokeObjectURL(url);
-      paperURLs.push(url);
-      root.style.setProperty(prop, `url(${url})`);
-    };
-    tile("--wc-paper").then(() =>
-      tile("--wc-paper-night", NIGHT_BASE, NIGHT_AMP),
-    );
-
-    /* Night follows dark mode. Changing it while here lets dusk fall (or
+    /* ── Night ──
+       Night follows dark mode. Changing it while here lets dusk fall (or
        dawn break) over a few seconds: the sky darkens from the top down,
        the sun sets and the moon rises, stars come out, the lamp comes on,
        and the page's paper and type turn with it. */
@@ -304,10 +223,52 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     };
     darkMq.addEventListener("change", onScheme);
 
+    /* ── Painting ── */
+    const paintPage = (instant: boolean) => {
+      if (!engine) return;
+      const c = composeScene(geo.current.region, hashString(pathRef.current));
+      const now = instant || reduced();
+      if (now) engine.paintInstant(c);
+      else engine.paint(c);
+      engine.setHorizon(c.features.horizon);
+      if (life) {
+        const { w, h, region } = geo.current;
+        life.setScene(c.features, region, w, h, now ? 0 : c.length * 0.8);
+        life.setNight(nightNow);
+      }
+    };
+
+    const layout = (first: boolean) => {
+      if (!engine) return;
+      geo.current = layoutFor(canvas);
+      const { w, h, region } = geo.current;
+      engine.resize(w, h, region);
+      engine.palette(pigment(resolve(currentPalette())), null, true);
+      paintPage(!first);
+    };
+
+    /* Two sheets of the same paper, lit for day and for night. */
+    const paperURLs: string[] = [];
+    let alive = true;
+    const tile = async (
+      prop: string,
+      base?: [number, number, number],
+      amp?: number,
+    ) => {
+      const url = await engine?.paperURL(base, amp);
+      if (!url) return;
+      if (!alive) return URL.revokeObjectURL(url);
+      paperURLs.push(url);
+      root.style.setProperty(prop, `url(${url})`);
+    };
+    tile("--wc-paper").then(() =>
+      tile("--wc-paper-night", NIGHT_BASE, NIGHT_AMP),
+    );
+
     layout(true);
 
     /* A new palette bleeds out from wherever the site was just touched, or
-       else from the painting's inner edge, level with the reading line. */
+       else from the plate's left edge. */
     let palRaf = 0;
     const unsubscribe = subscribe(() => {
       target = resolve(currentPalette());
@@ -323,10 +284,11 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
         const R = geo.current.region;
         const origin = recent
           ? { x: touch.current.x, y: touch.current.y }
-          : landing(window.innerHeight * 0.55, R.x0);
+          : { x: R.x0, y: (R.y0 + R.y1) / 2 };
         engine?.palette(pigment(resolve(currentPalette())), origin);
       });
     });
+    // The day's colours move on as the visitor stays.
     const skyTimer = window.setInterval(() => {
       if (currentPalette() !== "cade") return;
       target = resolve("cade");
@@ -335,113 +297,28 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
       engine?.palette(pigment(target), { x: R.x1, y: R.y0 });
     }, 60_000);
 
-    /* A touch drops clean water where it lands, which blooms back through
-       the drying paint; a harder one carries a little colour too. */
-    const offRipple = onRipple((clientY, strength, clientX) => {
-      if (clientY <= 1) return; // the light field's arrival wave
-      const at = landing(clientY, clientX);
-      touch.current = { ...at, at: performance.now() };
-      // The scene keeps its picture; only its colours answer.
-      if (!engine || reduced() || scene) return;
-      const R = geo.current.region;
-      const deep = rampWeights(
-        clamp((at.y - R.y0) / Math.max(1, R.y1 - R.y0) + 0.25, 0, 1),
-      );
-      const ink = strength > 1.2 ? 0.05 : 0.012;
-      const r = 22 + strength * 16;
-      engine.dab({
-        x: at.x,
-        y: at.y,
-        r,
-        water: 0.55,
-        load: deep.map((v) => v * ink) as Weights,
-        lift: 0.22,
-        dry: 0,
-      });
-      for (let i = 0; i < 3; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const d = r * (0.5 + Math.random() * 0.5);
-        engine.dab({
-          x: at.x + Math.cos(a) * d,
-          y: at.y + Math.sin(a) * d,
-          r: r * (0.35 + Math.random() * 0.3),
-          water: 0.45,
-          load: [0, 0, 0, 0],
-          lift: 0.15,
-          dry: 0,
-        });
-      }
+    /* Touching something on the page only sets where colour bleeds from;
+       the picture itself is left alone. */
+    const offRipple = onRipple((clientY, _strength, clientX) => {
+      if (clientY <= 1) return;
+      touch.current = { ...landing(clientY, clientX), at: performance.now() };
     });
 
-    /* The cursor over the painting is a clean, damp brush. */
-    let lastX = 0;
-    let lastY = 0;
-    let travelled = 0;
+    /* The scene's living things answer the cursor. */
     const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      if (life) {
-        // The scene's living things answer the cursor instead.
-        const p = toCanvas(e.clientX, e.clientY);
-        const over = !(e.target as Element | null)?.closest?.(
-          "a, button, input, textarea, select, label",
-        );
-        const hit = over ? life.pointer(p.x, p.y) : (life.leave(), null);
-        root.classList.toggle("wc-pointing", !!hit);
-        return;
-      }
-      if (!engine || reduced()) return;
+      if (e.pointerType !== "mouse" || !life) return;
       const p = toCanvas(e.clientX, e.clientY);
-      const R = geo.current.region;
-      const over =
-        p.x > R.x0 + 8 && p.x < R.x1 - 8 && p.y > R.y0 + 8 && p.y < R.y1 - 8;
-      travelled += Math.hypot(p.x - lastX, p.y - lastY);
-      lastX = p.x;
-      lastY = p.y;
-      if (!over) return;
-      touch.current = { x: p.x, y: p.y, at: performance.now() };
-      if (travelled < 10) return;
-      travelled = 0;
-      engine.dab({
-        x: p.x,
-        y: p.y,
-        r: 14,
-        water: 0.3,
-        load: [0, 0, 0, 0],
-        lift: 0.05,
-        dry: 0,
-      });
+      const free = !(e.target as Element | null)?.closest?.(INTERACTIVE);
+      const hit = free ? life.pointer(p.x, p.y) : (life.leave(), null);
+      root.classList.toggle("wc-pointing", !!hit);
     };
     window.addEventListener("pointermove", onMove, { passive: true });
 
-    /* Clicking the painting drops in colour. */
     const onDown = (e: PointerEvent) => {
-      if (e.button !== 0) return;
-      if (
-        (e.target as Element | null)?.closest?.(
-          "a, button, input, textarea, select, label",
-        )
-      )
-        return;
-      if (life) {
-        const p = toCanvas(e.clientX, e.clientY);
-        life.click(p.x, p.y);
-        return;
-      }
-      if (!engine || reduced()) return;
+      if (e.button !== 0 || !life) return;
+      if ((e.target as Element | null)?.closest?.(INTERACTIVE)) return;
       const p = toCanvas(e.clientX, e.clientY);
-      const R = geo.current.region;
-      if (p.x < R.x0 || p.x > R.x1 || p.y < R.y0 || p.y > R.y1) return;
-      const f = clamp((p.y - R.y0) / Math.max(1, R.y1 - R.y0) + 0.2, 0, 1);
-      const load = rampWeights(f).map((v) => v * 0.2) as Weights;
-      engine.dab({
-        x: p.x,
-        y: p.y,
-        r: 24 + Math.random() * 10,
-        water: 0.8,
-        load,
-        lift: 0,
-        dry: 0,
-      });
+      life.click(p.x, p.y);
     };
     window.addEventListener("pointerdown", onDown);
     const onLeave = () => {
@@ -455,13 +332,9 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     const ro = new ResizeObserver(() => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
-        const next = layoutFor(canvas, mode);
+        const next = layoutFor(canvas);
         const prev = geo.current;
-        if (
-          Math.abs(next.w - prev.w) < 2 &&
-          Math.abs(next.h - prev.h) < 120 &&
-          next.wide === prev.wide
-        )
+        if (Math.abs(next.w - prev.w) < 2 && Math.abs(next.h - prev.h) < 120)
           return;
         layout(false);
       }, 220);
@@ -478,20 +351,20 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
       window.removeEventListener("pointerdown", onDown);
       root.removeEventListener("pointerleave", onLeave);
       root.classList.remove("wc-pointing");
-      life?.destroy();
-      lifeRef.current = null;
+      darkMq.removeEventListener("change", onScheme);
+      cancelAnimationFrame(nightRaf);
       cancelAnimationFrame(cssRaf);
       cancelAnimationFrame(palRaf);
       ro.disconnect();
+      life?.destroy();
+      lifeRef.current = null;
       engine?.destroy();
       engineRef.current = null;
-      darkMq.removeEventListener("change", onScheme);
-      cancelAnimationFrame(nightRaf);
       root.style.removeProperty("--wc-paper");
       root.style.removeProperty("--wc-paper-night");
       paperURLs.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [mode]);
+  }, []);
 
   /* ── Opening another page washes the sheet and paints it again ─────── */
   const firstPath = useRef(true);
@@ -505,7 +378,7 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const c = (mode === "scene" ? composeScene : compose)(
+    const c = composeScene(
       geo.current.region,
       hashString(pathname),
       reduced ? 0 : 0.35,
@@ -517,16 +390,16 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
       engine.wash(0.75);
       engine.paint(c);
     }
-    if (lifeRef.current && "features" in c) {
+    engine.setHorizon(c.features.horizon);
+    const life = lifeRef.current;
+    if (life) {
       const { w, h, region } = geo.current;
-      const features = (c as Scene).features;
-      lifeRef.current.setScene(features, region, w, h, reduced ? 0 : c.length * 0.8);
-      lifeRef.current.setNight(
+      life.setScene(c.features, region, w, h, reduced ? 0 : c.length * 0.8);
+      life.setNight(
         document.documentElement.hasAttribute("data-night") ? 1 : 0,
       );
-      engine.setHorizon(features.horizon);
     }
-  }, [pathname, mode]);
+  }, [pathname]);
 
   /* ── Which palette you're reading ──────────────────────────────────── */
   useEffect(() => {
@@ -576,11 +449,8 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
           </filter>
         </svg>
       </div>
-      {/* Snow, smoke, lamplight and birds: lighter than paper, so not
-        multiplied with the paint. */}
-      {mode === "scene" && (
-        <canvas ref={lifeCanvasRef} className="wc-life" aria-hidden="true" />
-      )}
+      {/* Snow, smoke, lamplight and birds: lighter than paper. */}
+      <canvas ref={lifeCanvasRef} className="wc-life" aria-hidden="true" />
     </>
   );
 }

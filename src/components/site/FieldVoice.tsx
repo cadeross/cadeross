@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { rippleFrom, setVoice } from "./fieldStore";
 import type { PaletteKey } from "./palettes";
 
-/* Sets the palette a page speaks in. Rendered once per page; the field
+/* Sets the palette a page speaks in. Rendered once per page; the painting
    crosses to it as the page arrives. */
 export function FieldPage({ palette }: { palette: PaletteKey }) {
   useEffect(() => {

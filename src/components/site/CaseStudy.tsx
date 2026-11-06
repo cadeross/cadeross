@@ -7,8 +7,8 @@ import type { PaletteKey } from "./palettes";
 import { Tile } from "./ProjectRow";
 
 /* The page every project shares: title and a line under it, the actions,
-   a hero figure, then plain sections. Each section heading is a tick on the
-   field's scrollbar. It ends on a card for the next project. */
+   a hero figure, then plain sections. It ends on a card for the next
+   project. */
 
 export type NextCard = {
   href: string;
