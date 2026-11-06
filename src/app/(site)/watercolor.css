@@ -7,6 +7,45 @@
    display, Newsreader for reading. Wide screens give the right half to
    the painting; narrower ones paint across the top of the page. */
 
+/* The colour tokens are registered so they can be animated: when night
+   falls, the paper, ink and rules all turn together over the same few
+   seconds as the painting. */
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a1b18;
+}
+@property --ink-soft {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #5f5e59;
+}
+@property --muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #8a8983;
+}
+@property --faint {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #bdbcb6;
+}
+@property --rule {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgb(26 27 24 / 0.12);
+}
+@property --paper {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f7f7f5;
+}
+@property --paper-base {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f7f7f5;
+}
+
 html[data-paint] {
   --paper-base: #f4efe4;
   --paper: #f4efe4;
@@ -22,8 +61,30 @@ html[data-paint] {
   --text-h1: calc(var(--text-body) * 1.62);
   --gutter-right: var(--gutter);
   --wc-band: 58svh;
-  background: var(--paper-base);
+  --night-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  /* The page's paper: the day sheet here, the night sheet on body::before. */
+  background: var(--paper-base) var(--wc-paper, none) 0 0 / 512px 512px repeat;
   font-family: var(--font-sans);
+  transition:
+    --ink 3.4s var(--night-ease),
+    --ink-soft 3.4s var(--night-ease),
+    --muted 3.4s var(--night-ease),
+    --faint 3.4s var(--night-ease),
+    --rule 3.4s var(--night-ease),
+    --paper-base 3.4s var(--night-ease),
+    --paper 3.4s var(--night-ease);
+}
+
+/* Night (dark mode): deep blue-black paper, warm moonlit ink. */
+html[data-paint][data-night] {
+  --paper-base: #141822;
+  --paper: #141822;
+  --ink: #ebe5d8;
+  --ink-soft: #bdb5a6;
+  --muted: #8d877c;
+  --faint: #4c4a46;
+  --rule: rgb(235 229 216 / 0.14);
+  color-scheme: dark;
 }
 
 @media (min-width: 64rem) {
@@ -34,7 +95,8 @@ html[data-paint] {
 }
 
 html[data-paint] body {
-  background: var(--paper-base) var(--wc-paper, none) 0 0 / 512px 512px repeat;
+  position: relative;
+  background: none;
   font-weight: 400;
   line-height: 1.44;
   letter-spacing: 0;
@@ -42,8 +104,29 @@ html[data-paint] body {
   font-optical-sizing: auto;
 }
 
+/* The night sheet, laid over the day one and faded in as night falls. */
+html[data-paint] body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #141822 var(--wc-paper-night, none) 0 0 / 512px 512px repeat;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 3.4s var(--night-ease);
+}
+
+html[data-paint][data-night] body::before {
+  opacity: 1;
+}
+
 @media (min-width: 64rem) {
-  html[data-version="watercolor"] body {
+  html[data-version="watercolor"] {
+    background-attachment: fixed;
+  }
+
+  html[data-version="watercolor"] body::before {
+    position: fixed;
     background-attachment: fixed;
   }
 }
@@ -72,9 +155,6 @@ html[data-paint] .wc {
   height: var(--wc-band);
   pointer-events: none;
   user-select: none;
-  /* Paint is subtractive: the canvas multiplies onto the paper, so the
-     tooth shows through every wash. */
-  mix-blend-mode: multiply;
 }
 
 @media (min-width: 64rem) {
@@ -134,7 +214,7 @@ html[data-paint] .page {
 }
 
 html[data-version="monet"] .page {
-  padding-top: calc(var(--wc-band) + 1.5rem);
+  padding-top: calc(var(--wc-band) - 0.5rem);
 }
 
 html[data-version="monet"] .hero {
@@ -151,12 +231,12 @@ html[data-version="monet"] .case-head {
 html[data-version="monet"] {
   /* The plate: a wide view, about 2.6 : 1 (1.6 : 1 on phones), at most
      1040px wide, plus the header. Matches layoutFor in Watercolor.tsx. */
-  --wc-band: calc(min(84vw, 1040px) / 2.6 + 7rem);
+  --wc-band: calc(min(84vw, 1040px) / 2.6 + 9rem);
 }
 
 @media (max-width: 39.99rem) {
   html[data-version="monet"] {
-    --wc-band: calc(90vw / 1.6 + 6.25rem);
+    --wc-band: calc(90vw / 1.6 + 8.25rem);
   }
 }
 
@@ -180,7 +260,7 @@ html.wc-pointing body {
 }
 
 html[data-version="monet"] .page {
-  padding-top: calc(var(--wc-band) + 1.5rem);
+  padding-top: calc(var(--wc-band) - 0.5rem);
 }
 
 html[data-version="monet"] .hero {
@@ -208,7 +288,7 @@ html[data-version="monet"] {
 
 @media (min-width: 64rem) {
   html[data-version="monet"] {
-    --wc-band: calc(min(80vw, 1040px, 56svh * 2.6) / 2.6 + 7.25rem);
+    --wc-band: calc(min(80vw, 1040px, 56svh * 2.6) / 2.6 + 9.25rem);
     --gutter: max(4rem, calc((100vw - 47.6rem) / 2));
     --gutter-right: var(--gutter);
   }
@@ -444,4 +524,52 @@ html[data-paint] .layout-switch {
   font-style: italic;
   letter-spacing: 0;
   background: color-mix(in srgb, var(--paper-base) 80%, transparent);
+}
+
+/* ─── Night ──────────────────────────────────────────────────────────── */
+
+/* The header's paper turns with the page. */
+html[data-paint] .site-header-fade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #141822 var(--wc-paper-night, none) 0 0 / 512px 512px repeat;
+  opacity: 0;
+  transition: opacity 3.4s var(--night-ease);
+}
+
+html[data-paint][data-night] .site-header-fade::after {
+  opacity: 1;
+}
+
+@media (min-width: 64rem) {
+  html[data-version="watercolor"] .site-header-fade::after {
+    background-attachment: fixed;
+  }
+}
+
+/* Multiplying only darkens, which would sink the swatches and plates into
+   the dark paper; at night they sit on it instead, a touch softer. */
+html[data-paint][data-night] .tile::before,
+html[data-paint][data-night] .intro-swatch,
+html[data-paint][data-night] .to-top-swatch,
+html[data-paint][data-night] .sc-plate {
+  mix-blend-mode: normal;
+}
+
+html[data-paint][data-night] .tile::before {
+  opacity: 0.82;
+}
+
+html[data-paint][data-night] .tile-shot {
+  box-shadow: 0 0 0 0.5px rgb(255 255 255 / 0.08), 0 2px 4px rgb(0 0 0 / 0.3), 0 14px 30px -8px rgb(0 0 0 / 0.6);
+}
+
+html[data-paint][data-night] ::selection {
+  background: color-mix(in oklab, var(--f1) 45%, var(--paper-base));
+  color: var(--ink);
+}
+
+html[data-paint][data-night] .wc[data-fallback] {
+  opacity: 0.5;
 }

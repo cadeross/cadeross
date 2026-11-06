@@ -94,6 +94,7 @@ in vec2 v_uv;
 uniform sampler2D u_data;
 uniform vec2 u_texel;
 uniform vec3 u_base;
+uniform float u_amp;
 out vec4 o;
 float hash1(vec2 p) {
   return fract(sin(dot(p, vec2(41.31, 289.17))) * 43758.5453);
@@ -105,7 +106,7 @@ void main() {
   vec3 n = normalize(vec3(-hx * 2.2, -hy * 2.2, 1.0));
   vec3 L = normalize(vec3(-0.55, 0.65, 0.75));
   float shade = dot(n, L) / L.z;
-  vec3 col = u_base * (0.962 + 0.038 * shade) * (0.99 + 0.012 * h);
+  vec3 col = u_base * ((1.0 - u_amp) + u_amp * shade) * (0.99 + 0.012 * h);
   // The odd fleck of fibre.
   float fleck = step(0.9985, hash1(floor(v_uv * 1024.0)));
   col *= 1.0 - fleck * 0.07;
@@ -304,10 +305,37 @@ uniform vec2 u_cres;
 uniform vec2 u_sres;
 uniform float u_dpr;
 uniform float u_tile;
+uniform vec3 u_dayBase;
+uniform vec3 u_nightBase;
+uniform float u_night;
+uniform vec4 u_region;   // css px, top-left origin: x0, y0, x1, y1
+uniform float u_horizon; // css px from the top; < 0 for none
 out vec4 o;
 
 float total(vec2 uv) {
   return dot(texture(u_s2, uv) + texture(u_s1, uv), vec4(1.0));
+}
+
+float hash1(vec2 p) {
+  return fract(sin(dot(p, vec2(41.31, 289.17))) * 43758.5453);
+}
+
+vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }
+vec3 srgb(vec3 c) { return pow(clamp(c, 0.0, 1.0), vec3(1.0 / 2.2)); }
+
+// The paper at a point, lit the same way as the CSS tile, so the painting
+// and the page are one sheet.
+vec3 paperColor(vec2 tuv, vec3 base, float amp) {
+  float tx = 1.0 / 1024.0;
+  float h = texture(u_paper, tuv).r;
+  float hx = texture(u_paper, tuv + vec2(tx, 0.0)).r - texture(u_paper, tuv - vec2(tx, 0.0)).r;
+  float hy = texture(u_paper, tuv + vec2(0.0, tx)).r - texture(u_paper, tuv - vec2(0.0, tx)).r;
+  vec3 n = normalize(vec3(-hx * 2.2, -hy * 2.2, 1.0));
+  vec3 L = normalize(vec3(-0.55, 0.65, 0.75));
+  float shade = dot(n, L) / L.z;
+  vec3 col = base * ((1.0 - amp) + amp * shade) * (0.99 + 0.012 * h);
+  float fleck = step(0.9985, hash1(floor(fract(tuv) * 1024.0)));
+  return col * (1.0 - fleck * 0.07);
 }
 
 void main() {
@@ -319,7 +347,8 @@ void main() {
   vec4 P1 = texture(u_p1, uv);
   vec4 P2 = texture(u_p2, uv);
   vec2 css = vec2(gl_FragCoord.x, u_cres.y - gl_FragCoord.y) / u_dpr;
-  vec4 pp = texture(u_paper, vec2(css.x / u_tile, 1.0 - css.y / u_tile));
+  vec2 tuv = vec2(css.x / u_tile, 1.0 - css.y / u_tile);
+  vec4 pp = texture(u_paper, tuv);
 
   vec4 amt = a2 + a1 * 0.9;
   vec3 k3 = vec3(P0.w, P1.w, P2.w);
@@ -331,21 +360,52 @@ void main() {
   float gy = total(uv + vec2(0.0, t.y)) - total(uv - vec2(0.0, t.y));
   float edge = clamp(length(vec2(gx, gy)) * 1.1, 0.0, 0.4);
 
-  // Granulation: pigment sits in the valleys of the tooth.
   float valley = 1.0 - pp.r;
   A *= 0.72 + 0.6 * valley;
-  // Flocculation: a soft mottle through the wash.
   A *= 0.88 + 0.24 * pp.b;
   A *= 1.0 + edge;
 
-  // Wet paint reads deeper, and wet paper a touch grey.
   float w = a0.x;
   A *= 1.0 + 0.24 * smoothstep(0.0, 0.5, w);
   vec3 T = exp(-A);
   T *= 1.0 - 0.045 * smoothstep(0.0, 0.35, w) * (0.6 + 0.4 * valley);
-  // A little sheen on the tops of the tooth while it's wet.
   T += 0.025 * smoothstep(0.25, 0.7, w) * smoothstep(0.62, 0.9, pp.r);
+  T = clamp(T, 0.0, 1.0);
 
-  o = vec4(pow(clamp(T, 0.0, 1.0), vec3(1.0 / 2.2)), 1.0);
+  // Day: light through the pigment, off the paper.
+  vec3 dayPaper = paperColor(tuv, u_dayBase, 0.038);
+  vec3 day = lin(dayPaper) * T;
+
+  // The sheet the painting covers, with a ragged edge.
+  vec2 lo = css - u_region.xy;
+  vec2 hi = u_region.zw - css;
+  float d = min(min(lo.x, lo.y), min(hi.x, hi.y));
+  // A deckled edge: ragged like a wash, but crisp rather than blurred.
+  float rag = (pp.g - 0.5) * 34.0 + (pp.b - 0.5) * 16.0 + (pp.r - 0.5) * 4.0;
+  float plate = smoothstep(-5.0, 3.0, d + rag);
+
+  // Night: the same picture by moonlight. Bare paper inside the plate is
+  // snow catching the moon; the deeper the paint, the deeper the night.
+  // The sky sits darker than the snow, and darkest at the top.
+  float lum = dot(T, vec3(0.3, 0.5, 0.2));
+  vec3 hue = T / max(lum, 0.05);
+  vec3 deep = vec3(0.012, 0.016, 0.03);
+  vec3 moonlit = vec3(0.25, 0.285, 0.40);
+  vec3 night = mix(deep, moonlit, pow(lum, 1.35)) * mix(vec3(1.0), hue, u_horizon > 0.0 ? 0.3 : 0.6);
+  if (u_horizon > 0.0) {
+    float sky = smoothstep(u_horizon + 18.0, u_horizon - 34.0, css.y + rag * 0.8);
+    float up = clamp((u_horizon - css.y) / max(1.0, u_horizon - u_region.y), 0.0, 1.0);
+    vec3 skyCol = mix(vec3(0.05, 0.065, 0.11), vec3(0.018, 0.024, 0.05), up) * (0.75 + 0.5 * lum);
+    night = mix(night, skyCol, sky * 0.85);
+  }
+  night *= paperColor(tuv, vec3(1.0), 0.07).r;
+
+  // Night falls from the top of the sheet down, unevenly.
+  float yn = clamp((css.y - u_region.y) / max(1.0, u_region.w - u_region.y), 0.0, 1.0);
+  float fall = smoothstep(0.0, 1.0, u_night * 1.55 - yn * 0.45 - (pp.g - 0.5) * 0.12);
+
+  vec3 col = mix(day, night, fall);
+  // Outside the plate the page shows through; inside, the painting.
+  o = vec4(srgb(col) * plate, plate);
 }
 `;

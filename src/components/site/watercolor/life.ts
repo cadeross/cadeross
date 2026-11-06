@@ -16,6 +16,10 @@ import type { SceneFeatures } from "./scene";
    - A rabbit sits by the bush in the near corner. Get close and it hops
      off out of the picture, and comes back along its tracks later.
 
+   At night (dark mode) the sun sets and a moon rises, stars come out one
+   by one, the lamp in the cabin comes on by itself, the smoke turns
+   silver and the birds go off to roost until morning.
+
    Everything is slow on purpose. With reduced motion, the scene is drawn
    once, still: no falling snow, no flight. */
 
@@ -49,7 +53,10 @@ type Rabbit = {
 
 export type Hit = "cabin" | "pond" | "sun" | "sky" | `tree:${number}` | null;
 
+type Star = { x: number; y: number; r: number; ph: number; at: number };
+
 export type Life = {
+  setNight: (n: number) => void;
   setScene: (f: SceneFeatures, region: Region, w: number, h: number, revealIn: number) => void;
   pointer: (x: number, y: number) => Hit;
   leave: () => void;
@@ -80,7 +87,10 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
 
   const pointer = { x: -1e4, y: -1e4, over: false };
   let hover: Hit = null;
-  let lamp = false;
+  /* null: the lamp follows the dark; true/false: someone switched it. */
+  let lamp: boolean | null = null;
+  let nightAmt = 0;
+  let stars: Star[] = [];
   let windowGlow = 0.2;
   let sunGlow = 0;
   let glint = 0;
@@ -212,7 +222,7 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
     // The sun's glow.
     {
       const r = f.sun.r * (3 + sunGlow * 0.8);
-      const a = (0.28 + 0.06 * Math.sin(clock * 0.35) + sunGlow * 0.22) * s;
+      const a = (0.28 + 0.06 * Math.sin(clock * 0.35) + sunGlow * 0.22) * s * (1 - nightAmt);
       const g = ctx.createRadialGradient(f.sun.x, f.sun.y, 0, f.sun.x, f.sun.y, r);
       g.addColorStop(0, `rgba(255, 249, 236, ${a})`);
       g.addColorStop(0.35, `rgba(255, 238, 214, ${a * 0.55})`);
@@ -223,14 +233,66 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       ctx.fill();
     }
 
+    // Stars, coming out one by one as night falls.
+    if (nightAmt > 0.01) {
+      for (const st of stars) {
+        const on = Math.min(1, Math.max(0, (nightAmt - st.at) / 0.18));
+        if (on <= 0) continue;
+        const tw = 0.55 + 0.45 * Math.sin(clock * (0.6 + st.ph * 0.5) + st.ph * 10);
+        const a = on * tw * 0.85 * edgeFade(st.x, st.y);
+        ctx.fillStyle = `rgba(236, 240, 255, ${a})`;
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+        ctx.fill();
+        if (st.r > 1.1 * u) {
+          const g = ctx.createRadialGradient(st.x, st.y, 0, st.x, st.y, st.r * 4);
+          g.addColorStop(0, `rgba(220, 230, 255, ${a * 0.25})`);
+          g.addColorStop(1, "rgba(220, 230, 255, 0)");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, st.r * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // The moon rises where the sun set, a little higher.
+      const rise = Math.min(1, Math.max(0, (nightAmt - 0.25) / 0.75));
+      if (rise > 0) {
+        const mx = f.sun.x;
+        const my = f.sun.y + (1 - rise) * f.sun.r * 3 - f.sun.r * 0.8;
+        const mr = f.sun.r * 0.62;
+        const halo = ctx.createRadialGradient(mx, my, 0, mx, my, mr * 7);
+        halo.addColorStop(0, `rgba(214, 224, 250, ${0.28 * rise})`);
+        halo.addColorStop(0.4, `rgba(190, 204, 240, ${0.1 * rise})`);
+        halo.addColorStop(1, "rgba(190, 204, 240, 0)");
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(mx, my, mr * 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(246, 244, 232, ${0.92 * rise})`;
+        ctx.beginPath();
+        ctx.arc(mx, my, mr, 0, Math.PI * 2);
+        ctx.fill();
+        // A few soft seas on its face.
+        ctx.fillStyle = `rgba(200, 200, 196, ${0.35 * rise})`;
+        ctx.beginPath();
+        ctx.arc(mx - mr * 0.3, my - mr * 0.15, mr * 0.28, 0, Math.PI * 2);
+        ctx.arc(mx + mr * 0.25, my + mr * 0.3, mr * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
     // Chimney smoke.
     for (const p of smoke) {
       const k = p.age / p.life;
-      const a = 0.1 * Math.sin(Math.PI * Math.min(1, k * 1.2)) * edgeFade(p.x, p.y) * s;
+      const a = (0.1 + 0.06 * nightAmt) * Math.sin(Math.PI * Math.min(1, k * 1.2)) * edgeFade(p.x, p.y) * s;
       if (a <= 0) continue;
+      const sr = Math.round(168 + 40 * nightAmt);
+      const sg = Math.round(166 + 46 * nightAmt);
+      const sb = Math.round(170 + 62 * nightAmt);
       const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-      g.addColorStop(0, `rgba(168, 166, 170, ${a})`);
-      g.addColorStop(1, "rgba(168, 166, 170, 0)");
+      g.addColorStop(0, `rgba(${sr}, ${sg}, ${sb}, ${a})`);
+      g.addColorStop(1, `rgba(${sr}, ${sg}, ${sb}, 0)`);
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -434,7 +496,8 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       }
     }
 
-    const lampGoal = lamp ? 0.85 : hover === "cabin" ? 0.6 : 0.22;
+    const lit = lamp ?? nightAmt > 0.45;
+    const lampGoal = lit ? 0.85 + nightAmt * 0.15 : hover === "cabin" ? 0.6 : 0.22;
     windowGlow += (lampGoal - windowGlow) * (1 - Math.exp(-dt * 3));
     sunGlow += ((hover === "sun" ? 1 : 0) - sunGlow) * (1 - Math.exp(-dt * 2));
     glint += ((hover === "pond" ? 1 : 0) - glint) * (1 - Math.exp(-dt * 4));
@@ -442,7 +505,8 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
     for (const b of birds) {
       if (b.state === "away") {
         b.wait -= dt;
-        if (b.wait <= 0) comeBack(b);
+        // Birds stay away all night.
+        if (b.wait <= 0 && nightAmt < 0.3) comeBack(b);
       } else if (b.state === "landing") {
         const [px, py] = f.perches[b.perch];
         b.t += dt / b.dur;
@@ -508,6 +572,12 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       }
     }
 
+    // At dusk the birds go off to roost.
+    if (nightAmt > 0.5 && birds.some((b) => b.state === "perched")) {
+      const c = f.sun;
+      scatter(c.x, c.y + 200 * u);
+    }
+
     // Birds keep a little distance from the cursor.
     if (pointer.over && birds.some((b) => b.state === "perched" && Math.hypot(b.x - pointer.x, b.y - pointer.y) < 55 * u))
       scatter(pointer.x, pointer.y);
@@ -521,7 +591,7 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
     if (reduced()) {
       shown = 1;
       reveal = 0;
-      windowGlow = lamp ? 0.85 : 0.22;
+      windowGlow = (lamp ?? nightAmt > 0.45) ? 0.85 + nightAmt * 0.15 : 0.22;
       draw();
       cancelAnimationFrame(raf);
       raf = 0;
@@ -560,6 +630,16 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       const area = (region.x1 - region.x0) * (region.y1 - region.y0);
       flakes = Array.from({ length: Math.round(Math.min(150, area / 3800)) }, () => makeFlake(false));
       makeBirds();
+      stars = Array.from({ length: Math.round(Math.min(90, (region.x1 - region.x0) / 11)) }, () => {
+        const big = Math.random() < 0.12;
+        return {
+          x: rnd(region.x0 + 10, region.x1 - 10),
+          y: rnd(region.y0 + 6, features.horizon - (features.horizon - region.y0) * 0.22),
+          r: (big ? rnd(1.1, 1.6) : rnd(0.45, 0.95)) * u,
+          ph: Math.random(),
+          at: rnd(0.3, 0.92),
+        };
+      });
       rabbit = {
         x: features.rabbit[0],
         y: features.rabbit[1],
@@ -603,7 +683,7 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
     click(x, y) {
       const h = hitTest(x, y);
       if (!h) return false;
-      if (h === "cabin") lamp = !lamp;
+      if (h === "cabin") lamp = !(lamp ?? nightAmt > 0.45);
       else if (h.startsWith("tree:")) shake(Number(h.slice(5)), 40);
       else if (h === "sky" || h === "sun") {
         gust = 1;
@@ -613,6 +693,12 @@ export function createLife(canvas: HTMLCanvasElement, { reduced }: { reduced: ()
       wake();
       if (reduced()) draw();
       return true;
+    },
+
+    setNight(n) {
+      nightAmt = n;
+      wake();
+      if (reduced()) draw();
     },
 
     destroy() {

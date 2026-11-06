@@ -21,6 +21,9 @@ const SIM_SCALE = 0.62; // simulation cells per CSS pixel
 const STEP = 1 / 120; // seconds per simulation step
 const DRY_AFTER = 7; // seconds for the wettest stroke to dry
 export const PAPER_BASE: [number, number, number] = [0.957, 0.937, 0.894]; // #f4efe4
+export const NIGHT_BASE: [number, number, number] = [0.078, 0.094, 0.133]; // #141822
+export const PAPER_AMP = 0.038;
+export const NIGHT_AMP = 0.07;
 
 type Program = {
   prog: WebGLProgram;
@@ -39,7 +42,11 @@ export type Engine = {
   /* Runs a composition to dry, without drawing in between. */
   paintInstant: (c: Composition) => void;
   clearPaint: () => void;
-  paperURL: () => Promise<string | null>;
+  paperURL: (base?: [number, number, number], amp?: number) => Promise<string | null>;
+  /* 0 day … 1 night; the painting re-grades, night falling from the top. */
+  setNight: (n: number) => void;
+  /* Where the land meets the sky, CSS px from the top, or -1. */
+  setHorizon: (y: number) => void;
   destroy: () => void;
   region: () => Region;
 };
@@ -83,11 +90,11 @@ export function createEngine(
   { reduced }: { reduced: () => boolean },
 ): Engine | null {
   const gl = canvas.getContext("webgl2", {
-    alpha: false,
+    alpha: true,
     antialias: false,
     depth: false,
     stencil: false,
-    premultipliedAlpha: false,
+    premultipliedAlpha: true,
     preserveDrawingBuffer: false,
   });
   if (!gl) return null;
@@ -180,6 +187,8 @@ export function createEngine(
   ];
   const front = { x: 0, y: 0, r: 0, w: 1, active: false, start: 0, speed: 1 };
   let palReset = true;
+  let night = 0;
+  let horizon = -1;
 
   const player = new Player();
   const queued: Dab[] = [];
@@ -220,7 +229,7 @@ export function createEngine(
 
   /* Scissor to the region (plus its ragged margin), in a target's pixels. */
   const scissor = (scaleX: number, scaleY: number, h: number) => {
-    const m = 40;
+    const m = 80;
     const x = Math.max(0, Math.floor((region.x0 - m) * scaleX));
     const y = Math.max(0, Math.floor((cssH - region.y1 - m) * scaleY));
     const x2 = Math.ceil((region.x1 + m) * scaleX);
@@ -318,7 +327,7 @@ export function createEngine(
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, cw, ch);
     gl.disable(gl.SCISSOR_TEST);
-    gl.clearColor(1, 1, 1, 1);
+    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     scissor(dpr, dpr, ch);
     bindTex(0, sim[0].tex[0], p.u("u_s0"));
@@ -332,6 +341,11 @@ export function createEngine(
     gl.uniform2f(p.u("u_sres"), sw, sh);
     gl.uniform1f(p.u("u_dpr"), dpr);
     gl.uniform1f(p.u("u_tile"), TILE_CSS);
+    gl.uniform3fv(p.u("u_dayBase"), PAPER_BASE);
+    gl.uniform3fv(p.u("u_nightBase"), NIGHT_BASE);
+    gl.uniform1f(p.u("u_night"), night);
+    gl.uniform4f(p.u("u_region"), region.x0, region.y0, region.x1, region.y1);
+    gl.uniform1f(p.u("u_horizon"), horizon);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
@@ -472,7 +486,18 @@ export function createEngine(
       dirty = true;
     },
 
-    async paperURL() {
+    setNight(n) {
+      if (n === night) return;
+      night = n;
+      dirty = true;
+    },
+
+    setHorizon(y) {
+      horizon = y;
+      dirty = true;
+    },
+
+    async paperURL(base = PAPER_BASE, amp = PAPER_AMP) {
       // Light the tile once and hand it to CSS as the page's background.
       const fb = gl.createFramebuffer()!;
       const tex = texture(TILE_PX, TILE_PX, rgba8, gl.NEAREST, gl.CLAMP_TO_EDGE);
@@ -485,7 +510,8 @@ export function createEngine(
       gl.useProgram(p.prog);
       bindTex(0, paperTex, p.u("u_data"));
       gl.uniform2f(p.u("u_texel"), 1 / TILE_PX, 1 / TILE_PX);
-      gl.uniform3fv(p.u("u_base"), PAPER_BASE);
+      gl.uniform3fv(p.u("u_base"), base);
+      gl.uniform1f(p.u("u_amp"), amp);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       const px = new Uint8Array(TILE_PX * TILE_PX * 4);
       gl.readPixels(0, 0, TILE_PX, TILE_PX, gl.RGBA, gl.UNSIGNED_BYTE, px);

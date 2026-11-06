@@ -11,7 +11,12 @@ import {
   skyAt,
   type PaletteKey,
 } from "./palettes";
-import { createEngine, type Engine } from "./watercolor/engine";
+import {
+  NIGHT_AMP,
+  NIGHT_BASE,
+  createEngine,
+  type Engine,
+} from "./watercolor/engine";
 import { createLife, type Life } from "./watercolor/life";
 import { composeScene, type Scene } from "./watercolor/scene";
 import {
@@ -92,7 +97,8 @@ function layoutFor(canvas: HTMLCanvasElement, mode: PaintMode) {
     // across a valley rather than a close-up. Taller on phones so the
     // scene still reads. Matches --wc-band in watercolor.css.
     const top = wide ? 100 : 82;
-    const ph = Math.max(120, h - top - 16);
+    // Room below the plate for its ragged edge to fade out.
+    const ph = Math.max(120, h - top - 48);
     const ratio = w < 640 ? 1.6 : 2.6;
     const pw = Math.min(w - Math.max(32, w * 0.1), ph * ratio, 1040);
     const x0 = (w - pw) / 2;
@@ -101,7 +107,7 @@ function layoutFor(canvas: HTMLCanvasElement, mode: PaintMode) {
   }
   const region: Region = wide
     ? { x0: w * 0.515, y0: h * 0.075, x1: w - w * 0.035, y1: h - h * 0.075 }
-    : { x0: w * 0.06, y0: 84, x1: w * 0.94, y1: h * 0.94 };
+    : { x0: w * 0.08, y0: 84, x1: w * 0.92, y1: h - 48 };
   return { w, h, wide, region };
 }
 
@@ -221,13 +227,10 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
       else engine.paint(c);
       if (life && "features" in c) {
         const { w, h, region } = geo.current;
-        life.setScene(
-          (c as Scene).features,
-          region,
-          w,
-          h,
-          now ? 0 : c.length * 0.8,
-        );
+        const features = (c as Scene).features;
+        life.setScene(features, region, w, h, now ? 0 : c.length * 0.8);
+        life.setNight(nightNow);
+        engine.setHorizon(features.horizon);
       }
     };
 
@@ -239,16 +242,69 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
       engine.palette(pigment(resolve(currentPalette())), null, true);
       paintPage(!first);
     };
-    layout(true);
 
-    let paperURL: string | null = null;
+    /* Two sheets of the same paper, lit for day and for night. */
+    const paperURLs: string[] = [];
     let alive = true;
-    engine?.paperURL().then((url) => {
+    const tile = async (
+      prop: string,
+      base?: [number, number, number],
+      amp?: number,
+    ) => {
+      const url = await engine?.paperURL(base, amp);
       if (!url) return;
       if (!alive) return URL.revokeObjectURL(url);
-      paperURL = url;
-      root.style.setProperty("--wc-paper", `url(${url})`);
-    });
+      paperURLs.push(url);
+      root.style.setProperty(prop, `url(${url})`);
+    };
+    tile("--wc-paper").then(() =>
+      tile("--wc-paper-night", NIGHT_BASE, NIGHT_AMP),
+    );
+
+    /* Night follows dark mode. Changing it while here lets dusk fall (or
+       dawn break) over a few seconds: the sky darkens from the top down,
+       the sun sets and the moon rises, stars come out, the lamp comes on,
+       and the page's paper and type turn with it. */
+    const forced = new URLSearchParams(window.location.search).get("night");
+    const darkMq = window.matchMedia("(prefers-color-scheme: dark)");
+    let nightNow = root.hasAttribute("data-night") ? 1 : 0;
+    let nightFrom = nightNow;
+    let nightGoal = nightNow;
+    let nightStart = 0;
+    let nightRaf = 0;
+    const NIGHT_MS = 3400;
+    const ease = (x: number) =>
+      x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    engine?.setNight(nightNow);
+    const nightLoop = (now: number) => {
+      const k = Math.min(1, (now - nightStart) / NIGHT_MS);
+      nightNow = nightFrom + (nightGoal - nightFrom) * ease(k);
+      engine?.setNight(nightNow);
+      life?.setNight(nightNow);
+      nightRaf = k < 1 ? requestAnimationFrame(nightLoop) : 0;
+    };
+    const goNight = (dark: boolean) => {
+      const goal = dark ? 1 : 0;
+      if (goal === nightGoal) return;
+      root.toggleAttribute("data-night", dark);
+      nightFrom = nightNow;
+      nightGoal = goal;
+      if (reduced()) {
+        nightNow = goal;
+        engine?.setNight(goal);
+        life?.setNight(goal);
+        return;
+      }
+      nightStart = performance.now();
+      cancelAnimationFrame(nightRaf);
+      nightRaf = requestAnimationFrame(nightLoop);
+    };
+    const onScheme = (e: MediaQueryListEvent) => {
+      if (forced !== "1" && forced !== "0") goNight(e.matches);
+    };
+    darkMq.addEventListener("change", onScheme);
+
+    layout(true);
 
     /* A new palette bleeds out from wherever the site was just touched, or
        else from the painting's inner edge, level with the reading line. */
@@ -429,8 +485,11 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
       ro.disconnect();
       engine?.destroy();
       engineRef.current = null;
+      darkMq.removeEventListener("change", onScheme);
+      cancelAnimationFrame(nightRaf);
       root.style.removeProperty("--wc-paper");
-      if (paperURL) URL.revokeObjectURL(paperURL);
+      root.style.removeProperty("--wc-paper-night");
+      paperURLs.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [mode]);
 
@@ -460,13 +519,12 @@ export default function Watercolor({ mode = "wash" }: { mode?: PaintMode }) {
     }
     if (lifeRef.current && "features" in c) {
       const { w, h, region } = geo.current;
-      lifeRef.current.setScene(
-        (c as Scene).features,
-        region,
-        w,
-        h,
-        reduced ? 0 : c.length * 0.8,
+      const features = (c as Scene).features;
+      lifeRef.current.setScene(features, region, w, h, reduced ? 0 : c.length * 0.8);
+      lifeRef.current.setNight(
+        document.documentElement.hasAttribute("data-night") ? 1 : 0,
       );
+      engine.setHorizon(features.horizon);
     }
   }, [pathname, mode]);
 
