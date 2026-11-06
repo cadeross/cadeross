@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import TypeToggle from "./TypeToggle";
 
 /* The top left, pinned over a soft fade of paper so text slips under it
    cleanly. The homepage leaves it empty. Every other page gets a way back
-   home and a crumb naming the page you're on. */
+   home and a crumb naming the page you're on. The top right holds the
+   switch between typeset and handwritten text. */
 
 export default function Header({ crumbs }: { crumbs: Record<string, string> }) {
   const pathname = usePathname();
@@ -31,6 +33,7 @@ export default function Header({ crumbs }: { crumbs: Record<string, string> }) {
           </span>
         </nav>
       )}
+      <TypeToggle />
     </header>
   );
 }

@@ -7,8 +7,6 @@ import ProjectRow, { Tile } from "@/components/site/ProjectRow";
 import { EMAIL, explorations, workItems } from "@/lib/portfolio";
 
 const work = (slug: string) => workItems.find((w) => w.slug === slug)!;
-const exploration = (href: string) =>
-  explorations.find((e) => e.href === href)!;
 
 const project = (
   item: {
@@ -28,23 +26,14 @@ const project = (
 
 const EVERDECK = project(work("everdeck"), "/work/everdeck", "Study app");
 const OPENWRIT = project(work("openwrit"), "/work/openwrit", "Bible reader");
-const HARBOR = project(exploration("/harbor"), "/harbor", "Menu bar app");
-const SPYGLASS = project(
-  exploration("/spyglass"),
-  "/spyglass",
-  "Screen recorder",
-);
 
 const INTRO = {
   lead: "I'm Cade, a product and interaction designer.",
   parts: [
     "I've designed and built",
-    { project: EVERDECK, after: "," },
-    { project: OPENWRIT },
-    "and two small Mac apps,",
-    { project: HARBOR },
+    { project: EVERDECK },
     "and",
-    { project: SPYGLASS, after: "." },
+    { project: OPENWRIT, after: "." },
   ],
 };
 

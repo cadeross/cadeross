@@ -8,7 +8,8 @@ import { useEffect } from "react";
    reading order, capped so a long batch never drags. Once an element has
    finished, `data-done` drops the reveal transition so its own hover
    effects keep their timing. Re-scans on every navigation and whenever new
-   content mounts. */
+   content mounts. While the homepage's introduction is being written by
+   hand, the batch waits for it (the `intro-written` event). */
 
 const STEP = 60;
 const MAX = 480;
@@ -25,6 +26,9 @@ export default function Reveal() {
 
     const flush = () => {
       raf = 0;
+      // On the homepage in handwritten mode, nothing below the introduction
+      // comes in until the pen has finished writing it (HeroIntro).
+      if (document.documentElement.hasAttribute("data-intro-writing")) return;
       const batch = Array.from(pending).sort((a, b) =>
         a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
       );
@@ -58,12 +62,17 @@ export default function Reveal() {
       });
     };
     scan();
+    const release = () => {
+      if (pending.size && !raf) raf = requestAnimationFrame(flush);
+    };
+    window.addEventListener("intro-written", release);
     const mo = new MutationObserver(scan);
     mo.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       io.disconnect();
       mo.disconnect();
+      window.removeEventListener("intro-written", release);
       cancelAnimationFrame(raf);
       timers.forEach((t) => window.clearTimeout(t));
     };

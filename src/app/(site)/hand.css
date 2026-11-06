@@ -1,0 +1,379 @@
+/* Handwritten text: an experiment beside the typeset site, switched from
+   the top right (TypeToggle) and set before paint by typeScript.ts as
+   <html data-type="hand">.
+
+   The words are written by hand, in a slightly messy joined cursive: Ms
+   Madi for the larger writing and Oooh Baby, with the same slant and fine
+   line, for paragraphs (alternates: ?pen=baby|nz|print). The ink is a
+   blue-black that soaks into the paper (multiplied, so the sheet's tooth
+   shows through) and runs through the #wc-ink filter in Watercolor.tsx,
+   which lets each line wander off its baseline, roughens the edges where
+   the nib caught, pools the ink unevenly and bleeds it faintly into the
+   fibres. The introduction is written out with a pen (penWriter.ts).
+   Small captions (labels, years, crumbs, meta) stay in the printed serif,
+   like the captions under a plate. */
+
+html[data-paint][data-type="hand"] {
+  --hand-body: var(--font-oooh-baby), "Segoe Script", "Apple Chancery", cursive;
+  --hand-display: var(--font-ms-madi), "Segoe Script", "Apple Chancery", cursive;
+  --font-print: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--hand-body);
+  --font-display: var(--hand-display);
+  /* Blue-black fountain-pen ink. */
+  --ink: #1e2638;
+  --ink-soft: #485066;
+  --hand-scale: 1.14;
+  --hand-display-scale: 1.32;
+  --hand-weight: 400;
+  --hand-display-weight: 400;
+  --hand-leading: 1.62;
+  --hand-display-leading: 1.22;
+  font-synthesis: none;
+}
+
+html[data-paint][data-type="hand"][data-pen="baby"] {
+  --hand-display: var(--hand-body);
+  --hand-display-scale: 1.06;
+  --hand-display-leading: 1.35;
+}
+
+html[data-paint][data-type="hand"][data-pen="nz"] {
+  --hand-body: var(--font-playwrite-nz), "Segoe Script", cursive;
+  --hand-display: var(--hand-body);
+  --hand-scale: 0.86;
+  --hand-display-scale: 0.95;
+  --hand-weight: 260;
+  --hand-display-weight: 230;
+  --hand-leading: 1.85;
+  --hand-display-leading: 1.55;
+}
+
+html[data-paint][data-type="hand"][data-pen="print"] {
+  --hand-body: var(--font-kalam), "Segoe Print", cursive;
+  --hand-display: var(--hand-body);
+  --hand-scale: 1.06;
+  --hand-display-scale: 1;
+  --hand-weight: 300;
+  --hand-display-weight: 300;
+  --hand-leading: 1.52;
+  --hand-display-leading: 1.3;
+}
+
+/* At night the ink is pale, like gouache on the dark sheet. */
+html[data-paint][data-type="hand"][data-night] {
+  --ink: #ece6d9;
+  --ink-soft: #c2baab;
+}
+
+html[data-paint][data-type="hand"] body {
+  font-size: calc(var(--text-body) * var(--hand-scale));
+  font-weight: var(--hand-weight);
+  line-height: var(--hand-leading);
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* ─── The ink ────────────────────────────────────────────────────────── */
+
+html[data-paint][data-type="hand"] :is(
+    .hero-title,
+    .prose > p,
+    .steps li > span:last-child,
+    .row-title,
+    .row-blurb,
+    .grid-list li,
+    .contact-title,
+    .copy-email-address,
+    .case-title,
+    .case-lede,
+    .lost-title,
+    .site-footer-id > span:first-child,
+    .site-footer-links .link,
+    .home-link
+  ) {
+  filter: url(#wc-ink);
+  mix-blend-mode: multiply;
+}
+
+html[data-paint][data-type="hand"][data-night] :is(
+    .hero-title,
+    .prose > p,
+    .steps li > span:last-child,
+    .row-title,
+    .row-blurb,
+    .grid-list li,
+    .contact-title,
+    .copy-email-address,
+    .case-title,
+    .case-lede,
+    .lost-title,
+    .site-footer-id > span:first-child,
+    .site-footer-links .link,
+    .home-link
+  ) {
+  mix-blend-mode: normal;
+}
+
+/* A pen underline: a little heavier, and the filter makes it waver. */
+html[data-paint][data-type="hand"] .link {
+  text-decoration-thickness: 1.4px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 38%, transparent);
+}
+
+
+/* ─── Sizes and faces ────────────────────────────────────────────────── */
+
+html[data-paint][data-type="hand"] .hero-title {
+  font-size: calc(1em * var(--hand-display-scale));
+  font-weight: var(--hand-display-weight);
+  line-height: var(--hand-display-leading);
+  letter-spacing: 0;
+}
+
+html[data-paint][data-type="hand"] .intro-name,
+html[data-paint][data-type="hand"] .steps-n,
+html[data-paint][data-type="hand"] .tile-initial,
+html[data-paint][data-type="hand"] .button {
+  font-style: normal;
+}
+
+html[data-paint][data-type="hand"] .row-title {
+  font-size: calc(1.2em * var(--hand-display-scale));
+  font-weight: var(--hand-display-weight);
+  line-height: 1.3;
+}
+
+html[data-paint][data-type="hand"] .contact-title {
+  font-size: calc(1.9em * var(--hand-display-scale));
+  font-weight: var(--hand-display-weight);
+  line-height: 1.3;
+}
+
+html[data-paint][data-type="hand"] .case-title {
+  font-size: calc(var(--text-body) * 2.5 * var(--hand-display-scale));
+  font-weight: var(--hand-display-weight);
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+html[data-paint][data-type="hand"] .home-link {
+  font-size: calc(1.1rem * var(--hand-display-scale));
+  font-weight: var(--hand-display-weight);
+}
+
+/* Printed captions. */
+html[data-paint][data-type="hand"] :is(
+    .label,
+    .next-label,
+    .row-year,
+    .crumb,
+    .case-meta,
+    .peek-note,
+    .steps-n,
+    .copy-email-tag,
+    .site-footer-id > span + span,
+    .to-top
+  ) {
+  font-family: var(--font-print);
+  font-weight: 400;
+  font-style: italic;
+  font-size: calc(1em / var(--hand-scale));
+}
+
+html[data-paint][data-type="hand"] .steps-n {
+  font-family: var(--font-print);
+}
+
+/* ─── Each word put down by hand ─────────────────────────────────────── */
+
+/* A hand doesn't keep to a ruled line: every word sits a touch higher or
+   lower and leans a little, the same way on every visit. */
+html[data-paint][data-type="hand"] .hero-word {
+  rotate: calc(sin(var(--i) * 2.39) * 1.3deg);
+  translate: 0 calc(sin(var(--i) * 1.31 + 1) * 0.06em);
+}
+
+/* The introduction is written out with a pen (penWriter.ts): while it's
+   being written each word's text is hidden and a canvas inside it shows
+   the ink the pen has laid down so far. When a word is dry it's marked
+   data-written and the text shows again. */
+html.js[data-paint][data-type="hand"] .hero-word {
+  animation: none;
+}
+
+html.js[data-paint][data-type="hand"] .intro:is([data-write="pending"], [data-write="go"]):not([data-measure]) .hero-word:not([data-written]),
+html.js[data-paint][data-type="hand"] .intro:is([data-write="pending"], [data-write="go"]):not([data-measure]) .hero-word:not([data-written]) .intro-chip {
+  color: transparent;
+  text-decoration-color: transparent;
+  transition: none;
+}
+
+html.js[data-paint][data-type="hand"] .intro[data-write="go"] .hero-word {
+  position: relative;
+}
+
+/* While the pen reads the words' colours, they're their real colours at
+   once (the chips would otherwise still be fading in from transparent). */
+.intro[data-measure],
+.intro[data-measure] * {
+  transition: none !important;
+}
+
+.pen-canvas {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ─── The project names' underline ───────────────────────────────────── */
+
+/* In handwritten mode the names aren't underlined in type: once the
+   sentence is written, the pen goes back and underlines each one with a
+   flourish, the last thing it does. The stroke speeds up as it goes and
+   flicks off at the end; the second follows the first. */
+.intro-swash {
+  display: none;
+}
+
+html[data-paint][data-type="hand"] .intro-chip {
+  position: relative;
+  text-decoration-color: transparent;
+}
+
+html[data-paint][data-type="hand"] .intro-swash {
+  position: absolute;
+  left: -0.06em;
+  /* Just under the baseline, not under the whole line box. */
+  bottom: 0.14em;
+  display: block;
+  width: calc(100% + 0.32em);
+  height: 0.34em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+html[data-paint][data-type="hand"] .intro-swash-ink {
+  fill: currentColor;
+}
+
+/* The pen's path through the stroke: as it advances, it uncovers the ink. */
+html[data-paint][data-type="hand"] .intro-swash-pen {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+}
+
+html.js[data-paint][data-type="hand"] .intro:is([data-write="pending"], [data-write="go"]) .intro-swash-pen {
+  stroke-dashoffset: 1;
+}
+
+html.js[data-paint][data-type="hand"] .intro[data-write="underline"] .intro-swash-pen {
+  animation: swash-draw 0.5s cubic-bezier(0.5, 0.05, 0.25, 1) backwards;
+  animation-delay: calc(0.2s + var(--swash) * 0.6s);
+}
+
+@keyframes swash-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* ─── The switch ─────────────────────────────────────────────────────── */
+
+.type-toggle {
+  position: absolute;
+  top: var(--header-top);
+  right: var(--gutter);
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  line-height: 1.5rem;
+  color: var(--muted);
+  pointer-events: auto;
+  animation: fade-in 0.8s ease 0.3s both;
+}
+
+.type-toggle-option {
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: transparent;
+  transition: color 0.25s ease, text-decoration-color 0.25s ease;
+}
+
+.type-toggle-option[data-face="set"] {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+}
+
+/* The pen's option is written in the pen, so it previews itself. */
+.type-toggle-option[data-face="hand"] {
+  font-family: var(--font-ms-madi), cursive;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+html[data-pen="baby"] .type-toggle-option[data-face="hand"] {
+  font-family: var(--font-oooh-baby), cursive;
+  font-size: 1.1rem;
+}
+
+html[data-pen="nz"] .type-toggle-option[data-face="hand"] {
+  font-family: var(--font-playwrite-nz), cursive;
+  font-weight: 300;
+  font-size: 0.86rem;
+}
+
+html[data-pen="print"] .type-toggle-option[data-face="hand"] {
+  font-family: var(--font-kalam), cursive;
+  font-size: 1.02rem;
+}
+
+.type-toggle-option[aria-pressed="true"] {
+  color: var(--ink);
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .type-toggle-option[aria-pressed="false"]:hover {
+    color: var(--ink-soft);
+  }
+}
+
+.type-toggle-option:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.type-toggle-sep {
+  color: var(--faint);
+}
+
+/* The swap is a crossfade; the ink and paper colours change at once rather
+   than over the slow night transition. */
+html.type-swap,
+html.type-swap * {
+  transition: none !important;
+}
+
+html.type-swap::view-transition-old(root),
+html.type-swap::view-transition-new(root) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js[data-paint][data-type="hand"] .intro[data-write] .intro-swash-pen {
+    animation: none;
+  }
+}

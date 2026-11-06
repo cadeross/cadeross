@@ -3,9 +3,11 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./site.css";
 import "./watercolor.css";
-import { instrument, newsreader } from "@/components/site/fonts";
+import "./hand.css";
+import { fontVars } from "@/components/site/fonts";
 import Header from "@/components/site/Header";
 import { nightScript } from "@/components/site/nightScript";
+import { typeScript } from "@/components/site/typeScript";
 import Reveal from "@/components/site/Reveal";
 import Watercolor from "@/components/site/Watercolor";
 import { apps, workItems } from "@/lib/portfolio";
@@ -49,7 +51,7 @@ export default function SiteLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${newsreader.variable} ${instrument.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${fontVars}`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
       data-paint=""
@@ -58,7 +60,7 @@ export default function SiteLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js');${nightScript}`,
+            __html: `document.documentElement.classList.add('js');${nightScript}${typeScript}`,
           }}
         />
       </head>

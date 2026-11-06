@@ -447,6 +447,71 @@ export default function Watercolor() {
               yChannelSelector="G"
             />
           </filter>
+          {/* Handwritten text (html[data-type="hand"]): the pen's line
+              wanders a little off the baseline, its edges catch on the
+              paper's tooth, and the ink lies heavier in some places than
+              others, with a faint bleed into the fibres. */}
+          <filter
+            id="wc-ink"
+            x="-2%"
+            y="-6%"
+            width="104%"
+            height="112%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.006 0.022"
+              numOctaves="1"
+              seed="4"
+              result="drift"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="drift"
+              scale="6"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="wander"
+            />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.7"
+              numOctaves="2"
+              seed="9"
+              result="tooth"
+            />
+            <feDisplacementMap
+              in="wander"
+              in2="tooth"
+              scale="1.15"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="rough"
+            />
+            <feGaussianBlur in="rough" stdDeviation="0.55" result="soft" />
+            <feComponentTransfer in="soft" result="bleed">
+              <feFuncA type="linear" slope="0.4" />
+            </feComponentTransfer>
+            <feMerge result="wet">
+              <feMergeNode in="bleed" />
+              <feMergeNode in="rough" />
+            </feMerge>
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.035 0.06"
+              numOctaves="2"
+              seed="21"
+              result="pool"
+            />
+            <feColorMatrix
+              in="pool"
+              type="matrix"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.25 0 0 0 0.22"
+              result="density"
+            />
+            <feComposite in="wet" in2="density" operator="in" />
+          </filter>
         </svg>
       </div>
       {/* Snow, smoke, lamplight and birds: lighter than paper. */}

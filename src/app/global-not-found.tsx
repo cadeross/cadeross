@@ -4,9 +4,11 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./(site)/site.css";
 import "./(site)/watercolor.css";
-import { instrument, newsreader } from "@/components/site/fonts";
+import "./(site)/hand.css";
+import { fontVars } from "@/components/site/fonts";
 import Header from "@/components/site/Header";
 import { nightScript } from "@/components/site/nightScript";
+import { typeScript } from "@/components/site/typeScript";
 import Watercolor from "@/components/site/Watercolor";
 
 export const metadata: Metadata = {
@@ -27,14 +29,14 @@ export default function GlobalNotFound() {
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${newsreader.variable} ${instrument.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${fontVars}`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
       data-paint=""
       data-version="monet"
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: nightScript }} />
+        <script dangerouslySetInnerHTML={{ __html: nightScript + typeScript }} />
       </head>
       <body>
         <Watercolor />
