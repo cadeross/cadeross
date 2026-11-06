@@ -31,8 +31,10 @@ const instrument = Instrument_Serif({
 });
 
 const title = "Cade Ross — Product and interaction designer";
-const description =
-  "Product and interaction designer, open to fully remote roles.";
+/* While the remote-roles lines are hidden (see SHOW_CONTACT_NOTE in
+   page.tsx), the description leaves it out too. To bring it back:
+   "Product and interaction designer, open to fully remote roles." */
+const description = "Product and interaction designer.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://cadeross.com"),
