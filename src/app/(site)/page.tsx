@@ -3,6 +3,7 @@ import { FieldPage } from "@/components/site/FieldVoice";
 import Footer from "@/components/site/Footer";
 import HeroFade from "@/components/site/HeroFade";
 import HeroIntro, { type HeroProject } from "@/components/site/HeroIntro";
+import LetterClose from "@/components/site/LetterClose";
 import ProjectRow, { Tile } from "@/components/site/ProjectRow";
 import { EMAIL, explorations, workItems } from "@/lib/portfolio";
 
@@ -125,7 +126,7 @@ export default function Home() {
           development studio that worked with teams like Solana and Baylor
           University.
         </p>
-        <p data-reveal>
+        <p data-reveal data-set-only>
           Outside of design, I&apos;m learning Portuguese, playing tennis and
           reading sci-fi and fantasy. Recommendations welcome.
         </p>
@@ -239,26 +240,30 @@ export default function Home() {
         </ul>
       </section>
 
-      <section
-        id="contact"
-        className="block contact"
-        aria-labelledby="contact-label"
-        data-tick="Contact"
-      >
+      {/* Typeset: "Say hello". Handwritten: the letter's sign-off. */}
+      <div id="contact" className="contact-anchor">
         <span id="connect" className="anchor" aria-hidden="true" />
-        <h2 id="contact-label" className="contact-title" data-reveal>
-          Say hello
-        </h2>
-        <div data-reveal>
-          <CopyEmail email={EMAIL} />
-        </div>
-        {SHOW_CONTACT_NOTE && (
-          <p className="contact-note" data-reveal>
-            I&apos;m open to fully remote design roles starting in January.
-            Email is the fastest way to reach me.
-          </p>
-        )}
-      </section>
+        <section
+          className="block contact"
+          data-set-only
+          aria-labelledby="contact-label"
+          data-tick="Contact"
+        >
+          <h2 id="contact-label" className="contact-title" data-reveal>
+            Say hello
+          </h2>
+          <div data-reveal>
+            <CopyEmail email={EMAIL} />
+          </div>
+          {SHOW_CONTACT_NOTE && (
+            <p className="contact-note" data-reveal>
+              I&apos;m open to fully remote design roles starting in January.
+              Email is the fastest way to reach me.
+            </p>
+          )}
+        </section>
+        <LetterClose email={EMAIL} />
+      </div>
 
       <Footer />
     </main>

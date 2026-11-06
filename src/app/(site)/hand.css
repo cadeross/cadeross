@@ -88,7 +88,11 @@ html[data-paint][data-type="hand"] :is(
     .lost-title,
     .site-footer-id > span:first-child,
     .site-footer-links .link,
-    .home-link
+    .home-link,
+    .sign-off,
+    .valediction,
+    .signature,
+    .ps
   ) {
   filter: url(#wc-ink);
   mix-blend-mode: multiply;
@@ -108,7 +112,11 @@ html[data-paint][data-type="hand"][data-night] :is(
     .lost-title,
     .site-footer-id > span:first-child,
     .site-footer-links .link,
-    .home-link
+    .home-link,
+    .sign-off,
+    .valediction,
+    .signature,
+    .ps
   ) {
   mix-blend-mode: normal;
 }
@@ -261,7 +269,7 @@ html[data-paint][data-type="hand"] .intro-swash-pen {
   stroke: #fff;
   stroke-width: 12;
   stroke-linecap: round;
-  stroke-dasharray: 1 1;
+  stroke-dasharray: 1 2;
   stroke-dashoffset: 0;
 }
 
@@ -278,6 +286,130 @@ html.js[data-paint][data-type="hand"] .intro[data-write="underline"] .intro-swas
   from {
     stroke-dashoffset: 1;
   }
+}
+
+/* ─── The letter's close ────────────────────────────────────────────── */
+
+/* Content that belongs to one mode only. */
+[data-hand-only] {
+  display: none;
+}
+
+html[data-paint][data-type="hand"] [data-hand-only] {
+  display: block;
+}
+
+html[data-paint][data-type="hand"] [data-set-only] {
+  display: none;
+}
+
+.contact-anchor {
+  position: relative;
+}
+
+/* An invitation to write back, a closing and a signature set in from the
+   left as a letter's would be, and the postscript under it all. */
+html[data-paint][data-type="hand"] .letter-close {
+  max-width: 36em;
+  margin-top: 5rem;
+}
+
+html[data-paint][data-type="hand"] .letter-copy {
+  margin-left: 0.55em;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-print);
+  font-size: calc(0.86em / var(--hand-scale));
+  font-style: italic;
+  transition: color 0.25s ease;
+}
+
+html[data-paint][data-type="hand"] .letter-copy::before {
+  content: "(";
+}
+
+html[data-paint][data-type="hand"] .letter-copy::after {
+  content: ")";
+}
+
+html[data-paint][data-type="hand"] .letter-copy[data-copied] {
+  color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-paint][data-type="hand"] .letter-copy:hover {
+    color: var(--ink-soft);
+  }
+}
+
+html[data-paint][data-type="hand"] .valediction {
+  margin-top: 2.4rem;
+  padding-left: min(38%, 13rem);
+}
+
+html[data-paint][data-type="hand"] .signature {
+  position: relative;
+  width: fit-content;
+  margin: 0.1em 0 0 min(38%, 13rem);
+  padding-left: 0.6em;
+  font-family: var(--hand-display);
+  font-size: calc(3em * var(--hand-display-scale) / 1.32);
+  line-height: 1.15;
+}
+
+html[data-paint][data-type="hand"] .sig-word {
+  position: relative;
+  display: inline-block;
+  rotate: -4deg;
+}
+
+html[data-paint][data-type="hand"] .sig-swash {
+  position: absolute;
+  left: 0.1em;
+  bottom: -0.12em;
+  display: block;
+  width: calc(100% + 0.25em);
+  height: 0.32em;
+  overflow: visible;
+  rotate: -4deg;
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.sig-swash {
+  display: none;
+}
+
+html.js[data-paint][data-type="hand"] .signature:is([data-write="pending"], [data-write="go"]):not([data-measure]) .sig-word:not([data-written]) {
+  color: transparent;
+}
+
+html.js[data-paint][data-type="hand"] .signature:is([data-write="pending"], [data-write="go"]) .intro-swash-pen {
+  stroke-dashoffset: 1;
+}
+
+html.js[data-paint][data-type="hand"] .signature[data-write="underline"] .intro-swash-pen {
+  animation: swash-draw 0.75s cubic-bezier(0.45, 0.05, 0.25, 1) 0.12s backwards;
+}
+
+html.js[data-paint][data-type="hand"] .signature[data-measure] * {
+  transition: none !important;
+}
+
+html[data-paint][data-type="hand"] .ps {
+  margin-top: 3.2rem;
+  color: var(--ink-soft);
+}
+
+html[data-paint][data-type="hand"] .ps-mark {
+  margin-right: 0.25em;
+  color: var(--ink);
+  font-family: var(--hand-display);
+  font-size: 1.3em;
+  line-height: 1;
 }
 
 /* ─── The switch ─────────────────────────────────────────────────────── */

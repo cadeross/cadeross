@@ -336,10 +336,11 @@ function paintRuns(c: HTMLCanvasElement, runs: Run[], color?: string) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-/* Plan the whole introduction and start writing. Returns a function that
-   stops the pen and shows the text as it is. */
-export function writeIntro(intro: HTMLElement, onDone: () => void) {
-  const words = [...intro.querySelectorAll<HTMLElement>(".hero-word")];
+/* Plan the writing of every `selector` word inside `intro` (the homepage
+   introduction, or the signature) and start the pen. Returns a function
+   that stops it and shows the text as it is. */
+export function writeIntro(intro: HTMLElement, onDone: () => void, selector = ".hero-word") {
+  const words = [...intro.querySelectorAll<HTMLElement>(selector)];
 
   intro.dataset.measure = "";
   const measured = words.map((el) => {
